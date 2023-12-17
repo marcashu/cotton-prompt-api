@@ -5,6 +5,10 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CottonPrompt.Api", "CottonPrompt.Api\CottonPrompt.Api.csproj", "{B8E3104C-49E7-4A0E-B62A-D4B89A2A473E}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "CottonPrompt.Data", "CottonPrompt.Data\CottonPrompt.Data.sqlproj", "{7712499E-74B2-45D0-BCA4-B8A56B430D70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CottonPrompt.Infrastructure", "CottonPrompt.Infrastructure\CottonPrompt.Infrastructure.csproj", "{0E88EC57-63B6-4D91-92FC-3E6E9CE03FE2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,16 @@ Global
 		{B8E3104C-49E7-4A0E-B62A-D4B89A2A473E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8E3104C-49E7-4A0E-B62A-D4B89A2A473E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8E3104C-49E7-4A0E-B62A-D4B89A2A473E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7712499E-74B2-45D0-BCA4-B8A56B430D70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7712499E-74B2-45D0-BCA4-B8A56B430D70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7712499E-74B2-45D0-BCA4-B8A56B430D70}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{7712499E-74B2-45D0-BCA4-B8A56B430D70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7712499E-74B2-45D0-BCA4-B8A56B430D70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7712499E-74B2-45D0-BCA4-B8A56B430D70}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{0E88EC57-63B6-4D91-92FC-3E6E9CE03FE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E88EC57-63B6-4D91-92FC-3E6E9CE03FE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E88EC57-63B6-4D91-92FC-3E6E9CE03FE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E88EC57-63B6-4D91-92FC-3E6E9CE03FE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
