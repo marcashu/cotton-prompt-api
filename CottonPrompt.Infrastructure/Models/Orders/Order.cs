@@ -6,7 +6,8 @@
         bool IsPriority,
         string Concept,
         string PrintColor,
-        decimal DesignBracket,
-        IEnumerable<string> ImageReferences
+        DesignBracket DesignBracket,
+        IEnumerable<string> ImageReferences,
+        DateTime CreatedOn
     );
 }

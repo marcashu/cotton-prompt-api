@@ -1,4 +1,6 @@
-﻿using CottonPrompt.Infrastructure.Messages.Orders;
+﻿using CottonPrompt.Infrastructure.Entities;
+using CottonPrompt.Infrastructure.Messages.Orders;
+using CottonPrompt.Infrastructure.Models.Orders;
 
 namespace CottonPrompt.Infrastructure.Extensions
 {
@@ -6,7 +8,7 @@ namespace CottonPrompt.Infrastructure.Extensions
     {
         internal static Models.Orders.Order AsModel(this Entities.Order entity)
         {
-            var result = new Models.Orders.Order(entity.Id, entity.Number, entity.IsPriority, entity.Concept, entity.PrintColor, entity.DesignBracket.Value, entity.OrderImageReferences.Select(r => r.Url));
+            var result = new Models.Orders.Order(entity.Id, entity.Number, entity.IsPriority, entity.Concept, entity.PrintColor, entity.DesignBracket.AsModel(), entity.OrderImageReferences.Select(r => r.Url), entity.CreatedOn);
             return result;
         }
 
@@ -32,6 +34,12 @@ namespace CottonPrompt.Infrastructure.Extensions
                 }).ToList(),
                 CreatedBy = request.CreatedBy,
             };
+            return result;
+        }
+
+        internal static DesignBracket AsModel(this OrderDesignBracket entity)
+        {
+            var result = new DesignBracket(entity.Id, entity.Value);
             return result;
         }
     }
