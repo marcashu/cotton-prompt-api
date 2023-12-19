@@ -1,4 +1,5 @@
 using CottonPrompt.Infrastructure.Entities;
+using CottonPrompt.Infrastructure.Services.DesignBrackets;
 using CottonPrompt.Infrastructure.Services.Orders;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,6 +24,7 @@ builder.Services.AddCors(opt =>
 builder.Services.AddDbContext<CottonPromptContext>(
         options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IDesignBracketService, DesignBracketService>();
 
 var app = builder.Build();
 

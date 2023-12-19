@@ -1,4 +1,4 @@
-﻿namespace CottonPrompt.Infrastructure.Models.Orders
+﻿namespace CottonPrompt.Infrastructure.Models.DesignBrackets
 {
     public record DesignBracket(
         int Id,

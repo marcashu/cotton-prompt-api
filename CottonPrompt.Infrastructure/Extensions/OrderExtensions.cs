@@ -1,6 +1,4 @@
-﻿using CottonPrompt.Infrastructure.Entities;
-using CottonPrompt.Infrastructure.Messages.Orders;
-using CottonPrompt.Infrastructure.Models.Orders;
+﻿using CottonPrompt.Infrastructure.Messages.Orders;
 
 namespace CottonPrompt.Infrastructure.Extensions
 {
@@ -34,12 +32,6 @@ namespace CottonPrompt.Infrastructure.Extensions
                 }).ToList(),
                 CreatedBy = request.CreatedBy,
             };
-            return result;
-        }
-
-        internal static DesignBracket AsModel(this OrderDesignBracket entity)
-        {
-            var result = new DesignBracket(entity.Id, entity.Value);
             return result;
         }
     }

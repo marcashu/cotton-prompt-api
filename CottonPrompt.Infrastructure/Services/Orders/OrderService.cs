@@ -28,6 +28,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 var orders = await dbContext.Orders
                     .Include(o => o.DesignBracket)
                     .Include(o => o.OrderImageReferences)
+                    .OrderByDescending(o => o.IsPriority)
+                    .ThenBy(o => o.CreatedOn)
                     .ToListAsync();
                 var result = orders.AsModel();
                 return result;

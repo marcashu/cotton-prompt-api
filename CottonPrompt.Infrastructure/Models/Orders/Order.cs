@@ -1,4 +1,6 @@
-﻿namespace CottonPrompt.Infrastructure.Models.Orders
+﻿using CottonPrompt.Infrastructure.Models.DesignBrackets;
+
+namespace CottonPrompt.Infrastructure.Models.Orders
 {
     public record Order(
         int Id, 
