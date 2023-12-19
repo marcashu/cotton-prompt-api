@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CottonPrompt.Infrastructure.Messages.Orders
+namespace CottonPrompt.Api.Messages.Orders
 {
     public class CreateOrderRequest
     {
-        public string Number { get; set; }
+        public string OrderNumber { get; set; }
 
-        public bool IsPriority { get; set; }
+        public bool Priority { get; set; }
 
         public string Concept { get; set; }
 

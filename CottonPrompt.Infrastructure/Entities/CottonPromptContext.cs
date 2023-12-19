@@ -27,7 +27,7 @@ public partial class CottonPromptContext : DbContext
 
             entity.Property(e => e.Concept).IsRequired();
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.Number)
+            entity.Property(e => e.OrderNumber)
                 .IsRequired()
                 .HasMaxLength(50);
             entity.Property(e => e.PrintColor)
@@ -55,7 +55,6 @@ public partial class CottonPromptContext : DbContext
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderImageReferences)
                 .HasForeignKey(d => d.OrderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_OrderImageReferences_Orders");
         });
 

@@ -1,4 +1,5 @@
-﻿using CottonPrompt.Infrastructure.Messages.Orders;
+﻿using CottonPrompt.Api.Extensions;
+using CottonPrompt.Api.Messages.Orders;
 using CottonPrompt.Infrastructure.Models.Orders;
 using CottonPrompt.Infrastructure.Services.Orders;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,10 @@ namespace CottonPrompt.Api.Controllers
     public class OrdersController(IOrderService orderService) : ControllerBase
     {
         [HttpGet]
-        [ProducesResponseType<IEnumerable<Order>>((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetAsync()
+        [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetAsync([FromQuery] GetOrdersRequest request)
         {
-            var result = await orderService.GetAsync();
+            var result = await orderService.GetAsync(request.Priority);
             return Ok(result);
         }
 
@@ -23,8 +24,17 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateAsync([FromBody] CreateOrderRequest request)
         {
-            await orderService.CreateAsync(request);
+            await orderService.CreateAsync(request.AsEntity());
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> DeleteAsync([FromRoute] int id)
+        {
+            await orderService.DeleteAsync(id);
+            return NoContent();
+        }
+
     }
 }
