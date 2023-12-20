@@ -19,6 +19,14 @@ namespace CottonPrompt.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id}")]
+        [ProducesResponseType<GetOrderModel>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetByIdAsync([FromRoute] int id)
+        {
+            var result = await orderService.GetByIdAsync(id);
+            return Ok(result);
+        }
+
         [HttpPost]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.BadRequest)]
@@ -36,5 +44,12 @@ namespace CottonPrompt.Api.Controllers
             return NoContent();
         }
 
+        [HttpPut]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> UpdateAsync([FromBody] UpdateOrderRequest request)
+        {
+            await orderService.UpdateAsync(request.AsEntity());
+            return NoContent();
+        }
     }
 }

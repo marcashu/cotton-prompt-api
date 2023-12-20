@@ -23,5 +23,27 @@ namespace CottonPrompt.Api.Extensions
             };
             return result;
         }
+
+        public static Order AsEntity(this UpdateOrderRequest request)
+        {
+            var result = new Order
+            {
+                Id = request.Id,
+                OrderNumber = request.OrderNumber,
+                Priority = request.Priority,
+                Concept = request.Concept,
+                PrintColor = request.PrintColor,
+                DesignBracketId = request.DesignBracketId,
+                OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
+                {
+                    OrderId = request.Id,
+                    LineId = i + 1,
+                    Url = r,
+                }).ToList(),
+                UpdatedBy = request.UpdatedBy,
+                UpdatedOn = DateTime.UtcNow,
+            };
+            return result;
+        }
     }
 }

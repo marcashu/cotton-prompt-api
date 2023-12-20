@@ -7,7 +7,11 @@ namespace CottonPrompt.Infrastructure.Services.Orders
     {
         Task<IEnumerable<GetOrdersModel>> GetAsync(bool priority);
 
+        Task<GetOrderModel> GetByIdAsync(int id);
+
         Task CreateAsync(Order order);
+
+        Task UpdateAsync(Order order);
 
         Task DeleteAsync(int id);
     }

@@ -23,6 +23,10 @@ public partial class Order
 
     public DateTime CreatedOn { get; set; }
 
+    public Guid? UpdatedBy { get; set; }
+
+    public DateTime? UpdatedOn { get; set; }
+
     public virtual OrderDesignBracket DesignBracket { get; set; }
 
     public virtual ICollection<OrderImageReference> OrderImageReferences { get; set; } = new List<OrderImageReference>();

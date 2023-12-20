@@ -7,5 +7,7 @@
 	[PrintColor] NVARCHAR(50) NOT NULL,
 	[DesignBracketId] INT NOT NULL CONSTRAINT FK_Orders_OrderDesignBrackets REFERENCES [dbo].[OrderDesignBrackets]([Id]), 
     [CreatedBy] UNIQUEIDENTIFIER NOT NULL,
-	[CreatedOn] DATETIME2 NOT NULL CONSTRAINT DF_Orders_CreatedOn DEFAULT GETUTCDATE(),
+	[CreatedOn] DATETIME2 NOT NULL CONSTRAINT DF_Orders_CreatedOn DEFAULT GETUTCDATE(), 
+    [UpdatedBy] UNIQUEIDENTIFIER NULL, 
+    [UpdatedOn] DATETIME2 NULL,
 )
