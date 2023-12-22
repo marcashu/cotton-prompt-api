@@ -15,7 +15,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAsync([FromQuery] GetOrdersRequest request)
         {
-            var result = await orderService.GetAsync(request.Priority);
+            var result = await orderService.GetAsync(request.Priority, request.ArtistId, request.HasArtistFilter);
             return Ok(result);
         }
 
