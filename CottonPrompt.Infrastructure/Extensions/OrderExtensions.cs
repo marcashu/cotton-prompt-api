@@ -19,7 +19,7 @@ namespace CottonPrompt.Infrastructure.Extensions
 
         internal static GetOrderModel AsGetOrderModel(this Order entity)
         {
-            var result = new GetOrderModel(entity.Id, entity.OrderNumber, entity.Priority, entity.Concept, entity.PrintColor, entity.DesignBracketId, entity.OrderImageReferences.Select(oir => oir.Url));
+            var result = new GetOrderModel(entity.Id, entity.OrderNumber, entity.Priority, entity.Concept, entity.PrintColor, entity.DesignBracket.AsModel(), entity.OrderImageReferences.Select(oir => oir.Url));
             return result;
         }
     }
