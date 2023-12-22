@@ -51,5 +51,13 @@ namespace CottonPrompt.Api.Controllers
             await orderService.UpdateAsync(request.AsEntity());
             return NoContent();
         }
+
+        [HttpPost("{id}/artist")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> AssignArtistAsync([FromRoute] int id, [FromBody] AssignArtristRequest request)
+        {
+            await orderService.AssignArtistAsync(id, request.ArtistId);
+            return NoContent();
+        }
     }
 }

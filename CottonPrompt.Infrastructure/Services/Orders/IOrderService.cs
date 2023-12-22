@@ -14,5 +14,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         Task UpdateAsync(Order order);
 
         Task DeleteAsync(int id);
+
+        Task AssignArtistAsync(int id, Guid artistId);
     }
 }

@@ -23,6 +23,14 @@ public partial class Order
 
     public DateTime CreatedOn { get; set; }
 
+    public Guid? ArtistClaimedBy { get; set; }
+
+    public DateTime? ArtistClaimedOn { get; set; }
+
+    public Guid? CheckerClaimedBy { get; set; }
+
+    public DateTime? CheckerClaimedOn { get; set; }
+
     public Guid? UpdatedBy { get; set; }
 
     public DateTime? UpdatedOn { get; set; }

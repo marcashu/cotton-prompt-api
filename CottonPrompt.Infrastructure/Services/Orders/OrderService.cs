@@ -7,6 +7,26 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 {
     public class OrderService(CottonPromptContext dbContext) : IOrderService
     {
+        public async Task AssignArtistAsync(int id, Guid artistId)
+        {
+            try
+            {
+                var order = await dbContext.Orders.FindAsync(id);
+
+                if (order is null) return;
+
+                order.ArtistClaimedBy = artistId;
+                order.ArtistClaimedOn = DateTime.UtcNow;
+                order.UpdatedBy = artistId;
+                order.UpdatedOn = DateTime.UtcNow;
+                await dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task CreateAsync(Order order)
         {
             try
