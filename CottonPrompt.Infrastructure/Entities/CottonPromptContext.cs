@@ -49,7 +49,7 @@ public partial class CottonPromptContext : DbContext
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.Name)
                 .IsRequired()
-                .HasMaxLength(50);
+                .HasMaxLength(100);
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderDesigns)
                 .HasForeignKey(d => d.OrderId)

@@ -1,6 +1,8 @@
 ﻿using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
 using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Extensions;
+using CottonPrompt.Infrastructure.Models.Design;
 using CottonPrompt.Infrastructure.Models.Orders;
 using Microsoft.EntityFrameworkCore;
 
@@ -78,8 +80,26 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 var order = await dbContext.Orders
                     .Include(o => o.DesignBracket)
                     .Include(o => o.OrderImageReferences)
+                    .Include(o => o.OrderDesigns)
                     .SingleAsync(o => o.Id == id);
-                var result = order.AsGetOrderModel();
+
+                var designs = new List<DesignModel>();
+
+                if (order.OrderDesigns.Any())
+                {
+                    var container = blobServiceClient.GetBlobContainerClient(order.ArtistClaimedBy.ToString());
+
+                    foreach (var orderDesign in order.OrderDesigns)
+                    {
+                        var blob = container.GetBlobClient(orderDesign.Name);
+                        var url = blob.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddDays(1)).ToString();
+                        var design = new DesignModel(orderDesign.LineId, orderDesign.Name, url, orderDesign.CreatedOn);
+                        designs.Add(design);
+                    }
+                }
+
+                var result = order.AsGetOrderModel(designs);
+
                 return result;
             }
             catch (Exception)
@@ -92,21 +112,27 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                var order = await dbContext.Orders.FindAsync(id);
+                var order = await dbContext.Orders
+                    .Include(o => o.OrderDesigns)
+                    .SingleAsync(o => o.Id == id);
 
                 if (order is null || order.ArtistClaimedBy is null) return;
 
                 var container = blobServiceClient.GetBlobContainerClient(order.ArtistClaimedBy.ToString());
                 await container.CreateIfNotExistsAsync();
 
-                var blob = container.GetBlobClient(designName);
+                var saltedDesignName = $"{designName}_{Guid.NewGuid()}";
+
+                if (saltedDesignName.Length > 100) saltedDesignName = saltedDesignName[..100]; // max length is 100
+
+                var blob = container.GetBlobClient(saltedDesignName);
                 await blob.UploadAsync(designContent);
 
                 order.OrderDesigns.Add(new OrderDesign
                 {
                     OrderId = order.Id,
                     LineId = order.OrderDesigns.Count + 1,
-                    Name = designName,
+                    Name = saltedDesignName,
                     CreatedBy = order.ArtistClaimedBy.Value,
                 });
 

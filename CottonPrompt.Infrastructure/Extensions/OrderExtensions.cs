@@ -1,4 +1,5 @@
 ﻿using CottonPrompt.Infrastructure.Entities;
+using CottonPrompt.Infrastructure.Models.Design;
 using CottonPrompt.Infrastructure.Models.Orders;
 
 namespace CottonPrompt.Infrastructure.Extensions
@@ -17,9 +18,9 @@ namespace CottonPrompt.Infrastructure.Extensions
             return result;
         }
 
-        internal static GetOrderModel AsGetOrderModel(this Order entity)
+        internal static GetOrderModel AsGetOrderModel(this Order entity, IEnumerable<DesignModel> designs)
         {
-            var result = new GetOrderModel(entity.Id, entity.OrderNumber, entity.Priority, entity.Concept, entity.PrintColor, entity.DesignBracket.AsModel(), entity.OrderImageReferences.Select(oir => oir.Url));
+            var result = new GetOrderModel(entity.Id, entity.OrderNumber, entity.Priority, entity.Concept, entity.PrintColor, entity.DesignBracket.AsModel(), entity.OrderImageReferences.Select(oir => oir.Url), designs);
             return result;
         }
     }
