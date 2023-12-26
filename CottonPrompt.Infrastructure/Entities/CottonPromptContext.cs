@@ -15,6 +15,8 @@ public partial class CottonPromptContext : DbContext
 
     public virtual DbSet<Order> Orders { get; set; }
 
+    public virtual DbSet<OrderDesign> OrderDesigns { get; set; }
+
     public virtual DbSet<OrderDesignBracket> OrderDesignBrackets { get; set; }
 
     public virtual DbSet<OrderImageReference> OrderImageReferences { get; set; }
@@ -38,6 +40,20 @@ public partial class CottonPromptContext : DbContext
                 .HasForeignKey(d => d.DesignBracketId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_OrderDesignBrackets");
+        });
+
+        modelBuilder.Entity<OrderDesign>(entity =>
+        {
+            entity.HasKey(e => new { e.OrderId, e.LineId }).HasName("PK_OrderDesigns_OrderID_LineId");
+
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderDesigns)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("FK_OrderDesigns_Orders");
         });
 
         modelBuilder.Entity<OrderDesignBracket>(entity =>

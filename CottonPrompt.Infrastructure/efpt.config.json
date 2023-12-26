@@ -20,6 +20,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[OrderDesigns]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[OrderImageReferences]",
          "ObjectType": 0
       },

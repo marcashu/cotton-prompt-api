@@ -16,5 +16,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         Task DeleteAsync(int id);
 
         Task AssignArtistAsync(int id, Guid artistId);
+
+        Task SubmitDesignAsync(int id, string designName, Stream designContent);
     }
 }

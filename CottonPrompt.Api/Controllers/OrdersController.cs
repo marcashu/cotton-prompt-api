@@ -59,5 +59,16 @@ namespace CottonPrompt.Api.Controllers
             await orderService.AssignArtistAsync(id, request.ArtistId);
             return NoContent();
         }
+
+        [HttpPost("{id}/designs")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> SubmitDesignAsync([FromRoute] int id, [FromBody] SubmitDesignRequest request)
+        {
+            var base64 = request.Design.Substring(request.Design.IndexOf("base64,") + 7);
+            var bytes = Convert.FromBase64String(base64);
+            var designStream = new MemoryStream(bytes);
+            await orderService.SubmitDesignAsync(id, request.FileName, designStream);
+            return NoContent();
+        }
     }
 }

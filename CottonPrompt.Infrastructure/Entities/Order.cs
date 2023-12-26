@@ -37,5 +37,7 @@ public partial class Order
 
     public virtual OrderDesignBracket DesignBracket { get; set; }
 
+    public virtual ICollection<OrderDesign> OrderDesigns { get; set; } = new List<OrderDesign>();
+
     public virtual ICollection<OrderImageReference> OrderImageReferences { get; set; } = new List<OrderImageReference>();
 }

@@ -1,3 +1,4 @@
+using Azure.Storage.Blobs;
 using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Services.DesignBrackets;
 using CottonPrompt.Infrastructure.Services.Orders;
@@ -25,6 +26,13 @@ builder.Services.AddDbContext<CottonPromptContext>(
         options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IDesignBracketService, DesignBracketService>();
+builder.Services.AddScoped(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var connectionString = config.GetSection("Storage")["ConnectionString"];
+    var client = new BlobServiceClient(connectionString);
+    return client;
+});
 
 var app = builder.Build();
 

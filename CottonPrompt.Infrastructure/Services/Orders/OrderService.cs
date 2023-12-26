@@ -1,11 +1,12 @@
-﻿using CottonPrompt.Infrastructure.Entities;
+﻿using Azure.Storage.Blobs;
+using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Extensions;
 using CottonPrompt.Infrastructure.Models.Orders;
 using Microsoft.EntityFrameworkCore;
 
 namespace CottonPrompt.Infrastructure.Services.Orders
 {
-    public class OrderService(CottonPromptContext dbContext) : IOrderService
+    public class OrderService(CottonPromptContext dbContext, BlobServiceClient blobServiceClient) : IOrderService
     {
         public async Task AssignArtistAsync(int id, Guid artistId)
         {
@@ -80,6 +81,36 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .SingleAsync(o => o.Id == id);
                 var result = order.AsGetOrderModel();
                 return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task SubmitDesignAsync(int id, string designName, Stream designContent)
+        {
+            try
+            {
+                var order = await dbContext.Orders.FindAsync(id);
+
+                if (order is null || order.ArtistClaimedBy is null) return;
+
+                var container = blobServiceClient.GetBlobContainerClient(order.ArtistClaimedBy.ToString());
+                await container.CreateIfNotExistsAsync();
+
+                var blob = container.GetBlobClient(designName);
+                await blob.UploadAsync(designContent);
+
+                order.OrderDesigns.Add(new OrderDesign
+                {
+                    OrderId = order.Id,
+                    LineId = order.OrderDesigns.Count + 1,
+                    Name = designName,
+                    CreatedBy = order.ArtistClaimedBy.Value,
+                });
+
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception)
             {
