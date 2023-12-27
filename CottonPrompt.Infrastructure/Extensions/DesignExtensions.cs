@@ -1,5 +1,5 @@
 ﻿using CottonPrompt.Infrastructure.Entities;
-using CottonPrompt.Infrastructure.Models.Design;
+using CottonPrompt.Infrastructure.Models.Designs;
 
 namespace CottonPrompt.Infrastructure.Extensions
 {
@@ -7,7 +7,7 @@ namespace CottonPrompt.Infrastructure.Extensions
     {
         internal static DesignModel AsModel(this OrderDesign entity)
         {
-            var result = new DesignModel(entity.LineId, entity.Name, string.Empty, entity.CreatedOn);
+            var result = new DesignModel(entity.Id, entity.Name, string.Empty, entity.CreatedOn);
             return result;
         }
 

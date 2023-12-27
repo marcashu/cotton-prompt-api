@@ -1,6 +1,7 @@
 using Azure.Storage.Blobs;
 using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Services.DesignBrackets;
+using CottonPrompt.Infrastructure.Services.Designs;
 using CottonPrompt.Infrastructure.Services.Orders;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,8 +25,6 @@ builder.Services.AddCors(opt =>
 });
 builder.Services.AddDbContext<CottonPromptContext>(
         options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IDesignBracketService, DesignBracketService>();
 builder.Services.AddScoped(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -33,6 +32,9 @@ builder.Services.AddScoped(sp =>
     var client = new BlobServiceClient(connectionString);
     return client;
 });
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IDesignBracketService, DesignBracketService>();
+builder.Services.AddScoped<IDesignService, DesignService>();
 
 var app = builder.Build();
 

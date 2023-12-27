@@ -5,19 +5,17 @@ using System.Collections.Generic;
 
 namespace CottonPrompt.Infrastructure.Entities;
 
-public partial class OrderDesign
+public partial class OrderDesignComment
 {
     public int Id { get; set; }
 
-    public int OrderId { get; set; }
+    public int OrderDesignId { get; set; }
 
-    public string Name { get; set; }
+    public string Comment { get; set; }
 
     public Guid CreatedBy { get; set; }
 
     public DateTime CreatedOn { get; set; }
 
-    public virtual Order Order { get; set; }
-
-    public virtual ICollection<OrderDesignComment> OrderDesignComments { get; set; } = new List<OrderDesignComment>();
+    public virtual OrderDesign OrderDesign { get; set; }
 }

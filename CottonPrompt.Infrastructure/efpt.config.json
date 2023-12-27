@@ -20,6 +20,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[OrderDesignComments]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[OrderDesigns]",
          "ObjectType": 0
       },

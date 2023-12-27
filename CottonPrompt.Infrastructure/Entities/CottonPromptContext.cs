@@ -19,6 +19,8 @@ public partial class CottonPromptContext : DbContext
 
     public virtual DbSet<OrderDesignBracket> OrderDesignBrackets { get; set; }
 
+    public virtual DbSet<OrderDesignComment> OrderDesignComments { get; set; }
+
     public virtual DbSet<OrderImageReference> OrderImageReferences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -44,7 +46,7 @@ public partial class CottonPromptContext : DbContext
 
         modelBuilder.Entity<OrderDesign>(entity =>
         {
-            entity.HasKey(e => new { e.OrderId, e.LineId }).HasName("PK_OrderDesigns_OrderID_LineId");
+            entity.HasKey(e => e.Id).HasName("PK_OrderDesigns_Id");
 
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.Name)
@@ -61,6 +63,18 @@ public partial class CottonPromptContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_OrderDesignBracketId");
 
             entity.Property(e => e.Value).HasColumnType("decimal(19, 4)");
+        });
+
+        modelBuilder.Entity<OrderDesignComment>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_OrderDesignComments_Id");
+
+            entity.Property(e => e.Comment).IsRequired();
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.OrderDesign).WithMany(p => p.OrderDesignComments)
+                .HasForeignKey(d => d.OrderDesignId)
+                .HasConstraintName("FK_OrderDesignComments_OrderDesigns");
         });
 
         modelBuilder.Entity<OrderImageReference>(entity =>

@@ -2,7 +2,7 @@
 using Azure.Storage.Sas;
 using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Extensions;
-using CottonPrompt.Infrastructure.Models.Design;
+using CottonPrompt.Infrastructure.Models.Designs;
 using CottonPrompt.Infrastructure.Models.Orders;
 using Microsoft.EntityFrameworkCore;
 
@@ -106,11 +106,11 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 {
                     var container = blobServiceClient.GetBlobContainerClient(order.ArtistClaimedBy.ToString());
 
-                    foreach (var orderDesign in order.OrderDesigns)
+                    foreach (var orderDesign in order.OrderDesigns.OrderBy(o => o.CreatedOn))
                     {
                         var blob = container.GetBlobClient(orderDesign.Name);
                         var url = blob.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddDays(1)).ToString();
-                        var design = new DesignModel(orderDesign.LineId, orderDesign.Name, url, orderDesign.CreatedOn);
+                        var design = new DesignModel(orderDesign.Id, orderDesign.Name, url, orderDesign.CreatedOn);
                         designs.Add(design);
                     }
                 }
@@ -148,7 +148,6 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 order.OrderDesigns.Add(new OrderDesign
                 {
                     OrderId = order.Id,
-                    LineId = order.OrderDesigns.Count + 1,
                     Name = saltedDesignName,
                     CreatedBy = order.ArtistClaimedBy.Value,
                 });

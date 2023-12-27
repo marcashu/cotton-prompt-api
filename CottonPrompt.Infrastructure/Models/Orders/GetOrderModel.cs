@@ -1,5 +1,5 @@
-﻿using CottonPrompt.Infrastructure.Models.Design;
-using CottonPrompt.Infrastructure.Models.DesignBrackets;
+﻿using CottonPrompt.Infrastructure.Models.DesignBrackets;
+using CottonPrompt.Infrastructure.Models.Designs;
 
 namespace CottonPrompt.Infrastructure.Models.Orders
 {

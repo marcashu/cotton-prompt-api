@@ -1,5 +1,5 @@
 ﻿using CottonPrompt.Infrastructure.Entities;
-using CottonPrompt.Infrastructure.Models.Design;
+using CottonPrompt.Infrastructure.Models.Designs;
 using CottonPrompt.Infrastructure.Models.Orders;
 
 namespace CottonPrompt.Infrastructure.Extensions
