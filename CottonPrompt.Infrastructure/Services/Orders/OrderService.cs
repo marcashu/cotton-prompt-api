@@ -14,15 +14,31 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                var order = await dbContext.Orders.FindAsync(id);
+                var order = await dbContext.Orders
+                    .Where(o => o.Id == id)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(o => o.ArtistClaimedBy, artistId)
+                        .SetProperty(o => o.ArtistClaimedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.UpdatedBy, artistId)
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-                if (order is null) return;
-
-                order.ArtistClaimedBy = artistId;
-                order.ArtistClaimedOn = DateTime.UtcNow;
-                order.UpdatedBy = artistId;
-                order.UpdatedOn = DateTime.UtcNow;
-                await dbContext.SaveChangesAsync();
+        public async Task AssignCheckerAsync(int id, Guid checkerId)
+        {
+            try
+            {
+                var order = await dbContext.Orders
+                    .Where(o => o.Id == id)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(o => o.CheckerClaimedBy, checkerId)
+                        .SetProperty(o => o.CheckerClaimedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.UpdatedBy, checkerId)
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
             }
             catch (Exception)
             {
@@ -55,13 +71,14 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<IEnumerable<GetOrdersModel>> GetAsync(bool priority, Guid? artistId, bool hasArtistFilter = false)
+        public async Task<IEnumerable<GetOrdersModel>> GetAsync(bool priority, Guid? artistId, Guid? checkerId, bool hasArtistFilter = false, bool hasCheckerFilter = false)
         {
             try
             {
                 var orders = await dbContext.Orders
                     .Where(o => o.Priority == priority
-                        && (!hasArtistFilter || (hasArtistFilter && o.ArtistClaimedBy == artistId)))
+                        && (!hasArtistFilter || (hasArtistFilter && o.ArtistClaimedBy == artistId))
+                        && (!hasCheckerFilter || (hasCheckerFilter && o.CheckerClaimedBy == checkerId)))
                     .OrderBy(o => o.CreatedOn)
                     .ToListAsync();
                 var result = orders.AsGetOrdersModel();

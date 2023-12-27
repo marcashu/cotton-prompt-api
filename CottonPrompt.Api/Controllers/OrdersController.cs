@@ -15,7 +15,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAsync([FromQuery] GetOrdersRequest request)
         {
-            var result = await orderService.GetAsync(request.Priority, request.ArtistId, request.HasArtistFilter);
+            var result = await orderService.GetAsync(request.Priority, request.ArtistId, request.CheckerId, request.HasArtistFilter, request.HasCheckerFilter);
             return Ok(result);
         }
 
@@ -57,6 +57,14 @@ namespace CottonPrompt.Api.Controllers
         public async Task<IActionResult> AssignArtistAsync([FromRoute] int id, [FromBody] AssignArtristRequest request)
         {
             await orderService.AssignArtistAsync(id, request.ArtistId);
+            return NoContent();
+        }
+
+        [HttpPost("{id}/checker")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> AssignCheckerAsync([FromRoute] int id, [FromBody] AssignCheckerRequest request)
+        {
+            await orderService.AssignCheckerAsync(id, request.CheckerId);
             return NoContent();
         }
 

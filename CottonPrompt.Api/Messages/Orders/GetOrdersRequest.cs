@@ -14,5 +14,11 @@ namespace CottonPrompt.Api.Messages.Orders
 
         [FromQuery(Name = "artistId")]
         public Guid? ArtistId { get; set; }
+
+        [FromQuery(Name = "hasCheckerFilter")]
+        public bool HasCheckerFilter { get; set; }
+
+        [FromQuery(Name = "checkerId")]
+        public Guid? CheckerId { get; set; }
     }
 }
