@@ -97,7 +97,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 var order = await dbContext.Orders
                     .Include(o => o.DesignBracket)
                     .Include(o => o.OrderImageReferences)
-                    .Include(o => o.OrderDesigns)
+                    .Include(o => o.OrderDesigns).ThenInclude(od => od.OrderDesignComments)
                     .SingleAsync(o => o.Id == id);
 
                 var designs = new List<DesignModel>();
@@ -106,11 +106,11 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 {
                     var container = blobServiceClient.GetBlobContainerClient(order.ArtistClaimedBy.ToString());
 
-                    foreach (var orderDesign in order.OrderDesigns.OrderBy(o => o.CreatedOn))
+                    foreach (var orderDesign in order.OrderDesigns)
                     {
                         var blob = container.GetBlobClient(orderDesign.Name);
                         var url = blob.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddDays(1)).ToString();
-                        var design = new DesignModel(orderDesign.Id, orderDesign.Name, url, orderDesign.CreatedOn);
+                        var design = orderDesign.AsModel(url);
                         designs.Add(design);
                     }
                 }

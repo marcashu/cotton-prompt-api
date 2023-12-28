@@ -11,6 +11,7 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         string PrintColor,
         DesignBracket DesignBracket,
         IEnumerable<string> ImageReferences,
-        IEnumerable<DesignModel> Designs
+        DesignModel? Design,
+        IEnumerable<DesignModel> PreviousDesigns
     );
 }

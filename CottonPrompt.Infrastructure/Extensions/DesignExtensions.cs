@@ -5,15 +5,9 @@ namespace CottonPrompt.Infrastructure.Extensions
 {
     internal static class DesignExtensions
     {
-        internal static DesignModel AsModel(this OrderDesign entity)
+        internal static DesignModel AsModel(this OrderDesign entity, string url = "")
         {
-            var result = new DesignModel(entity.Id, entity.Name, string.Empty, entity.CreatedOn);
-            return result;
-        }
-
-        internal static IEnumerable<DesignModel> AsModel(this IEnumerable<OrderDesign> entities)
-        {
-            var result = entities.Select(AsModel);
+            var result = new DesignModel(entity.Id, entity.Name, url, entity.CreatedOn, entity.OrderDesignComments.AsModel());
             return result;
         }
     }
