@@ -20,5 +20,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         Task AssignCheckerAsync(int id, Guid checkerId);
 
         Task SubmitDesignAsync(int id, string designName, Stream designContent);
+
+        Task ApproveAsync(int id, Guid checkerId);
     }
 }

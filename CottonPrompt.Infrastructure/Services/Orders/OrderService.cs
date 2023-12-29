@@ -10,6 +10,22 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 {
     public class OrderService(CottonPromptContext dbContext, BlobServiceClient blobServiceClient) : IOrderService
     {
+        public async Task ApproveAsync(int id, Guid checkerId)
+        {
+            try
+            {
+                await dbContext.Orders
+                    .Where(o => o.Id == id)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(o => o.ApprovedBy, checkerId)
+                        .SetProperty(o => o.ApprovedOn, DateTime.UtcNow));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task AssignArtistAsync(int id, Guid artistId)
         {
             try

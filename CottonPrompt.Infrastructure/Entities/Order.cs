@@ -31,6 +31,10 @@ public partial class Order
 
     public DateTime? CheckerClaimedOn { get; set; }
 
+    public Guid? ApprovedBy { get; set; }
+
+    public DateTime? ApprovedOn { get; set; }
+
     public Guid? UpdatedBy { get; set; }
 
     public DateTime? UpdatedOn { get; set; }

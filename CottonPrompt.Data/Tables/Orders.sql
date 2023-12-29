@@ -12,6 +12,8 @@
 	[ArtistClaimedOn] DATETIME2 NULL,
 	[CheckerClaimedBy] UNIQUEIDENTIFIER NULL,
 	[CheckerClaimedOn] DATETIME2 NULL,
+	[ApprovedBy] UNIQUEIDENTIFIER NULL,
+	[ApprovedOn] DATETIME2 NULL,
     [UpdatedBy] UNIQUEIDENTIFIER NULL, 
     [UpdatedOn] DATETIME2 NULL,
 )

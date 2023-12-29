@@ -78,5 +78,13 @@ namespace CottonPrompt.Api.Controllers
             await orderService.SubmitDesignAsync(id, request.FileName, designStream);
             return NoContent();
         }
+
+        [HttpPost("{id}/approve")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> ApproveAsync([FromRoute] int id, [FromBody] ApproveRequest request)
+        {
+            await orderService.ApproveAsync(id, request.CheckerId);
+            return NoContent();
+        }
     }
 }
