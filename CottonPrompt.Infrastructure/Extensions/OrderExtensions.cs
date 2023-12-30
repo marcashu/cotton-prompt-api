@@ -22,7 +22,7 @@ namespace CottonPrompt.Infrastructure.Extensions
         {
             var currentDesign = designs.Any() ? designs.Last() : null;
             var previousDesigns = designs.Any() ? designs.Take(designs.Count() - 1) : Enumerable.Empty<DesignModel>();
-            var result = new GetOrderModel(entity.Id, entity.OrderNumber, entity.Priority, entity.Concept, entity.PrintColor, entity.DesignBracket.AsModel(), entity.OrderImageReferences.Select(oir => oir.Url), currentDesign, previousDesigns);
+            var result = new GetOrderModel(entity.Id, entity.OrderNumber, entity.Priority, entity.Concept, entity.PrintColor, entity.DesignBracket.AsModel(), entity.OrderImageReferences.Select(oir => oir.Url), currentDesign, previousDesigns, entity.ArtistStatus, entity.CheckerStatus, entity.CheckerId);
             return result;
         }
     }

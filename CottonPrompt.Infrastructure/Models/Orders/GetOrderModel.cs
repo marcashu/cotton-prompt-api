@@ -12,6 +12,9 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         DesignBracket DesignBracket,
         IEnumerable<string> ImageReferences,
         DesignModel? Design,
-        IEnumerable<DesignModel> PreviousDesigns
+        IEnumerable<DesignModel> PreviousDesigns,
+        string ArtistStatus,
+        string CheckerStatus,
+        Guid? CheckerId
     );
 }

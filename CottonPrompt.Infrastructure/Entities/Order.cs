@@ -23,29 +23,23 @@ public partial class Order
 
     public DateTime CreatedOn { get; set; }
 
-    public Guid? ArtistClaimedBy { get; set; }
+    public Guid? ArtistId { get; set; }
 
-    public DateTime? ArtistClaimedOn { get; set; }
-
-    public Guid? CheckerClaimedBy { get; set; }
-
-    public DateTime? CheckerClaimedOn { get; set; }
-
-    public Guid? ApprovedBy { get; set; }
-
-    public DateTime? ApprovedOn { get; set; }
-
-    public Guid? UpdatedBy { get; set; }
-
-    public DateTime? UpdatedOn { get; set; }
+    public Guid? CheckerId { get; set; }
 
     public string ArtistStatus { get; set; }
 
     public string CheckerStatus { get; set; }
+
+    public Guid? UpdatedBy { get; set; }
+
+    public DateTime? UpdatedOn { get; set; }
 
     public virtual OrderDesignBracket DesignBracket { get; set; }
 
     public virtual ICollection<OrderDesign> OrderDesigns { get; set; } = new List<OrderDesign>();
 
     public virtual ICollection<OrderImageReference> OrderImageReferences { get; set; } = new List<OrderImageReference>();
+
+    public virtual ICollection<OrderStatusHistory> OrderStatusHistories { get; set; } = new List<OrderStatusHistory>();
 }

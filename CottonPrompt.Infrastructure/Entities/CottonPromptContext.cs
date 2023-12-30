@@ -23,6 +23,8 @@ public partial class CottonPromptContext : DbContext
 
     public virtual DbSet<OrderImageReference> OrderImageReferences { get; set; }
 
+    public virtual DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Order>(entity =>
@@ -88,6 +90,22 @@ public partial class CottonPromptContext : DbContext
             entity.HasOne(d => d.Order).WithMany(p => p.OrderImageReferences)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("FK_OrderImageReferences_Orders");
+        });
+
+        modelBuilder.Entity<OrderStatusHistory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_OrderStatusHistory_Id");
+
+            entity.ToTable("OrderStatusHistory");
+
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderStatusHistories)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("FK_OrderStatusHistory_Orders");
         });
 
         OnModelCreatingPartial(modelBuilder);

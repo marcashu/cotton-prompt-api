@@ -8,14 +8,10 @@
 	[DesignBracketId] INT NOT NULL CONSTRAINT FK_Orders_OrderDesignBrackets REFERENCES [dbo].[OrderDesignBrackets]([Id]), 
     [CreatedBy] UNIQUEIDENTIFIER NOT NULL,
 	[CreatedOn] DATETIME2 NOT NULL CONSTRAINT DF_Orders_CreatedOn DEFAULT GETUTCDATE(),
-	[ArtistClaimedBy] UNIQUEIDENTIFIER NULL,
-	[ArtistClaimedOn] DATETIME2 NULL,
-	[CheckerClaimedBy] UNIQUEIDENTIFIER NULL,
-	[CheckerClaimedOn] DATETIME2 NULL,
-	[ApprovedBy] UNIQUEIDENTIFIER NULL,
-	[ApprovedOn] DATETIME2 NULL,
-    [UpdatedBy] UNIQUEIDENTIFIER NULL, 
-    [UpdatedOn] DATETIME2 NULL,
+	[ArtistId] UNIQUEIDENTIFIER NULL,
+	[CheckerId] UNIQUEIDENTIFIER NULL,
 	[ArtistStatus] NVARCHAR(50) NULL,
-	[CheckerStatus] NVARCHAR(50) NULL
+	[CheckerStatus] NVARCHAR(50) NULL,
+    [UpdatedBy] UNIQUEIDENTIFIER NULL, 
+    [UpdatedOn] DATETIME2 NULL
 )

@@ -64,5 +64,6 @@
     <Build Include="Tables\OrderImageReferences.sql" />
     <Build Include="Tables\OrderDesigns.sql" />
     <Build Include="Tables\OrderDesignComments.sql" />
+    <Build Include="Tables\OrderStatusHistory.sql" />
   </ItemGroup>
 </Project>

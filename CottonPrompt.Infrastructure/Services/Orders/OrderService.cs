@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
+using CottonPrompt.Infrastructure.Constants;
 using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Extensions;
 using CottonPrompt.Infrastructure.Models.Designs;
@@ -10,18 +11,35 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 {
     public class OrderService(CottonPromptContext dbContext, BlobServiceClient blobServiceClient) : IOrderService
     {
-        public async Task ApproveAsync(int id, Guid checkerId)
+        public async Task ApproveAsync(int id)
         {
             try
             {
-                await dbContext.Orders
-                    .Where(o => o.Id == id)
-                    .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(o => o.ApprovedBy, checkerId)
-                        .SetProperty(o => o.ApprovedOn, DateTime.UtcNow)
-                        .SetProperty(o => o.UpdatedBy, checkerId)
-                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
-                        .SetProperty(o => o.CheckerStatus, "Approved"));
+                var order = await dbContext.Orders.FindAsync(id);
+
+                if (order is null || order.CheckerId is null) return;
+
+                await UpdateCheckerStatusAsync(id, OrderStatuses.Approved, order.CheckerId.Value);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task RequestReuploadAsync(int id)
+        {
+            try
+            {
+                var order = await dbContext.Orders.FindAsync(id);
+
+                if (order is null || order.CheckerId is null) return;
+
+                await UpdateCheckerStatusAsync(id, OrderStatuses.RequestedReupload, order.CheckerId.Value);
+
+                if (order.ArtistId is null) return;
+
+                await UpdateArtistStatusAsync(id, OrderStatuses.ForReupload, order.ArtistId.Value);
             }
             catch (Exception)
             {
@@ -36,11 +54,12 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 var order = await dbContext.Orders
                     .Where(o => o.Id == id)
                     .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(o => o.ArtistClaimedBy, artistId)
-                        .SetProperty(o => o.ArtistClaimedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.ArtistId, artistId)
+                        .SetProperty(o => o.ArtistStatus, OrderStatuses.Claimed)
                         .SetProperty(o => o.UpdatedBy, artistId)
-                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
-                        .SetProperty(o => o.ArtistStatus, "Claimed"));
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
+
+                await CreateOrderHistory(id, OrderStatuses.Claimed, artistId);
             }
             catch (Exception)
             {
@@ -53,13 +72,21 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             try
             {
                 var order = await dbContext.Orders
-                    .Where(o => o.Id == id)
-                    .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(o => o.CheckerClaimedBy, checkerId)
-                        .SetProperty(o => o.CheckerClaimedOn, DateTime.UtcNow)
-                        .SetProperty(o => o.UpdatedBy, checkerId)
-                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
-                        .SetProperty(o => o.CheckerStatus, "Claimed"));
+                    .Include(o => o.OrderDesigns)
+                    .SingleOrDefaultAsync(o => o.Id == id);
+
+                if (order is null) return;
+
+                var status = order.OrderDesigns.Count > 0 ? OrderStatuses.ForReview : OrderStatuses.Claimed;
+
+                order.CheckerId = checkerId;
+                order.CheckerStatus = status;
+                order.UpdatedBy = checkerId;
+                order.UpdatedOn = DateTime.UtcNow;
+
+                await dbContext.SaveChangesAsync();
+
+                await CreateOrderHistory(id, status, checkerId);
             }
             catch (Exception)
             {
@@ -98,8 +125,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 var orders = await dbContext.Orders
                     .Where(o => o.Priority == priority
-                        && (!hasArtistFilter || (hasArtistFilter && o.ArtistClaimedBy == artistId))
-                        && (!hasCheckerFilter || (hasCheckerFilter && o.CheckerClaimedBy == checkerId)))
+                        && (!hasArtistFilter || (hasArtistFilter && o.ArtistId == artistId))
+                        && (!hasCheckerFilter || (hasCheckerFilter && o.CheckerId == checkerId)))
                     .OrderBy(o => o.CreatedOn)
                     .ToListAsync();
                 var result = orders.AsGetOrdersModel();
@@ -125,7 +152,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 if (order.OrderDesigns.Any())
                 {
-                    var container = blobServiceClient.GetBlobContainerClient(order.ArtistClaimedBy.ToString());
+                    var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
 
                     foreach (var orderDesign in order.OrderDesigns)
                     {
@@ -154,9 +181,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Include(o => o.OrderDesigns)
                     .SingleAsync(o => o.Id == id);
 
-                if (order is null || order.ArtistClaimedBy is null) return;
+                if (order is null || order.ArtistId is null) return;
 
-                var container = blobServiceClient.GetBlobContainerClient(order.ArtistClaimedBy.ToString());
+                var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
                 await container.CreateIfNotExistsAsync();
 
                 var saltedDesignName = $"{designName}_{Guid.NewGuid()}";
@@ -170,14 +197,16 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 {
                     OrderId = order.Id,
                     Name = saltedDesignName,
-                    CreatedBy = order.ArtistClaimedBy.Value,
+                    CreatedBy = order.ArtistId.Value,
                 });
 
-                order.ArtistStatus = "Design submitted";
-                order.UpdatedBy = order.ArtistClaimedBy;
-                order.UpdatedOn = DateTime.UtcNow;
-
                 await dbContext.SaveChangesAsync();
+
+                await UpdateArtistStatusAsync(id, OrderStatuses.DesignSubmitted, order.ArtistId.Value);
+
+                if (order.CheckerId is null) return;
+
+                await UpdateCheckerStatusAsync(id, OrderStatuses.ForReview, order.CheckerId.Value);
             }
             catch (Exception)
             {
@@ -206,6 +235,64 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 {
                     currentOrder.OrderImageReferences.Add(imageRef);
                 }
+
+                await dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task UpdateArtistStatusAsync(int id, string status, Guid artistId)
+        {
+            try
+            {
+                await dbContext.Orders
+                    .Where(o => o.Id == id)
+                    .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(o => o.ArtistStatus, status)
+                        .SetProperty(o => o.UpdatedBy, artistId)
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
+
+                await CreateOrderHistory(id, status, artistId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task UpdateCheckerStatusAsync(int id, string status, Guid checkerId)
+        {
+            try
+            {
+                await dbContext.Orders
+                    .Where(o => o.Id == id)
+                    .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(o => o.CheckerStatus, status)
+                        .SetProperty(o => o.UpdatedBy, checkerId)
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
+
+                await CreateOrderHistory(id, status, checkerId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task CreateOrderHistory(int orderId, string status, Guid userId)
+        {
+            try
+            {
+                await dbContext.OrderStatusHistories.AddAsync(new OrderStatusHistory
+                {
+                    OrderId = orderId,
+                    Status = status,
+                    CreatedBy = userId,
+                    CreatedOn = DateTime.UtcNow,
+                });
 
                 await dbContext.SaveChangesAsync();
             }

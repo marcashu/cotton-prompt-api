@@ -81,9 +81,17 @@ namespace CottonPrompt.Api.Controllers
 
         [HttpPost("{id}/approve")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        public async Task<IActionResult> ApproveAsync([FromRoute] int id, [FromBody] ApproveRequest request)
+        public async Task<IActionResult> ApproveAsync([FromRoute] int id)
         {
-            await orderService.ApproveAsync(id, request.CheckerId);
+            await orderService.ApproveAsync(id);
+            return NoContent();
+        }
+
+        [HttpPost("{id}/request-reupload")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> RequestReuploadAsync([FromRoute] int id)
+        {
+            await orderService.RequestReuploadAsync(id);
             return NoContent();
         }
     }
