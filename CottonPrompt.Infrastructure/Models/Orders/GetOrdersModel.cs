@@ -6,6 +6,8 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         int Id, 
         string OrderNumber, 
         bool Priority,
-        DateTime CreatedOn
+        DateTime CreatedOn,
+        string ArtistStatus,
+        string CheckerStatus
     );
 }

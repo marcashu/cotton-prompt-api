@@ -16,4 +16,6 @@
 	[ApprovedOn] DATETIME2 NULL,
     [UpdatedBy] UNIQUEIDENTIFIER NULL, 
     [UpdatedOn] DATETIME2 NULL,
+	[ArtistStatus] NVARCHAR(50) NULL,
+	[CheckerStatus] NVARCHAR(50) NULL
 )

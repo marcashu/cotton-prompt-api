@@ -39,6 +39,10 @@ public partial class Order
 
     public DateTime? UpdatedOn { get; set; }
 
+    public string ArtistStatus { get; set; }
+
+    public string CheckerStatus { get; set; }
+
     public virtual OrderDesignBracket DesignBracket { get; set; }
 
     public virtual ICollection<OrderDesign> OrderDesigns { get; set; } = new List<OrderDesign>();

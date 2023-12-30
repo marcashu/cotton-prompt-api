@@ -1,9 +1,5 @@
 ﻿using CottonPrompt.Infrastructure.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace CottonPrompt.Infrastructure.Services.Designs
 {
@@ -13,6 +9,14 @@ namespace CottonPrompt.Infrastructure.Services.Designs
         {
             try
             {
+                var orderDesign = await dbContext.OrderDesigns.Include(o => o.Order).SingleOrDefaultAsync(od => od.Id == id);
+
+                if (orderDesign is null) return;
+
+                orderDesign.Order.CheckerStatus = "In Review";
+                orderDesign.Order.UpdatedBy = orderDesign.Order.CheckerClaimedBy;
+                orderDesign.Order.UpdatedOn = DateTime.UtcNow;
+
                 var designComment = new OrderDesignComment
                 {
                     OrderDesignId = id,
@@ -20,7 +24,8 @@ namespace CottonPrompt.Infrastructure.Services.Designs
                     CreatedBy = userId
                 };
 
-                dbContext.OrderDesignComments.Add(designComment);
+                orderDesign.OrderDesignComments.Add(designComment);
+
                 await dbContext.SaveChangesAsync();
             }
             catch (Exception)

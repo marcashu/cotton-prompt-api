@@ -29,6 +29,8 @@ public partial class CottonPromptContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_OrderId");
 
+            entity.Property(e => e.ArtistStatus).HasMaxLength(50);
+            entity.Property(e => e.CheckerStatus).HasMaxLength(50);
             entity.Property(e => e.Concept).IsRequired();
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.OrderNumber)

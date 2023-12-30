@@ -18,7 +18,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Where(o => o.Id == id)
                     .ExecuteUpdateAsync(setters => setters
                         .SetProperty(o => o.ApprovedBy, checkerId)
-                        .SetProperty(o => o.ApprovedOn, DateTime.UtcNow));
+                        .SetProperty(o => o.ApprovedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.UpdatedBy, checkerId)
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.CheckerStatus, "Approved"));
             }
             catch (Exception)
             {
@@ -36,7 +39,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         .SetProperty(o => o.ArtistClaimedBy, artistId)
                         .SetProperty(o => o.ArtistClaimedOn, DateTime.UtcNow)
                         .SetProperty(o => o.UpdatedBy, artistId)
-                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.ArtistStatus, "Claimed"));
             }
             catch (Exception)
             {
@@ -54,7 +58,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         .SetProperty(o => o.CheckerClaimedBy, checkerId)
                         .SetProperty(o => o.CheckerClaimedOn, DateTime.UtcNow)
                         .SetProperty(o => o.UpdatedBy, checkerId)
-                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.CheckerStatus, "Claimed"));
             }
             catch (Exception)
             {
@@ -167,6 +172,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     Name = saltedDesignName,
                     CreatedBy = order.ArtistClaimedBy.Value,
                 });
+
+                order.ArtistStatus = "Design submitted";
+                order.UpdatedBy = order.ArtistClaimedBy;
+                order.UpdatedOn = DateTime.UtcNow;
 
                 await dbContext.SaveChangesAsync();
             }
