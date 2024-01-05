@@ -9,7 +9,9 @@ public partial class OrderDesignBracket
 {
     public int Id { get; set; }
 
-    public decimal Value { get; set; }
+    public string Value { get; set; }
+
+    public int SortOrder { get; set; }
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

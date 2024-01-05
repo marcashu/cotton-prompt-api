@@ -66,7 +66,9 @@ public partial class CottonPromptContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_OrderDesignBracketId");
 
-            entity.Property(e => e.Value).HasColumnType("decimal(19, 4)");
+            entity.Property(e => e.Value)
+                .IsRequired()
+                .HasMaxLength(50);
         });
 
         modelBuilder.Entity<OrderDesignComment>(entity =>
