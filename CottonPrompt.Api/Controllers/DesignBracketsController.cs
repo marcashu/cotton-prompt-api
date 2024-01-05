@@ -33,6 +33,22 @@ namespace CottonPrompt.Api.Controllers
             await designBracketService.UpdateAsync(id, request.Value);
             return NoContent();
         }
+
+        [HttpGet("{id}/orders/count")]
+        [ProducesResponseType<GetOrdersCountModel>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetOrdersCountAsync([FromRoute] int id)
+        {
+            var result = await designBracketService.GetOrdersCountAsync(id);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> DeleteAsync([FromRoute] int id)
+        {
+            await designBracketService.DeleteAsync(id);
+            return NoContent();
+        }
     }
 }
     

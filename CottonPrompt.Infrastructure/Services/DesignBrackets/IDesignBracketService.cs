@@ -9,5 +9,9 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
         Task SwapAsync(int id1, int id2);
 
         Task UpdateAsync(int id, string value);
+
+        Task<GetOrdersCountModel> GetOrdersCountAsync(int id);
+
+        Task DeleteAsync(int id);
     }
 }

@@ -7,12 +7,40 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
 {
     public class DesignBracketService(CottonPromptContext dbContext) : IDesignBracketService
     {
+        public async Task DeleteAsync(int id)
+        {
+            try
+            {
+                await dbContext.OrderDesignBrackets.Where(db => db.Id == id).ExecuteDeleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<DesignBracket>> GetAsync()
         {
             try
             {
                 var designBrackets = await dbContext.OrderDesignBrackets.OrderBy(db => db.SortOrder).ToListAsync();
                 var result = designBrackets.AsModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<GetOrdersCountModel> GetOrdersCountAsync(int id)
+        {
+            try
+            {
+                var result = new GetOrdersCountModel
+                {
+                    Count = await dbContext.Orders.CountAsync(o => o.DesignBracketId == id)
+                };
                 return result;
             }
             catch (Exception)
