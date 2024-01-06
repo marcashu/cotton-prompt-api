@@ -2,11 +2,8 @@
 
 namespace CottonPrompt.Api.Messages.DesignBrackets
 {
-    public class CreateRequest
+    public class EnableDesignBracketRequest
     {
-        [Required]
-        public string Value { get; set; }
-
         [Required]
         public Guid UserId { get; set; }
     }

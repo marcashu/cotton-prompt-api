@@ -23,6 +23,8 @@ public partial class CottonPromptContext : DbContext
 
     public virtual DbSet<OrderImageReference> OrderImageReferences { get; set; }
 
+    public virtual DbSet<OrderPrintColor> OrderPrintColors { get; set; }
+
     public virtual DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,14 +40,16 @@ public partial class CottonPromptContext : DbContext
             entity.Property(e => e.OrderNumber)
                 .IsRequired()
                 .HasMaxLength(50);
-            entity.Property(e => e.PrintColor)
-                .IsRequired()
-                .HasMaxLength(50);
 
             entity.HasOne(d => d.DesignBracket).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.DesignBracketId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_OrderDesignBrackets");
+
+            entity.HasOne(d => d.PrintColor).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.PrintColorId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Orders_OrderPrintColors");
         });
 
         modelBuilder.Entity<OrderDesign>(entity =>
@@ -94,6 +98,17 @@ public partial class CottonPromptContext : DbContext
             entity.HasOne(d => d.Order).WithMany(p => p.OrderImageReferences)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("FK_OrderImageReferences_Orders");
+        });
+
+        modelBuilder.Entity<OrderPrintColor>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_OrderPrintColors_Id");
+
+            entity.Property(e => e.Active).HasDefaultValue(true);
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.Value)
+                .IsRequired()
+                .HasMaxLength(50);
         });
 
         modelBuilder.Entity<OrderStatusHistory>(entity =>

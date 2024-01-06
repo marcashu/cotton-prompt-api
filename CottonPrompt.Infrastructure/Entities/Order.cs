@@ -15,7 +15,7 @@ public partial class Order
 
     public string Concept { get; set; }
 
-    public string PrintColor { get; set; }
+    public int PrintColorId { get; set; }
 
     public int DesignBracketId { get; set; }
 
@@ -42,4 +42,6 @@ public partial class Order
     public virtual ICollection<OrderImageReference> OrderImageReferences { get; set; } = new List<OrderImageReference>();
 
     public virtual ICollection<OrderStatusHistory> OrderStatusHistories { get; set; } = new List<OrderStatusHistory>();
+
+    public virtual OrderPrintColor PrintColor { get; set; }
 }

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace CottonPrompt.Api.Messages.DesignBrackets
+namespace CottonPrompt.Api.Messages.PrintColors
 {
-    public class GetRequest
+    public class GetPrintColorsRequest
     {
         [FromQuery(Name = "hasActiveFilter")]
         public bool HasActiveFilter { get; set; }

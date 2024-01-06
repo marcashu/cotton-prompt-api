@@ -1,22 +1,22 @@
 ﻿using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Extensions;
-using CottonPrompt.Infrastructure.Models.DesignBrackets;
+using CottonPrompt.Infrastructure.Models.PrintColors;
 using Microsoft.EntityFrameworkCore;
 
-namespace CottonPrompt.Infrastructure.Services.DesignBrackets
+namespace CottonPrompt.Infrastructure.Services.PrintColors
 {
-    public class DesignBracketService(CottonPromptContext dbContext) : IDesignBracketService
+    public class PrintColorService(CottonPromptContext dbContext) : IPrintColorService
     {
         public async Task CreateAsync(string value, Guid userId)
         {
             try
             {
-                var sortOrder = await dbContext.OrderDesignBrackets
+                var sortOrder = await dbContext.OrderPrintColors
                     .OrderByDescending(db => db.SortOrder)
                     .Select(db => db.SortOrder + 1)
                     .FirstOrDefaultAsync();
 
-                var designBracket = new OrderDesignBracket
+                var designBracket = new OrderPrintColor
                 {
                     Value = value,
                     CreatedBy = userId,
@@ -24,7 +24,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
                     Active = true,
                 };
 
-                await dbContext.OrderDesignBrackets.AddAsync(designBracket);
+                await dbContext.OrderPrintColors.AddAsync(designBracket);
                 await dbContext.SaveChangesAsync();
             }
             catch (Exception)
@@ -37,7 +37,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
         {
             try
             {
-                await dbContext.OrderDesignBrackets.Where(db => db.Id == id).ExecuteDeleteAsync();
+                await dbContext.OrderPrintColors.Where(db => db.Id == id).ExecuteDeleteAsync();
             }
             catch (Exception)
             {
@@ -49,7 +49,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
         {
             try
             {
-                await dbContext.OrderDesignBrackets
+                await dbContext.OrderPrintColors
                     .Where(db => db.Id == id)
                     .ExecuteUpdateAsync(setters => setters
                         .SetProperty(db => db.Active, false)
@@ -66,7 +66,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
         {
             try
             {
-                await dbContext.OrderDesignBrackets
+                await dbContext.OrderPrintColors
                     .Where(db => db.Id == id)
                     .ExecuteUpdateAsync(setters => setters
                         .SetProperty(db => db.Active, true)
@@ -79,12 +79,12 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
             }
         }
 
-        public async Task<IEnumerable<DesignBracket>> GetAsync(bool hasActiveFilter, bool active)
+        public async Task<IEnumerable<PrintColor>> GetAsync(bool hasActiveFilter, bool active)
         {
             try
             {
-                var designBrackets = await dbContext.OrderDesignBrackets
-                    .Where(db => !hasActiveFilter || (hasActiveFilter && db.Active == active))
+                var designBrackets = await dbContext.OrderPrintColors
+                    .Where(db => !hasActiveFilter || hasActiveFilter && db.Active == active)
                     .OrderBy(db => db.SortOrder)
                     .ToListAsync();
                 var result = designBrackets.AsModel();
@@ -96,13 +96,13 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
             }
         }
 
-        public async Task<GetDesignBracketOrdersCountModel> GetOrdersCountAsync(int id)
+        public async Task<GetPrintColorOrdersCountModel> GetOrdersCountAsync(int id)
         {
             try
             {
-                var result = new GetDesignBracketOrdersCountModel
+                var result = new GetPrintColorOrdersCountModel
                 {
-                    Count = await dbContext.Orders.CountAsync(o => o.DesignBracketId == id)
+                    Count = await dbContext.Orders.CountAsync(o => o.PrintColorId == id)
                 };
                 return result;
             }
@@ -116,8 +116,8 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
         {
             try
             {
-                var designBracket1 = await dbContext.OrderDesignBrackets.FindAsync(id1);
-                var designBracket2 = await dbContext.OrderDesignBrackets.FindAsync(id2);
+                var designBracket1 = await dbContext.OrderPrintColors.FindAsync(id1);
+                var designBracket2 = await dbContext.OrderPrintColors.FindAsync(id2);
 
                 if (designBracket1 is null || designBracket2 is null) return;
 
@@ -140,7 +140,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
         {
             try
             {
-                await dbContext.OrderDesignBrackets
+                await dbContext.OrderPrintColors
                     .Where(db => db.Id == id)
                     .ExecuteUpdateAsync(setters => setters
                         .SetProperty(db => db.Value, value)

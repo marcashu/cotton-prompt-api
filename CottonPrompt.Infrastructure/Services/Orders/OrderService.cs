@@ -144,6 +144,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 var order = await dbContext.Orders
                     .Include(o => o.DesignBracket)
+                    .Include(o => o.PrintColor)
                     .Include(o => o.OrderImageReferences)
                     .Include(o => o.OrderDesigns).ThenInclude(od => od.OrderDesignComments)
                     .SingleAsync(o => o.Id == id);
@@ -225,7 +226,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 currentOrder.OrderNumber = order.OrderNumber;
                 currentOrder.Priority = order.Priority;
                 currentOrder.Concept = order.Concept;
-                currentOrder.PrintColor = order.PrintColor;
+                currentOrder.PrintColorId = order.PrintColorId;
                 currentOrder.DesignBracketId = order.DesignBracketId;
                 currentOrder.UpdatedBy = order.UpdatedBy;
                 currentOrder.UpdatedOn = order.UpdatedOn;

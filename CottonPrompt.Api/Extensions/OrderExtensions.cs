@@ -12,7 +12,7 @@ namespace CottonPrompt.Api.Extensions
                 OrderNumber = request.OrderNumber,
                 Priority = request.Priority,
                 Concept = request.Concept,
-                PrintColor = request.PrintColor,
+                PrintColorId = request.PrintColorId,
                 DesignBracketId = request.DesignBracketId,
                 OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
                 {
@@ -32,7 +32,7 @@ namespace CottonPrompt.Api.Extensions
                 OrderNumber = request.OrderNumber,
                 Priority = request.Priority,
                 Concept = request.Concept,
-                PrintColor = request.PrintColor,
+                PrintColorId = request.PrintColorId,
                 DesignBracketId = request.DesignBracketId,
                 OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
                 {

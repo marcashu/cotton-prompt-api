@@ -10,7 +10,7 @@
 
         public string Concept { get; set; }
 
-        public string PrintColor { get; set; }
+        public int PrintColorId { get; set; }
 
         public int DesignBracketId { get; set; }
 

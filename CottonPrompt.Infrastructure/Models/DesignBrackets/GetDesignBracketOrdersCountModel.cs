@@ -1,6 +1,6 @@
 ﻿namespace CottonPrompt.Infrastructure.Models.DesignBrackets
 {
-    public class GetOrdersCountModel
+    public class GetDesignBracketOrdersCountModel
     {
         public int Count { get; set; }
     }

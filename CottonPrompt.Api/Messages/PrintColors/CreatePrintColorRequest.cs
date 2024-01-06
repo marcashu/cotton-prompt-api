@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CottonPrompt.Api.Messages.DesignBrackets
+namespace CottonPrompt.Api.Messages.PrintColors
 {
-    public class UpdateRequest
+    public class CreatePrintColorRequest
     {
         [Required]
         public string Value { get; set; }

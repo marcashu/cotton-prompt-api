@@ -10,7 +10,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
 
         Task UpdateAsync(int id, string value, Guid userId);
 
-        Task<GetOrdersCountModel> GetOrdersCountAsync(int id);
+        Task<GetDesignBracketOrdersCountModel> GetOrdersCountAsync(int id);
 
         Task DeleteAsync(int id);
 
