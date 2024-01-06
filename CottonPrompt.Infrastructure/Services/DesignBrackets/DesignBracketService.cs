@@ -19,11 +19,44 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
             }
         }
 
-        public async Task<IEnumerable<DesignBracket>> GetAsync()
+        public async Task DisableAsync(int id)
         {
             try
             {
-                var designBrackets = await dbContext.OrderDesignBrackets.OrderBy(db => db.SortOrder).ToListAsync();
+                await dbContext.OrderDesignBrackets
+                    .Where(db => db.Id == id)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(db => db.Active, false));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task EnableAsync(int id)
+        {
+            try
+            {
+                await dbContext.OrderDesignBrackets
+                    .Where(db => db.Id == id)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(db => db.Active, true));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<DesignBracket>> GetAsync(bool hasActiveFilter, bool active)
+        {
+            try
+            {
+                var designBrackets = await dbContext.OrderDesignBrackets
+                    .Where(db => !hasActiveFilter || (hasActiveFilter && db.Active == active))
+                    .OrderBy(db => db.SortOrder)
+                    .ToListAsync();
                 var result = designBrackets.AsModel();
                 return result;
             }

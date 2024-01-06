@@ -13,5 +13,7 @@ public partial class OrderDesignBracket
 
     public int SortOrder { get; set; }
 
+    public bool Active { get; set; }
+
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }

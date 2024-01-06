@@ -4,7 +4,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
 {
     public interface IDesignBracketService
     {
-        Task<IEnumerable<DesignBracket>> GetAsync();
+        Task<IEnumerable<DesignBracket>> GetAsync(bool hasActiveFilter, bool active);
 
         Task SwapAsync(int id1, int id2);
 
@@ -13,5 +13,9 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
         Task<GetOrdersCountModel> GetOrdersCountAsync(int id);
 
         Task DeleteAsync(int id);
+
+        Task DisableAsync(int id);
+
+        Task EnableAsync(int id);
     }
 }
