@@ -7,6 +7,32 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
 {
     public class DesignBracketService(CottonPromptContext dbContext) : IDesignBracketService
     {
+        public async Task CreateAsync(string value, Guid userId)
+        {
+            try
+            {
+                var sortOrder = await dbContext.OrderDesignBrackets
+                    .OrderByDescending(db => db.SortOrder)
+                    .Select(db => db.SortOrder + 1)
+                    .FirstOrDefaultAsync();
+
+                var designBracket = new OrderDesignBracket
+                {
+                    Value = value,
+                    CreatedBy = userId,
+                    SortOrder = sortOrder,
+                    Active = true,
+                };
+
+                await dbContext.OrderDesignBrackets.AddAsync(designBracket);
+                await dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task DeleteAsync(int id)
         {
             try
@@ -19,14 +45,16 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
             }
         }
 
-        public async Task DisableAsync(int id)
+        public async Task DisableAsync(int id, Guid userId)
         {
             try
             {
                 await dbContext.OrderDesignBrackets
                     .Where(db => db.Id == id)
                     .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(db => db.Active, false));
+                        .SetProperty(db => db.Active, false)
+                        .SetProperty(db => db.UpdatedBy, userId)
+                        .SetProperty(db => db.UpdatedOn, DateTime.UtcNow));
             }
             catch (Exception)
             {
@@ -34,14 +62,16 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
             }
         }
 
-        public async Task EnableAsync(int id)
+        public async Task EnableAsync(int id, Guid userId)
         {
             try
             {
                 await dbContext.OrderDesignBrackets
                     .Where(db => db.Id == id)
                     .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(db => db.Active, true));
+                        .SetProperty(db => db.Active, true)
+                        .SetProperty(db => db.UpdatedBy, userId)
+                        .SetProperty(db => db.UpdatedOn, DateTime.UtcNow));
             }
             catch (Exception)
             {
@@ -82,7 +112,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
             }
         }
 
-        public async Task SwapAsync(int id1, int id2)
+        public async Task SwapAsync(int id1, int id2, Guid userId)
         {
             try
             {
@@ -92,6 +122,11 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
                 if (designBracket1 is null || designBracket2 is null) return;
 
                 (designBracket2.SortOrder, designBracket1.SortOrder) = (designBracket1.SortOrder, designBracket2.SortOrder);
+                designBracket1.UpdatedBy = userId;
+                designBracket1.UpdatedOn = DateTime.UtcNow;
+                designBracket2.UpdatedBy = userId;
+                designBracket2.UpdatedOn = DateTime.UtcNow;
+
                 await dbContext.SaveChangesAsync();
             }
             catch (Exception)
@@ -101,14 +136,16 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
             }
         }
 
-        public async Task UpdateAsync(int id, string value)
+        public async Task UpdateAsync(int id, string value, Guid userId)
         {
             try
             {
                 await dbContext.OrderDesignBrackets
                     .Where(db => db.Id == id)
                     .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(db => db.Value, value));
+                        .SetProperty(db => db.Value, value)
+                        .SetProperty(db => db.UpdatedBy, userId)
+                        .SetProperty(db => db.UpdatedOn, DateTime.UtcNow));
             }
             catch (Exception)
             {

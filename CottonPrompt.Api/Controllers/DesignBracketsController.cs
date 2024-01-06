@@ -12,9 +12,9 @@ namespace CottonPrompt.Api.Controllers
     {
         [HttpGet]
         [ProducesResponseType<IEnumerable<DesignBracket>>((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetAsync([FromQuery] bool hasActiveFilter, [FromQuery] bool active)
+        public async Task<IActionResult> GetAsync([FromQuery] GetRequest request)
         {
-            var result = await designBracketService.GetAsync(hasActiveFilter, active);
+            var result = await designBracketService.GetAsync(request.HasActiveFilter, request.Active);
             return Ok(result);
         }
 
@@ -22,7 +22,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> SwapAsync([FromBody] SwapRequest request)
         {
-            await designBracketService.SwapAsync(request.Id1, request.Id2);
+            await designBracketService.SwapAsync(request.Id1, request.Id2, request.UserId);
             return NoContent();
         }
 
@@ -30,7 +30,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> UpdateAsync([FromRoute] int id, [FromBody] UpdateRequest request)
         {
-            await designBracketService.UpdateAsync(id, request.Value);
+            await designBracketService.UpdateAsync(id, request.Value, request.UserId);
             return NoContent();
         }
 
@@ -52,17 +52,25 @@ namespace CottonPrompt.Api.Controllers
 
         [HttpPost("{id}/enable")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        public async Task<IActionResult> EnableAsync([FromRoute] int id)
+        public async Task<IActionResult> EnableAsync([FromRoute] int id, [FromBody] EnableRequest request)
         {
-            await designBracketService.EnableAsync(id);
+            await designBracketService.EnableAsync(id, request.UserId);
             return NoContent();
         }
 
         [HttpPost("{id}/disable")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        public async Task<IActionResult> DisableAsync([FromRoute] int id)
+        public async Task<IActionResult> DisableAsync([FromRoute] int id, [FromBody] DisableRequest request)
         {
-            await designBracketService.DisableAsync(id);
+            await designBracketService.DisableAsync(id, request.UserId);
+            return NoContent();
+        }
+
+        [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> CreateAsync([FromBody] CreateRequest request)
+        {
+            await designBracketService.CreateAsync(request.Value, request.UserId);
             return NoContent();
         }
     }

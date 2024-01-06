@@ -67,6 +67,7 @@ public partial class CottonPromptContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_OrderDesignBracketId");
 
             entity.Property(e => e.Active).HasDefaultValue(true);
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.Value)
                 .IsRequired()
                 .HasMaxLength(50);

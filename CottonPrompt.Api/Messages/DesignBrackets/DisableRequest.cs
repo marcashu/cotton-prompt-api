@@ -2,14 +2,8 @@
 
 namespace CottonPrompt.Api.Messages.DesignBrackets
 {
-    public class SwapRequest
+    public class DisableRequest
     {
-        [Required]
-        public int Id1 { get; set; }
-
-        [Required]
-        public int Id2 { get; set; }
-
         [Required]
         public Guid UserId { get; set; }
     }
