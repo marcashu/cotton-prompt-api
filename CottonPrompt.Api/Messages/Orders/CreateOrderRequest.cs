@@ -14,6 +14,8 @@ namespace CottonPrompt.Api.Messages.Orders
 
         public int DesignBracketId { get; set; }
 
+        public int OutputSizeId { get; set; }
+
         public IEnumerable<string>? ImageReferences { get; set; }
 
         public Guid CreatedBy { get; set; }

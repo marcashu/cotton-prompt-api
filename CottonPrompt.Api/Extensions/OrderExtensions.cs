@@ -14,6 +14,7 @@ namespace CottonPrompt.Api.Extensions
                 Concept = request.Concept,
                 PrintColorId = request.PrintColorId,
                 DesignBracketId = request.DesignBracketId,
+                OutputSizeId = request.OutputSizeId,
                 OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
                 {
                     LineId = i + 1,
@@ -34,6 +35,7 @@ namespace CottonPrompt.Api.Extensions
                 Concept = request.Concept,
                 PrintColorId = request.PrintColorId,
                 DesignBracketId = request.DesignBracketId,
+                OutputSizeId = request.OutputSizeId,
                 OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
                 {
                     OrderId = request.Id,

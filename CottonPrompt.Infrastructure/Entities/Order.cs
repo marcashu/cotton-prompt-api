@@ -19,6 +19,8 @@ public partial class Order
 
     public int DesignBracketId { get; set; }
 
+    public int OutputSizeId { get; set; }
+
     public Guid CreatedBy { get; set; }
 
     public DateTime CreatedOn { get; set; }
@@ -42,6 +44,8 @@ public partial class Order
     public virtual ICollection<OrderImageReference> OrderImageReferences { get; set; } = new List<OrderImageReference>();
 
     public virtual ICollection<OrderStatusHistory> OrderStatusHistories { get; set; } = new List<OrderStatusHistory>();
+
+    public virtual OrderOutputSize OutputSize { get; set; }
 
     public virtual OrderPrintColor PrintColor { get; set; }
 }

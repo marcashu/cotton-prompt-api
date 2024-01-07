@@ -23,6 +23,8 @@ public partial class CottonPromptContext : DbContext
 
     public virtual DbSet<OrderImageReference> OrderImageReferences { get; set; }
 
+    public virtual DbSet<OrderOutputSize> OrderOutputSizes { get; set; }
+
     public virtual DbSet<OrderPrintColor> OrderPrintColors { get; set; }
 
     public virtual DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
@@ -45,6 +47,11 @@ public partial class CottonPromptContext : DbContext
                 .HasForeignKey(d => d.DesignBracketId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_OrderDesignBrackets");
+
+            entity.HasOne(d => d.OutputSize).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.OutputSizeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Orders_OrderOutputSizes");
 
             entity.HasOne(d => d.PrintColor).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.PrintColorId)
@@ -98,6 +105,17 @@ public partial class CottonPromptContext : DbContext
             entity.HasOne(d => d.Order).WithMany(p => p.OrderImageReferences)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("FK_OrderImageReferences_Orders");
+        });
+
+        modelBuilder.Entity<OrderOutputSize>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_OrderOutputSizes_Id");
+
+            entity.Property(e => e.Active).HasDefaultValue(true);
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.Value)
+                .IsRequired()
+                .HasMaxLength(50);
         });
 
         modelBuilder.Entity<OrderPrintColor>(entity =>

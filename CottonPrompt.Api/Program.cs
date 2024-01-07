@@ -3,6 +3,7 @@ using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Services.DesignBrackets;
 using CottonPrompt.Infrastructure.Services.Designs;
 using CottonPrompt.Infrastructure.Services.Orders;
+using CottonPrompt.Infrastructure.Services.OutputSizes;
 using CottonPrompt.Infrastructure.Services.PrintColors;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,6 +38,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IDesignBracketService, DesignBracketService>();
 builder.Services.AddScoped<IDesignService, DesignService>();
 builder.Services.AddScoped<IPrintColorService, PrintColorService>();
+builder.Services.AddScoped<IOutputSizeService, OutputSizeService>();
 
 var app = builder.Build();
 

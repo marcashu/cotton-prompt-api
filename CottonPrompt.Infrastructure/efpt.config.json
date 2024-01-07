@@ -32,6 +32,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[OrderOutputSizes]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[OrderPrintColors]",
          "ObjectType": 0
       },

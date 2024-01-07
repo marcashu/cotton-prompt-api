@@ -66,5 +66,6 @@
     <Build Include="Tables\OrderDesignComments.sql" />
     <Build Include="Tables\OrderStatusHistory.sql" />
     <Build Include="Tables\OrderPrintColors.sql" />
+    <Build Include="Tables\OrderOutputSizes.sql" />
   </ItemGroup>
 </Project>
