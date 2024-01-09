@@ -119,14 +119,16 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<IEnumerable<GetOrdersModel>> GetAsync(bool priority, Guid? artistId, Guid? checkerId, bool hasArtistFilter = false, bool hasCheckerFilter = false)
+        public async Task<IEnumerable<GetOrdersModel>> GetAsync(bool priority, Guid? artistId, Guid? checkerId, bool availableForArtists = false, bool availableForCheckers = false)
         {
             try
             {
                 var orders = await dbContext.Orders
                     .Where(o => o.Priority == priority
-                        && (!hasArtistFilter || (hasArtistFilter && o.ArtistId == artistId))
-                        && (!hasCheckerFilter || (hasCheckerFilter && o.CheckerId == checkerId)))
+                        && (!availableForArtists || (availableForArtists && o.ArtistId == null))
+                        && (!availableForCheckers || (availableForCheckers && o.CheckerId == null && o.ArtistStatus == OrderStatuses.DesignSubmitted))
+                        && (artistId == null || (artistId != null && o.ArtistId == artistId))
+                        && (checkerId == null || (checkerId != null && o.CheckerId == checkerId)))
                     .OrderBy(o => o.CreatedOn)
                     .ToListAsync();
                 var result = orders.AsGetOrdersModel();
