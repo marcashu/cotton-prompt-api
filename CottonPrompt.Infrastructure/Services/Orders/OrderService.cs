@@ -123,14 +123,28 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                var orders = await dbContext.Orders
-                    .Where(o => o.Priority == priority
-                        && (!availableForArtists || (availableForArtists && o.ArtistId == null))
-                        && (!availableForCheckers || (availableForCheckers && o.CheckerId == null && o.ArtistStatus == OrderStatuses.DesignSubmitted))
-                        && (artistId == null || (artistId != null && o.ArtistId == artistId))
-                        && (checkerId == null || (checkerId != null && o.CheckerId == checkerId)))
-                    .OrderBy(o => o.CreatedOn)
-                    .ToListAsync();
+                var queryableOrders = dbContext.Orders.Where(o => o.Priority == priority);
+
+                // for artists
+                if (artistId != null)
+                {
+                    queryableOrders = queryableOrders.Where(o => o.ArtistId == artistId);
+                } else if (availableForArtists)
+                {
+                    queryableOrders = queryableOrders.Where(o => o.ArtistId == null);
+                }
+
+                // for checkers
+                if (checkerId != null)
+                {
+                    queryableOrders = queryableOrders.Where(o => o.CheckerId == checkerId);
+                }
+                else if (availableForCheckers)
+                {
+                    queryableOrders = queryableOrders.Where(o => o.CheckerId == null && o.ArtistStatus == OrderStatuses.DesignSubmitted);
+                }
+
+                var orders = await queryableOrders.OrderBy(o => o.CreatedOn).ToListAsync();
                 var result = orders.AsGetOrdersModel();
                 return result;
             }

@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using CottonPrompt.Infrastructure.Entities;
+using CottonPrompt.Infrastructure.Services.Artists;
 using CottonPrompt.Infrastructure.Services.DesignBrackets;
 using CottonPrompt.Infrastructure.Services.Designs;
 using CottonPrompt.Infrastructure.Services.Orders;
@@ -39,6 +40,7 @@ builder.Services.AddScoped<IDesignBracketService, DesignBracketService>();
 builder.Services.AddScoped<IDesignService, DesignService>();
 builder.Services.AddScoped<IPrintColorService, PrintColorService>();
 builder.Services.AddScoped<IOutputSizeService, OutputSizeService>();
+builder.Services.AddScoped<IArtistService, ArtistService>();
 
 var app = builder.Build();
 
