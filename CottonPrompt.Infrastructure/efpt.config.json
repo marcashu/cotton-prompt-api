@@ -46,6 +46,10 @@
       {
          "Name": "[dbo].[OrderStatusHistory]",
          "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Users]",
+         "ObjectType": 0
       }
    ],
    "UiHint": "(LocalDB)\\MSSQLLocalDB.CottonPrompt",

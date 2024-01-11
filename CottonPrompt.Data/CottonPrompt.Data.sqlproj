@@ -67,5 +67,6 @@
     <Build Include="Tables\OrderStatusHistory.sql" />
     <Build Include="Tables\OrderPrintColors.sql" />
     <Build Include="Tables\OrderOutputSizes.sql" />
+    <Build Include="Tables\Users.sql" />
   </ItemGroup>
 </Project>

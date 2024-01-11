@@ -6,7 +6,10 @@ using CottonPrompt.Infrastructure.Services.Designs;
 using CottonPrompt.Infrastructure.Services.Orders;
 using CottonPrompt.Infrastructure.Services.OutputSizes;
 using CottonPrompt.Infrastructure.Services.PrintColors;
+using CottonPrompt.Infrastructure.Services.Users;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +31,8 @@ builder.Services.AddCors(opt =>
 });
 builder.Services.AddDbContext<CottonPromptContext>(
         options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd")); ;
 builder.Services.AddScoped(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -41,6 +46,7 @@ builder.Services.AddScoped<IDesignService, DesignService>();
 builder.Services.AddScoped<IPrintColorService, PrintColorService>();
 builder.Services.AddScoped<IOutputSizeService, OutputSizeService>();
 builder.Services.AddScoped<IArtistService, ArtistService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
@@ -52,6 +58,7 @@ app.UseHttpsRedirection();
 
 app.UseCors();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
