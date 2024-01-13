@@ -96,6 +96,10 @@ public partial class CottonPromptContext : DbContext
             entity.HasOne(d => d.OrderDesign).WithMany(p => p.OrderDesignComments)
                 .HasForeignKey(d => d.OrderDesignId)
                 .HasConstraintName("FK_OrderDesignComments_OrderDesigns");
+
+            entity.HasOne(d => d.User).WithMany(p => p.OrderDesignComments)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_OrderDesignComments_Users");
         });
 
         modelBuilder.Entity<OrderImageReference>(entity =>

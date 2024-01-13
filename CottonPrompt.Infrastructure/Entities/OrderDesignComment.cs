@@ -11,6 +11,8 @@ public partial class OrderDesignComment
 
     public int OrderDesignId { get; set; }
 
+    public Guid UserId { get; set; }
+
     public string Comment { get; set; }
 
     public Guid CreatedBy { get; set; }
@@ -18,4 +20,6 @@ public partial class OrderDesignComment
     public DateTime CreatedOn { get; set; }
 
     public virtual OrderDesign OrderDesign { get; set; }
+
+    public virtual User User { get; set; }
 }

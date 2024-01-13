@@ -22,7 +22,5 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         Task SubmitDesignAsync(int id, string designName, Stream designContent);
 
         Task ApproveAsync(int id);
-
-        Task RequestReuploadAsync(int id);
     }
 }

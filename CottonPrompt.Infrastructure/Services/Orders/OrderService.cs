@@ -27,26 +27,6 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task RequestReuploadAsync(int id)
-        {
-            try
-            {
-                var order = await dbContext.Orders.FindAsync(id);
-
-                if (order is null || order.CheckerId is null) return;
-
-                await UpdateCheckerStatusAsync(id, OrderStatuses.RequestedReupload, order.CheckerId.Value);
-
-                if (order.ArtistId is null) return;
-
-                await UpdateArtistStatusAsync(id, OrderStatuses.ForReupload, order.ArtistId.Value);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task AssignArtistAsync(int id, Guid artistId)
         {
             try

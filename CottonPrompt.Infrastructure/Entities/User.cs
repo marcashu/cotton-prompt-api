@@ -24,4 +24,6 @@ public partial class User
     public Guid? UpdatedBy { get; set; }
 
     public DateTime? UpdatedOn { get; set; }
+
+    public virtual ICollection<OrderDesignComment> OrderDesignComments { get; set; } = new List<OrderDesignComment>();
 }
