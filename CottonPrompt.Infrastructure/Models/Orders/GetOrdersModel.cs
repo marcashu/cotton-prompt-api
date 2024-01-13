@@ -8,6 +8,7 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         bool Priority,
         DateTime CreatedOn,
         string ArtistStatus,
-        string CheckerStatus
+        string CheckerStatus,
+        Guid? ArtistId
     );
 }
