@@ -5,7 +5,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 {
     public interface IOrderService
     {
-        Task<IEnumerable<GetOrdersModel>> GetAsync(bool priority, Guid? artistId, Guid? checkerId, bool hasArtistFilter = false, bool hasCheckerFilter = false);
+        Task<IEnumerable<GetOrdersModel>> GetAsync(bool? priority, string? artistStatus, string? checkerStatus, Guid? artistId, Guid? checkerId, bool noArtist = false, bool noChecker = false);
 
         Task<GetOrderModel> GetByIdAsync(int id);
 

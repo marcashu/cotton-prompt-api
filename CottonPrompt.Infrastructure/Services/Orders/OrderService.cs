@@ -99,17 +99,23 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<IEnumerable<GetOrdersModel>> GetAsync(bool priority, Guid? artistId, Guid? checkerId, bool availableForArtists = false, bool availableForCheckers = false)
+        public async Task<IEnumerable<GetOrdersModel>> GetAsync(bool? priority, string? artistStatus, string? checkerStatus, Guid? artistId, Guid? checkerId, bool noArtist = false, bool noChecker = false)
         {
             try
             {
-                var queryableOrders = dbContext.Orders.Where(o => o.Priority == priority);
+                IQueryable<Order> queryableOrders = dbContext.Orders.Where(o => true);
+
+                if (priority != null)
+                {
+                    queryableOrders = queryableOrders.Where(o => o.Priority == priority);
+                }
 
                 // for artists
                 if (artistId != null)
                 {
                     queryableOrders = queryableOrders.Where(o => o.ArtistId == artistId);
-                } else if (availableForArtists)
+                } 
+                else if (noArtist)
                 {
                     queryableOrders = queryableOrders.Where(o => o.ArtistId == null);
                 }
@@ -119,12 +125,24 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 {
                     queryableOrders = queryableOrders.Where(o => o.CheckerId == checkerId);
                 }
-                else if (availableForCheckers)
+                else if (noChecker)
                 {
-                    queryableOrders = queryableOrders.Where(o => o.CheckerId == null && o.ArtistStatus == OrderStatuses.DesignSubmitted);
+                    queryableOrders = queryableOrders.Where(o => o.CheckerId == null);
                 }
 
-                var orders = await queryableOrders.OrderBy(o => o.CreatedOn).ToListAsync();
+                // order status
+                if (!string.IsNullOrEmpty(artistStatus))
+                {
+                    var statuses = artistStatus.Split(',');
+                    queryableOrders = queryableOrders.Where(o => statuses.Contains(o.ArtistStatus));
+                }
+                if (!string.IsNullOrEmpty(checkerStatus))
+                {
+                    var statuses = checkerStatus.Split(',');
+                    queryableOrders = queryableOrders.Where(o => statuses.Contains(o.CheckerStatus));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
                 var result = orders.AsGetOrdersModel();
                 return result;
             }
