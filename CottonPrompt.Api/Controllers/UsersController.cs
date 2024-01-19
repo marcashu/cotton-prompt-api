@@ -1,4 +1,5 @@
-﻿using CottonPrompt.Infrastructure.Services.Users;
+﻿using CottonPrompt.Infrastructure.Models.Users;
+using CottonPrompt.Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
@@ -13,7 +14,7 @@ namespace CottonPrompt.Api.Controllers
     public class UsersController(IUserService userService) : ControllerBase
     {
         [HttpGet("login")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType<GetUsersModel>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> LoginAsync()
         {
             var user = User;
@@ -30,8 +31,16 @@ namespace CottonPrompt.Api.Controllers
             var id = Guid.Parse(idClaim.Value);
             var name = nameClaim.Value;
             var email = emailClaim.Value;
-            await userService.LoginAsync(id, name, email);
-            return NoContent();
+            var result = await userService.LoginAsync(id, name, email);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [ProducesResponseType<IEnumerable<GetUsersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetAsync()
+        {
+            var result = await userService.GetAsync();
+            return Ok(result);
         }
     }
 }
