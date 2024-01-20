@@ -6,6 +6,8 @@ namespace CottonPrompt.Infrastructure.Services.Users
     {
         Task<GetUsersModel> LoginAsync(Guid id, string name, string email);
 
+        Task<IEnumerable<GetUsersModel>> GetRegisteredAsync();
+
         Task<IEnumerable<GetUsersModel>> GetAsync();
     }
 }

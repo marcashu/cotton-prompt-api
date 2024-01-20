@@ -6,26 +6,44 @@ using Microsoft.Graph;
 
 namespace CottonPrompt.Infrastructure.Services.Users
 {
-    public class UserService(CottonPromptContext dbContext, GraphServiceClient graphServiceClient) : IUserService
+    public class UserService(CottonPromptContext dbContext) : IUserService
     {
         public async Task<IEnumerable<GetUsersModel>> GetAsync()
         {
 			try
             {
-                var result = new List<GetUsersModel>();
-                var msUsers = await graphServiceClient.Users.GetAsync();
-				
-				if (msUsers?.Value is null) return result;
+				var result = Enumerable.Empty<GetUsersModel>();
+                var dbUsers = await dbContext.Users.OrderBy(u => u.Name).ToListAsync();
 
-				var dbUsers = await dbContext.Users.ToListAsync();
+				//if (registered)
+				//{
+				//	result = dbUsers.AsModel();
+				//}
+				//else
+				//{
+    //                var msUsersResponse = await graphServiceClient.Users.GetAsync();
 
-				foreach (var msUser in msUsers.Value) 
-				{
-					var role = dbUsers.SingleOrDefault(du => du.Id == Guid.Parse(msUser.Id ?? string.Empty))?.Role;
-					var user = msUser.AsModel(role);
-					result.Add(user);
-				}
+    //                if (msUsersResponse?.Value is null) return result;
 
+				//	var registeredUserIds = dbUsers.Select(u => u.Id.ToString()).ToList();
+				//	var msUsers = msUsersResponse.Value.Where(u => !registeredUserIds.Contains(u.Id ?? string.Empty)).ToList();
+				//	result = msUsers.AsModel();
+    //            }
+
+				return result;
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+        }
+
+        public async Task<IEnumerable<GetUsersModel>> GetRegisteredAsync()
+        {
+			try
+			{
+				var users = await dbContext.Users.OrderBy(u => u.Name).ToListAsync();
+				var result = users.AsModel();
 				return result;
 			}
 			catch (Exception)

@@ -42,6 +42,15 @@ namespace CottonPrompt.Api.Controllers
             var result = await userService.GetAsync();
             return Ok(result);
         }
+
+        [AllowAnonymous]
+        [HttpGet("registered")]
+        [ProducesResponseType<IEnumerable<GetUsersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetRegisteredAsync()
+        {
+            var result = await userService.GetRegisteredAsync();
+            return Ok(result);
+        }
     }
 }
     
