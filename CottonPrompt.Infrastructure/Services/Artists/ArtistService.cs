@@ -1,13 +1,13 @@
 ﻿using CottonPrompt.Infrastructure.Constants;
 using CottonPrompt.Infrastructure.Entities;
-using CottonPrompt.Infrastructure.Models.Artists;
+using CottonPrompt.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CottonPrompt.Infrastructure.Services.Artists
 {
     public class ArtistService(CottonPromptContext dbContext) : IArtistService
     {
-        public async Task<CanArtistClaimModel> CanClaimAsync(Guid id)
+        public async Task<CanDoModel> CanClaimAsync(Guid id)
         {
 			try
 			{
@@ -16,15 +16,15 @@ namespace CottonPrompt.Infrastructure.Services.Artists
 				
 				if (forReuploadOrders > 2)
 				{
-					return new CanArtistClaimModel(false, "You can't claim a new order because you already have 3 orders for reupload.");
+					return new CanDoModel(false, "You can't claim a new order because you already have 3 orders for reupload.");
 				}
 
 				if (newlyClaimedOrders > 0)
 				{
-					return new CanArtistClaimModel(false, "You can't claim a new order because you already have 1 order for upload.");
+					return new CanDoModel(false, "You can't claim a new order because you already have 1 order for upload.");
 				}
 				
-				return new CanArtistClaimModel(true, string.Empty);
+				return new CanDoModel(true, string.Empty);
             }
 			catch (Exception)
 			{

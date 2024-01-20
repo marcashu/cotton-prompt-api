@@ -1,13 +1,40 @@
-﻿using CottonPrompt.Infrastructure.Entities;
+﻿using CottonPrompt.Infrastructure.Constants;
+using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Extensions;
+using CottonPrompt.Infrastructure.Models;
 using CottonPrompt.Infrastructure.Models.Users;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Graph;
 
 namespace CottonPrompt.Infrastructure.Services.Users
 {
     public class UserService(CottonPromptContext dbContext) : IUserService
     {
+        public async Task<CanDoModel> CanUpdateRoleAsync(Guid id, string role)
+        {
+			try
+			{
+				if (role != "Artist")
+				{
+					return new CanDoModel(true, string.Empty);
+				}
+
+				var count = await dbContext.Orders.CountAsync(o => o.CheckerId == id && o.CheckerStatus != OrderStatuses.Approved);
+
+                if (count > 0)
+                {
+					return new CanDoModel(false, "Can't update role to Artist because the user still has orders for checking.");
+                }
+				else
+                {
+                    return new CanDoModel(true, string.Empty);
+                }
+            }
+			catch (Exception)
+			{
+				throw;
+			}
+        }
+
         public async Task<IEnumerable<GetUsersModel>> GetAsync()
         {
 			try
@@ -85,6 +112,21 @@ namespace CottonPrompt.Infrastructure.Services.Users
                     var result = user.AsModel();
                     return result;
                 }
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+        }
+
+        public async Task UpdateRoleAsync(Guid id, string role, Guid updatedBy)
+        {
+			try
+			{
+				await dbContext.Users.Where(u => u.Id == id).ExecuteUpdateAsync(setters => setters
+					.SetProperty(u => u.Role, role)
+					.SetProperty(u => u.UpdatedOn, DateTime.UtcNow)
+					.SetProperty(u => u.UpdatedBy, updatedBy));
 			}
 			catch (Exception)
 			{

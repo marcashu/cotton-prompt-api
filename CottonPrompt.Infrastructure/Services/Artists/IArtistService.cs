@@ -1,9 +1,9 @@
-﻿using CottonPrompt.Infrastructure.Models.Artists;
+﻿using CottonPrompt.Infrastructure.Models;
 
 namespace CottonPrompt.Infrastructure.Services.Artists
 {
     public interface IArtistService
     {
-        Task<CanArtistClaimModel> CanClaimAsync(Guid id);
+        Task<CanDoModel> CanClaimAsync(Guid id);
     }
 }

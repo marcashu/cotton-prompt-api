@@ -1,4 +1,6 @@
-﻿using CottonPrompt.Infrastructure.Models.Users;
+﻿using CottonPrompt.Api.Messages.Users;
+using CottonPrompt.Infrastructure.Models;
+using CottonPrompt.Infrastructure.Models.Users;
 using CottonPrompt.Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +52,24 @@ namespace CottonPrompt.Api.Controllers
         {
             var result = await userService.GetRegisteredAsync();
             return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{id}/can-update-role")]
+        [ProducesResponseType<CanDoModel>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> CanUpdateRoleAsync([FromRoute] Guid id, [FromQuery] string role)
+        {
+            var result = await userService.CanUpdateRoleAsync(id, role);
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPut("{id}/role")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> UpdateRoleAsync([FromRoute] Guid id, [FromBody] UpdateUserRoleRequest request)
+        {
+            await userService.UpdateRoleAsync(id, request.Role, request.UpdatedBy);
+            return NoContent();
         }
     }
 }

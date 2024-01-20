@@ -1,4 +1,5 @@
-﻿using CottonPrompt.Infrastructure.Models.Users;
+﻿using CottonPrompt.Infrastructure.Models;
+using CottonPrompt.Infrastructure.Models.Users;
 
 namespace CottonPrompt.Infrastructure.Services.Users
 {
@@ -9,5 +10,9 @@ namespace CottonPrompt.Infrastructure.Services.Users
         Task<IEnumerable<GetUsersModel>> GetRegisteredAsync();
 
         Task<IEnumerable<GetUsersModel>> GetAsync();
+
+        Task UpdateRoleAsync(Guid id, string role, Guid updatedBy);
+
+        Task<CanDoModel> CanUpdateRoleAsync(Guid id, string role);
     }
 }

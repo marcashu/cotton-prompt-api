@@ -1,4 +1,4 @@
-﻿using CottonPrompt.Infrastructure.Models.Artists;
+﻿using CottonPrompt.Infrastructure.Models;
 using CottonPrompt.Infrastructure.Services.Artists;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -10,7 +10,7 @@ namespace CottonPrompt.Api.Controllers
     public class ArtistsController(IArtistService artistService) : ControllerBase
     {
         [HttpGet("{id}/can-claim")]
-        [ProducesResponseType<IEnumerable<CanArtistClaimModel>>((int)HttpStatusCode.OK)]
+        [ProducesResponseType<IEnumerable<CanDoModel>>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> CanClaimAsnyc([FromRoute] Guid id)
         {
             var result = await artistService.CanClaimAsync(id);
