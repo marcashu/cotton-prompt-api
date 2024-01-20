@@ -11,25 +11,49 @@ namespace CottonPrompt.Infrastructure.Services.Users
 {
     public class UserService(CottonPromptContext dbContext, IServiceProvider serviceProvider) : IUserService
     {
-        public async Task<CanDoModel> CanUpdateRoleAsync(Guid id, string role)
+        public async Task<CanDoModel> CanUpdateRoleAsync(Guid id, string? role)
         {
 			try
 			{
-				if (role != "Artist")
+				if (!string.IsNullOrEmpty(role) && role != "Artist")
 				{
 					return new CanDoModel(true, string.Empty);
 				}
 
-				var count = await dbContext.Orders.CountAsync(o => o.CheckerId == id && o.CheckerStatus != OrderStatuses.Approved);
+				if (role == "Artist")
+                {
+                    var count = await dbContext.Orders.CountAsync(o => o.CheckerId == id && o.CheckerStatus != OrderStatuses.Approved);
 
-                if (count > 0)
-                {
-					return new CanDoModel(false, "Can't update role to Artist because the user still has orders for checking.");
+                    if (count > 0)
+                    {
+                        return new CanDoModel(false, "Can't update role to Artist because the user still has orders to complete as Checker.");
+                    }
+                    else
+                    {
+                        return new CanDoModel(true, string.Empty);
+                    }
                 }
+
+				// role is null
+				var checkerCount = await dbContext.Orders.CountAsync(o => o.CheckerId == id && o.CheckerStatus != OrderStatuses.Approved);
+				var artistCount = await dbContext.Orders.CountAsync(o => o.ArtistId == id && o.CheckerStatus != OrderStatuses.Approved);
+
+				if (checkerCount > 0 && artistCount > 0)
+				{
+					return new CanDoModel(false, "Can't remove role because the user still has orders to complete as both Artist and Checker.");
+				}
+				else if (checkerCount > 0)
+				{
+					return new CanDoModel(false, "Can't update role to Artist because the user still has orders to complete as Checker.");
+				}
+				else if (artistCount > 0)
+				{
+					return new CanDoModel(false, "Can't update role to Artist because the user still has orders to complete as Artist.");
+				}
 				else
-                {
-                    return new CanDoModel(true, string.Empty);
-                }
+				{
+					return new CanDoModel(true, string.Empty);
+				}
             }
 			catch (Exception)
 			{
@@ -102,7 +126,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
 			}
         }
 
-        public async Task UpdateRoleAsync(Guid id, string role, Guid updatedBy)
+        public async Task UpdateRoleAsync(Guid id, Guid updatedBy, string? role)
         {
 			try
 			{

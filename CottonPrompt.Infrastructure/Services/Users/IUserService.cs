@@ -13,8 +13,8 @@ namespace CottonPrompt.Infrastructure.Services.Users
 
         Task<IEnumerable<GetUsersModel>> GetUnregisteredAsync();
 
-        Task UpdateRoleAsync(Guid id, string role, Guid updatedBy);
+        Task UpdateRoleAsync(Guid id, Guid updatedBy, string? role);
 
-        Task<CanDoModel> CanUpdateRoleAsync(Guid id, string role);
+        Task<CanDoModel> CanUpdateRoleAsync(Guid id, string? role);
     }
 }

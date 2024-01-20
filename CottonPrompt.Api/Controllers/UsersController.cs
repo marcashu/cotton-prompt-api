@@ -57,7 +57,7 @@ namespace CottonPrompt.Api.Controllers
         [AllowAnonymous]
         [HttpGet("{id}/can-update-role")]
         [ProducesResponseType<CanDoModel>((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> CanUpdateRoleAsync([FromRoute] Guid id, [FromQuery] string role)
+        public async Task<IActionResult> CanUpdateRoleAsync([FromRoute] Guid id, [FromQuery] string? role)
         {
             var result = await userService.CanUpdateRoleAsync(id, role);
             return Ok(result);
@@ -68,7 +68,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> UpdateRoleAsync([FromRoute] Guid id, [FromBody] UpdateUserRoleRequest request)
         {
-            await userService.UpdateRoleAsync(id, request.Role, request.UpdatedBy);
+            await userService.UpdateRoleAsync(id, request.UpdatedBy, request.Role);
             return NoContent();
         }
 
