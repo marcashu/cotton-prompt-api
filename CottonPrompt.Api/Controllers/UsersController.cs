@@ -37,11 +37,11 @@ namespace CottonPrompt.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet]
+        [HttpGet("unregistered")]
         [ProducesResponseType<IEnumerable<GetUsersModel>>((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> GetUnregisteredAsync()
         {
-            var result = await userService.GetAsync();
+            var result = await userService.GetUnregisteredAsync();
             return Ok(result);
         }
 
@@ -69,6 +69,15 @@ namespace CottonPrompt.Api.Controllers
         public async Task<IActionResult> UpdateRoleAsync([FromRoute] Guid id, [FromBody] UpdateUserRoleRequest request)
         {
             await userService.UpdateRoleAsync(id, request.Role, request.UpdatedBy);
+            return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> AddAsync([FromBody] AddUserRequest request)
+        {
+            await userService.AddAsync(request.Id, request.Name, request.Email, request.Role, request.CreatedBy);
             return NoContent();
         }
     }

@@ -4,10 +4,12 @@ using CottonPrompt.Infrastructure.Extensions;
 using CottonPrompt.Infrastructure.Models;
 using CottonPrompt.Infrastructure.Models.Users;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Graph;
 
 namespace CottonPrompt.Infrastructure.Services.Users
 {
-    public class UserService(CottonPromptContext dbContext) : IUserService
+    public class UserService(CottonPromptContext dbContext, IServiceProvider serviceProvider) : IUserService
     {
         public async Task<CanDoModel> CanUpdateRoleAsync(Guid id, string role)
         {
@@ -35,29 +37,23 @@ namespace CottonPrompt.Infrastructure.Services.Users
 			}
         }
 
-        public async Task<IEnumerable<GetUsersModel>> GetAsync()
+        public async Task<IEnumerable<GetUsersModel>> GetUnregisteredAsync()
         {
 			try
             {
-				var result = Enumerable.Empty<GetUsersModel>();
-                var dbUsers = await dbContext.Users.OrderBy(u => u.Name).ToListAsync();
+                var result = Enumerable.Empty<GetUsersModel>();
+                
+				var graphClient = serviceProvider.GetRequiredService<GraphServiceClient>();
+				var msUsersResponse = await graphClient.Users.GetAsync();
 
-				//if (registered)
-				//{
-				//	result = dbUsers.AsModel();
-				//}
-				//else
-				//{
-    //                var msUsersResponse = await graphServiceClient.Users.GetAsync();
+				if (msUsersResponse is null || msUsersResponse.Value is null) return result;
 
-    //                if (msUsersResponse?.Value is null) return result;
+				var msUsers = msUsersResponse.Value;
+                var dbUserIds = await dbContext.Users.OrderBy(u => u.Name).Select(u => u.Id.ToString().ToLower()).ToListAsync();
 
-				//	var registeredUserIds = dbUsers.Select(u => u.Id.ToString()).ToList();
-				//	var msUsers = msUsersResponse.Value.Where(u => !registeredUserIds.Contains(u.Id ?? string.Empty)).ToList();
-				//	result = msUsers.AsModel();
-    //            }
+				result = msUsers.Where(u => !dbUserIds.Contains(u.Id?.ToLower() ?? string.Empty)).AsModel();
 
-				return result;
+                return result;
 			}
 			catch (Exception)
 			{
@@ -87,20 +83,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
 
 				if (user == null)
 				{
-					var newUser = new User
-					{
-						Id = id,
-						Name = name,
-						Email = email,
-						LastLoggedOn = DateTime.UtcNow,
-						CreatedBy = id,
-					};
-
-					await dbContext.Users.AddAsync(newUser);
-                    await dbContext.SaveChangesAsync();
-
-                    var result = newUser.AsModel();
-                    return result;
+					return new GetUsersModel(id, name, email, string.Empty);
                 }
 				else
 				{
@@ -127,6 +110,28 @@ namespace CottonPrompt.Infrastructure.Services.Users
 					.SetProperty(u => u.Role, role)
 					.SetProperty(u => u.UpdatedOn, DateTime.UtcNow)
 					.SetProperty(u => u.UpdatedBy, updatedBy));
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+        }
+
+        public async Task AddAsync(Guid id, string name, string email, string? role, Guid createdBy)
+        {
+			try
+			{
+				var user = new User
+				{
+					Id = id,
+					Name = name,
+					Email = email,
+					Role = role,
+					CreatedBy = createdBy
+				};
+
+				await dbContext.Users.AddAsync(user);
+				await dbContext.SaveChangesAsync();
 			}
 			catch (Exception)
 			{
