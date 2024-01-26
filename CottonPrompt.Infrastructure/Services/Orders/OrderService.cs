@@ -244,6 +244,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 currentOrder.PrintColorId = order.PrintColorId;
                 currentOrder.DesignBracketId = order.DesignBracketId;
                 currentOrder.OutputSizeId = order.OutputSizeId;
+                currentOrder.CustomerEmail = order.CustomerEmail;
                 currentOrder.UpdatedBy = order.UpdatedBy;
                 currentOrder.UpdatedOn = order.UpdatedOn;
 

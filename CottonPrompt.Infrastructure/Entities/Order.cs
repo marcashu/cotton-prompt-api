@@ -21,6 +21,8 @@ public partial class Order
 
     public int OutputSizeId { get; set; }
 
+    public string CustomerEmail { get; set; }
+
     public Guid CreatedBy { get; set; }
 
     public DateTime CreatedOn { get; set; }
