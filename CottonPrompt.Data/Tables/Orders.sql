@@ -7,7 +7,7 @@
 	[PrintColorId] INT NOT NULL CONSTRAINT FK_Orders_OrderPrintColors REFERENCES [dbo].[OrderPrintColors]([Id]),
 	[DesignBracketId] INT NOT NULL CONSTRAINT FK_Orders_OrderDesignBrackets REFERENCES [dbo].[OrderDesignBrackets]([Id]),
 	[OutputSizeId] INT NOT NULL CONSTRAINT FK_Orders_OrderOutputSizes REFERENCES [dbo].[OrderOutputSizes]([Id]),
-	[CustomerEmail] NVARCHAR(100) NULL, 
+	[CustomerEmail] NVARCHAR(100) NOT NULL, 
     [CreatedBy] UNIQUEIDENTIFIER NOT NULL,
 	[CreatedOn] DATETIME2 NOT NULL CONSTRAINT DF_Orders_CreatedOn DEFAULT GETUTCDATE(),
 	[ArtistId] UNIQUEIDENTIFIER NULL,

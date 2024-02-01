@@ -41,7 +41,9 @@ public partial class CottonPromptContext : DbContext
             entity.Property(e => e.CheckerStatus).HasMaxLength(50);
             entity.Property(e => e.Concept).IsRequired();
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.CustomerEmail).HasMaxLength(100);
+            entity.Property(e => e.CustomerEmail)
+                .IsRequired()
+                .HasMaxLength(100);
             entity.Property(e => e.OrderNumber)
                 .IsRequired()
                 .HasMaxLength(50);

@@ -15,7 +15,7 @@ namespace CottonPrompt.Api.Extensions
                 PrintColorId = request.PrintColorId,
                 DesignBracketId = request.DesignBracketId,
                 OutputSizeId = request.OutputSizeId,
-                CustomerEmail = !string.IsNullOrEmpty(request.CustomerEmail) ? request.CustomerEmail : null,
+                CustomerEmail = request.CustomerEmail,
                 OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
                 {
                     LineId = i + 1,
@@ -37,7 +37,7 @@ namespace CottonPrompt.Api.Extensions
                 PrintColorId = request.PrintColorId,
                 DesignBracketId = request.DesignBracketId,
                 OutputSizeId = request.OutputSizeId,
-                CustomerEmail = !string.IsNullOrEmpty(request.CustomerEmail) ? request.CustomerEmail : null,
+                CustomerEmail = request.CustomerEmail,
                 OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
                 {
                     OrderId = request.Id,
