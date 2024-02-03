@@ -25,13 +25,13 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 await UpdateCheckerStatusAsync(id, OrderStatuses.Approved, order.CheckerId.Value);
 
-                var currentDesign = order.OrderDesigns.Last();
-                var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
-                var blob = container.GetBlobClient(currentDesign.Name);
-                var response = await blob.DownloadContentAsync();
-                var result = response.Value;
-                var contentType = result.Details.ContentType;
-                var contentStream = result.Content.ToStream();
+                //var currentDesign = order.OrderDesigns.Last();
+                //var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
+                //var blob = container.GetBlobClient(currentDesign.Name);
+                //var response = await blob.DownloadContentAsync();
+                //var result = response.Value;
+                //var contentType = result.Details.ContentType;
+                //var contentStream = result.Content.ToStream();
 
                 var smtpConfig = config.GetSection("Smtp");
                 var client = new SmtpClient(smtpConfig["Host"], Convert.ToInt32(smtpConfig["Port"]))
@@ -42,11 +42,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 var from = new MailAddress(smtpConfig["SenderEmail"]!, smtpConfig["SenderName"]);
                 var to = new MailAddress(order.CustomerEmail);
                 var message = new MailMessage(from, to);
-                message.Body = "Dear Customer,\r\n\r\nYour order has been completed. Kindly see the attached file for the design.\r\n\r\nIf you want to send a request for some modifications, you can click on this link: https://localhost:1234/change-request/2008\r\n\r\nBest Regards,\r\nTeam CP";
+                message.Body = $"Dear Customer,\r\n\r\nHere is the proof of your order {config["FrontendUrl"]}/order-proof/{order.Id}.\r\nPlease let us know if you'd like any changes! Thank you so much for your order, We hope your custom artwork! 😄\r\n\r\nBest Regards,\r\nTeam CP";
                 message.BodyEncoding = Encoding.UTF8;
                 message.IsBodyHtml = false;
-                message.Subject = "Order Completed";
-                message.Attachments.Add(new Attachment(contentStream, currentDesign.Name, contentType));
+                message.Subject = "Order Proof Ready";
                 await client.SendMailAsync(message);
             }
             catch (Exception)
