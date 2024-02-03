@@ -4,6 +4,6 @@
         Guid Id, 
         string Name, 
         string Email, 
-        string? Role
+        IEnumerable<string> Roles
     );
 }

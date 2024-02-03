@@ -5,15 +5,15 @@ using System.Collections.Generic;
 
 namespace CottonPrompt.Infrastructure.Entities;
 
-public partial class User
+public partial class UserRole
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    public string Name { get; set; }
+    public Guid UserId { get; set; }
 
-    public string Email { get; set; }
+    public string Role { get; set; }
 
-    public DateTime LastLoggedOn { get; set; }
+    public bool Active { get; set; }
 
     public Guid CreatedBy { get; set; }
 
@@ -23,7 +23,5 @@ public partial class User
 
     public DateTime? UpdatedOn { get; set; }
 
-    public virtual ICollection<OrderDesignComment> OrderDesignComments { get; set; } = new List<OrderDesignComment>();
-
-    public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public virtual User User { get; set; }
 }

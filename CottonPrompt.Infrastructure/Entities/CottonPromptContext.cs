@@ -31,6 +31,8 @@ public partial class CottonPromptContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserRole> UserRoles { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Order>(entity =>
@@ -166,7 +168,19 @@ public partial class CottonPromptContext : DbContext
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<UserRole>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_UserRoles_Id");
+
+            entity.Property(e => e.Active).HasDefaultValue(true);
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.Role).HasMaxLength(50);
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_UserRoles_Users");
         });
 
         OnModelCreatingPartial(modelBuilder);

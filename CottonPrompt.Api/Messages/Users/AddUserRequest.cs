@@ -13,7 +13,7 @@ namespace CottonPrompt.Api.Messages.Users
         [Required]
         public string Email { get; set; }
 
-        public string? Role { get; set; }
+        public IEnumerable<string> Roles { get; set; } = Enumerable.Empty<string>();
 
         [Required]
         public Guid CreatedBy { get; set; }

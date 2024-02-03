@@ -48,6 +48,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[UserRoles]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[Users]",
          "ObjectType": 0
       }

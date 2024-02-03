@@ -11,49 +11,35 @@ namespace CottonPrompt.Infrastructure.Services.Users
 {
     public class UserService(CottonPromptContext dbContext, IServiceProvider serviceProvider) : IUserService
     {
-        public async Task<CanDoModel> CanUpdateRoleAsync(Guid id, string? role)
+        public async Task<CanDoModel> CanUpdateRoleAsync(Guid id, IEnumerable<string> roles)
         {
 			try
 			{
-				if (!string.IsNullOrEmpty(role) && role != "Artist")
-				{
-					return new CanDoModel(true, string.Empty);
-				}
+				var userRoles = await dbContext.UserRoles.Where(ur => ur.UserId == id && ur.Active).Select(ur => ur.Role).ToListAsync();
+				var rolesToRemove = userRoles.Except(roles);
+				var rolesToAdd = roles.Except(userRoles);
 
-				if (role == "Artist")
+				if (rolesToRemove.Contains(UserRoles.Checker))
                 {
-                    var count = await dbContext.Orders.CountAsync(o => o.CheckerId == id && o.CheckerStatus != OrderStatuses.Approved);
+                    var hasPendingOrdersAsChecker = await dbContext.Orders.AnyAsync(o => o.CheckerId == id && o.CheckerStatus != OrderStatuses.Approved);
 
-                    if (count > 0)
+                    if (hasPendingOrdersAsChecker)
                     {
-                        return new CanDoModel(false, "Can't update role to Artist because the user still has orders to complete as Checker.");
-                    }
-                    else
-                    {
-                        return new CanDoModel(true, string.Empty);
+                        return new CanDoModel(false, "Can't remove the Checker role because the user still has orders to complete as Checker.");
                     }
                 }
 
-				// role is null
-				var checkerCount = await dbContext.Orders.CountAsync(o => o.CheckerId == id && o.CheckerStatus != OrderStatuses.Approved);
-				var artistCount = await dbContext.Orders.CountAsync(o => o.ArtistId == id && o.CheckerStatus != OrderStatuses.Approved);
+                if (rolesToRemove.Contains(UserRoles.Artist))
+                {
+                    var hasPendingOrdersAsArtist = await dbContext.Orders.AnyAsync(o => o.ArtistId == id && o.CheckerStatus != OrderStatuses.Approved);
 
-				if (checkerCount > 0 && artistCount > 0)
-				{
-					return new CanDoModel(false, "Can't remove role because the user still has orders to complete as both Artist and Checker.");
-				}
-				else if (checkerCount > 0)
-				{
-					return new CanDoModel(false, "Can't update role to Artist because the user still has orders to complete as Checker.");
-				}
-				else if (artistCount > 0)
-				{
-					return new CanDoModel(false, "Can't update role to Artist because the user still has orders to complete as Artist.");
-				}
-				else
-				{
-					return new CanDoModel(true, string.Empty);
-				}
+                    if (hasPendingOrdersAsArtist)
+                    {
+                        return new CanDoModel(false, "Can't remove the Artist role because the user still has orders to complete as Artist.");
+                    }
+                }
+
+                return new CanDoModel(true, string.Empty);
             }
 			catch (Exception)
 			{
@@ -89,7 +75,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
         {
 			try
 			{
-				var users = await dbContext.Users.OrderBy(u => u.Name).ToListAsync();
+				var users = await dbContext.Users.Include(u => u.UserRoles.Where(ur => ur.Active)).OrderBy(u => u.Name).ToListAsync();
 				var result = users.AsModel();
 				return result;
 			}
@@ -103,11 +89,11 @@ namespace CottonPrompt.Infrastructure.Services.Users
         {
 			try
 			{
-				var user = await dbContext.Users.FindAsync(id);
+				var user = await dbContext.Users.Include(u => u.UserRoles).SingleOrDefaultAsync(u => u.Id == id);
 
 				if (user == null)
 				{
-					return new GetUsersModel(id, name, email, string.Empty);
+					return new GetUsersModel(id, name, email, Enumerable.Empty<string>());
                 }
 				else
 				{
@@ -126,14 +112,45 @@ namespace CottonPrompt.Infrastructure.Services.Users
 			}
         }
 
-        public async Task UpdateRoleAsync(Guid id, Guid updatedBy, string? role)
+        public async Task UpdateRoleAsync(Guid id, Guid updatedBy, IEnumerable<string> roles)
         {
 			try
 			{
-				await dbContext.Users.Where(u => u.Id == id).ExecuteUpdateAsync(setters => setters
-					.SetProperty(u => u.Role, role)
-					.SetProperty(u => u.UpdatedOn, DateTime.UtcNow)
-					.SetProperty(u => u.UpdatedBy, updatedBy));
+				var userRoles = await dbContext.UserRoles.Where(ur => ur.UserId == id).ToListAsync();
+
+				var allRoles = userRoles.Select(ur => ur.Role).Union(roles);
+
+				foreach (var role in allRoles)
+				{
+					var currentRole = userRoles.SingleOrDefault(ur => ur.Role == role);
+					var inNewRole = roles.Contains(role);
+
+					if (currentRole != null)
+					{
+						if (currentRole.Active == inNewRole)
+						{
+							continue;
+						}
+
+						currentRole.Active = inNewRole;
+						currentRole.UpdatedBy = updatedBy;
+						currentRole.UpdatedOn = DateTime.UtcNow;
+					}
+					else if (currentRole == null && inNewRole)
+					{
+						var newRole = new UserRole
+						{
+							UserId = id,
+							Role = role,
+							Active = true,
+							CreatedBy = updatedBy,
+						};
+
+						await dbContext.UserRoles.AddAsync(newRole);
+					}
+				}
+
+				await dbContext.SaveChangesAsync();
 			}
 			catch (Exception)
 			{
@@ -141,20 +158,25 @@ namespace CottonPrompt.Infrastructure.Services.Users
 			}
         }
 
-        public async Task AddAsync(Guid id, string name, string email, string? role, Guid createdBy)
+        public async Task AddAsync(Guid id, string name, string email, IEnumerable<string> roles, Guid createdBy)
         {
 			try
 			{
-				var user = new User
-				{
-					Id = id,
-					Name = name,
-					Email = email,
-					Role = role,
-					CreatedBy = createdBy
-				};
+                var user = new User
+                {
+                    Id = id,
+                    Name = name,
+                    Email = email,
+                    CreatedBy = createdBy,
+                    UserRoles = roles.Select(r => new UserRole
+                    {
+                        Role = r,
+                        Active = true,
+                        CreatedBy = createdBy,
+                    }).ToList()
+                };
 
-				await dbContext.Users.AddAsync(user);
+                await dbContext.Users.AddAsync(user);
 				await dbContext.SaveChangesAsync();
 			}
 			catch (Exception)

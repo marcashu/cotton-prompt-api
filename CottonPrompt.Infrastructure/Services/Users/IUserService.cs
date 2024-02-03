@@ -7,14 +7,14 @@ namespace CottonPrompt.Infrastructure.Services.Users
     {
         Task<GetUsersModel> LoginAsync(Guid id, string name, string email);
 
-        Task AddAsync(Guid id, string name, string email, string? role, Guid createdBy);
+        Task AddAsync(Guid id, string name, string email, IEnumerable<string> roles, Guid createdBy);
 
         Task<IEnumerable<GetUsersModel>> GetRegisteredAsync();
 
         Task<IEnumerable<GetUsersModel>> GetUnregisteredAsync();
 
-        Task UpdateRoleAsync(Guid id, Guid updatedBy, string? role);
+        Task UpdateRoleAsync(Guid id, Guid updatedBy, IEnumerable<string> roles);
 
-        Task<CanDoModel> CanUpdateRoleAsync(Guid id, string? role);
+        Task<CanDoModel> CanUpdateRoleAsync(Guid id, IEnumerable<string> roles);
     }
 }

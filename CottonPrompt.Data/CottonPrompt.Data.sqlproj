@@ -68,5 +68,6 @@
     <Build Include="Tables\OrderPrintColors.sql" />
     <Build Include="Tables\OrderOutputSizes.sql" />
     <Build Include="Tables\Users.sql" />
+    <Build Include="Tables\UserRoles.sql" />
   </ItemGroup>
 </Project>

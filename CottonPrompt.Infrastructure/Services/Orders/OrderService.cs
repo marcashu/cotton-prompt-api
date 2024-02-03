@@ -6,20 +6,48 @@ using CottonPrompt.Infrastructure.Extensions;
 using CottonPrompt.Infrastructure.Models.Designs;
 using CottonPrompt.Infrastructure.Models.Orders;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
+using System.Net;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace CottonPrompt.Infrastructure.Services.Orders
 {
-    public class OrderService(CottonPromptContext dbContext, BlobServiceClient blobServiceClient) : IOrderService
+    public class OrderService(CottonPromptContext dbContext, BlobServiceClient blobServiceClient, IConfiguration config) : IOrderService
     {
         public async Task ApproveAsync(int id)
         {
             try
             {
-                var order = await dbContext.Orders.FindAsync(id);
+                var order = await dbContext.Orders.Include(o => o.OrderDesigns).SingleOrDefaultAsync(o => o.Id == id);
 
                 if (order is null || order.CheckerId is null) return;
 
                 await UpdateCheckerStatusAsync(id, OrderStatuses.Approved, order.CheckerId.Value);
+
+                var currentDesign = order.OrderDesigns.Last();
+                var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
+                var blob = container.GetBlobClient(currentDesign.Name);
+                var response = await blob.DownloadContentAsync();
+                var result = response.Value;
+                var contentType = result.Details.ContentType;
+                var contentStream = result.Content.ToStream();
+
+                var smtpConfig = config.GetSection("Smtp");
+                var client = new SmtpClient(smtpConfig["Host"], Convert.ToInt32(smtpConfig["Port"]))
+                {
+                    Credentials = new NetworkCredential(smtpConfig["Username"], smtpConfig["Password"]),
+                    EnableSsl = true
+                };
+                var from = new MailAddress(smtpConfig["SenderEmail"]!, smtpConfig["SenderName"]);
+                var to = new MailAddress(order.CustomerEmail);
+                var message = new MailMessage(from, to);
+                message.Body = "Dear Customer,\r\n\r\nYour order has been completed. Kindly see the attached file for the design.\r\n\r\nIf you want to send a request for some modifications, you can click on this link: https://localhost:1234/change-request/2008\r\n\r\nBest Regards,\r\nTeam CP";
+                message.BodyEncoding = Encoding.UTF8;
+                message.IsBodyHtml = false;
+                message.Subject = "Order Completed";
+                message.Attachments.Add(new Attachment(contentStream, currentDesign.Name, contentType));
+                await client.SendMailAsync(message);
             }
             catch (Exception)
             {
@@ -202,9 +230,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
                 await container.CreateIfNotExistsAsync();
 
-                var saltedDesignName = $"{designName}_{Guid.NewGuid()}";
-
-                if (saltedDesignName.Length > 100) saltedDesignName = saltedDesignName[..100]; // max length is 100
+                var saltedDesignName = SaltDesignName(designName);
 
                 var blob = container.GetBlobClient(saltedDesignName);
                 await blob.UploadAsync(designContent);
@@ -318,6 +344,18 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 throw;
             }
+        }
+
+        private string SaltDesignName(string designName)
+        {
+            var lastDotIndex = designName.LastIndexOf('.');
+            var fileName  = designName.Substring(0, lastDotIndex);
+            var fileExtension = designName.Substring(lastDotIndex);
+            var result = $"{fileName}_{Guid.NewGuid().ToString()[..5]}{fileExtension}";
+
+            if (result.Length > 100) result = result.Substring(result.Length - 100); // max length is 100
+
+            return result;
         }
     }
 }
