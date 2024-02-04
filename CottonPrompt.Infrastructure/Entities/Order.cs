@@ -35,6 +35,8 @@ public partial class Order
 
     public string CheckerStatus { get; set; }
 
+    public string CustomerStatus { get; set; }
+
     public Guid? UpdatedBy { get; set; }
 
     public DateTime? UpdatedOn { get; set; }

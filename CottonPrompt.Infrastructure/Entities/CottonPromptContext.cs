@@ -46,6 +46,7 @@ public partial class CottonPromptContext : DbContext
             entity.Property(e => e.CustomerEmail)
                 .IsRequired()
                 .HasMaxLength(100);
+            entity.Property(e => e.CustomerStatus).HasMaxLength(50);
             entity.Property(e => e.OrderNumber)
                 .IsRequired()
                 .HasMaxLength(50);

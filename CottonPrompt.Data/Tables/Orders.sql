@@ -14,6 +14,7 @@
 	[CheckerId] UNIQUEIDENTIFIER NULL,
 	[ArtistStatus] NVARCHAR(50) NULL,
 	[CheckerStatus] NVARCHAR(50) NULL,
+	[CustomerStatus] NVARCHAR(50) NULL,
     [UpdatedBy] UNIQUEIDENTIFIER NULL, 
     [UpdatedOn] DATETIME2 NULL
 )

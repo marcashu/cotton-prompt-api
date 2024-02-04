@@ -10,6 +10,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Graph.Models;
 
 namespace CottonPrompt.Infrastructure.Services.Orders
 {
@@ -280,6 +281,25 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 }
 
                 await dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task AcceptAsync(int id)
+        {
+            try
+            {
+                await dbContext.Orders
+                    .Where(o => o.Id == id)
+                    .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(o => o.CustomerStatus, OrderStatuses.Accepted)
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.UpdatedBy, Guid.Empty));
+
+                await CreateOrderHistory(id, OrderStatuses.Accepted, Guid.Empty);
             }
             catch (Exception)
             {

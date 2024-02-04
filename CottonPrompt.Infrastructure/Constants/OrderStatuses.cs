@@ -8,10 +8,14 @@
 
         public static string ForReview = "For Review";
 
-        public static string RequestedReupload = "Requested Reupload";
+        public static string ReuploadRequested = "Reupload Requested";
 
         public static string ForReupload = "For Reupload";
 
         public static string Approved = "Approved";
+
+        public static string Accepted = "Accepted";
+
+        public static string ChangeRequested = "ChangeRequested";
     }
 }

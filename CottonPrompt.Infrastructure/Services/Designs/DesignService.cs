@@ -28,9 +28,9 @@ namespace CottonPrompt.Infrastructure.Services.Designs
                 // update order status
                 var order = design.Order;
 
-                if (order.CheckerStatus != OrderStatuses.RequestedReupload)
+                if (order.CheckerStatus != OrderStatuses.ReuploadRequested)
                 {
-                    order.CheckerStatus = OrderStatuses.RequestedReupload;
+                    order.CheckerStatus = OrderStatuses.ReuploadRequested;
                     order.UpdatedBy = userId;
                     order.UpdatedOn = DateTime.UtcNow;
                 }

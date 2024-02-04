@@ -19,6 +19,7 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         IEnumerable<DesignModel> PreviousDesigns,
         string ArtistStatus,
         string CheckerStatus,
+        string CustomerStatus,
         Guid? ArtistId,
         Guid? CheckerId
     );
