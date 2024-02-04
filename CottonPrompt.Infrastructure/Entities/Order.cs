@@ -23,19 +23,25 @@ public partial class Order
 
     public string CustomerEmail { get; set; }
 
-    public Guid CreatedBy { get; set; }
-
-    public DateTime CreatedOn { get; set; }
+    public string CustomerStatus { get; set; }
 
     public Guid? ArtistId { get; set; }
 
-    public Guid? CheckerId { get; set; }
-
     public string ArtistStatus { get; set; }
+
+    public Guid? CheckerId { get; set; }
 
     public string CheckerStatus { get; set; }
 
-    public string CustomerStatus { get; set; }
+    public Guid? ChangeRequestArtistId { get; set; }
+
+    public string ChangeRequestArtistStatus { get; set; }
+
+    public string ChangeRequestCheckerStatus { get; set; }
+
+    public Guid CreatedBy { get; set; }
+
+    public DateTime CreatedOn { get; set; }
 
     public Guid? UpdatedBy { get; set; }
 

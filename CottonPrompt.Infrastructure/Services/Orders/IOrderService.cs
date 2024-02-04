@@ -24,5 +24,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         Task ApproveAsync(int id);
 
         Task AcceptAsync(int id);
+
+        Task ChangeRequestAsync(int id, int designId, string comment);
     }
 }

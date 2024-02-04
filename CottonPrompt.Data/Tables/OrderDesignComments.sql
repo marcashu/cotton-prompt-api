@@ -7,5 +7,4 @@
     [CreatedBy] UNIQUEIDENTIFIER NOT NULL,
 	[CreatedOn] DATETIME2 NOT NULL CONSTRAINT DF_OrderDesignComments_CreatedOn DEFAULT GETUTCDATE(),
     CONSTRAINT FK_OrderDesignComments_OrderDesigns FOREIGN KEY ([OrderDesignId]) REFERENCES [dbo].[OrderDesigns]([Id]) ON DELETE CASCADE,
-    CONSTRAINT FK_OrderDesignComments_Users FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users]([Id]) ON DELETE CASCADE
 )

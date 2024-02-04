@@ -16,6 +16,6 @@
 
         public static string Accepted = "Accepted";
 
-        public static string ChangeRequested = "ChangeRequested";
+        public static string ChangeRequested = "Change Requested";
     }
 }

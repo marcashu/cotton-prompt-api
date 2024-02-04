@@ -189,7 +189,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Include(o => o.PrintColor)
                     .Include(o => o.OutputSize)
                     .Include(o => o.OrderImageReferences)
-                    .Include(o => o.OrderDesigns).ThenInclude(od => od.OrderDesignComments)
+                    .Include(o => o.OrderDesigns).ThenInclude(od => od.OrderDesignComments.Where(odc => odc.CreatedBy != Guid.Empty))
                     .SingleAsync(o => o.Id == id);
 
                 var designs = new List<DesignModel>();
@@ -292,14 +292,29 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                await dbContext.Orders
-                    .Where(o => o.Id == id)
-                    .ExecuteUpdateAsync(setter => setter
-                        .SetProperty(o => o.CustomerStatus, OrderStatuses.Accepted)
-                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
-                        .SetProperty(o => o.UpdatedBy, Guid.Empty));
+                await UpdateCustomerStatusAsync(id, OrderStatuses.Accepted);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-                await CreateOrderHistory(id, OrderStatuses.Accepted, Guid.Empty);
+        public async Task ChangeRequestAsync(int id, int designId, string comment)
+        {
+            try
+            {
+                await UpdateCustomerStatusAsync(id, OrderStatuses.ChangeRequested);
+
+                var orderComment = new OrderDesignComment
+                {
+                    OrderDesignId = designId,
+                    UserId = Guid.Empty,
+                    Comment = comment,
+                    CreatedBy = Guid.Empty,
+                };
+                await dbContext.OrderDesignComments.AddAsync(orderComment);
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception)
             {
@@ -338,6 +353,25 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
 
                 await CreateOrderHistory(id, status, checkerId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task UpdateCustomerStatusAsync(int id, string status)
+        {
+            try
+            {
+                await dbContext.Orders
+                    .Where(o => o.Id == id)
+                    .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(o => o.CustomerStatus, status)
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.UpdatedBy, Guid.Empty));
+
+                await CreateOrderHistory(id, status, Guid.Empty);
             }
             catch (Exception)
             {
