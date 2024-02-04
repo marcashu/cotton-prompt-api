@@ -7,6 +7,7 @@ using CottonPrompt.Infrastructure.Services.Designs;
 using CottonPrompt.Infrastructure.Services.Orders;
 using CottonPrompt.Infrastructure.Services.OutputSizes;
 using CottonPrompt.Infrastructure.Services.PrintColors;
+using CottonPrompt.Infrastructure.Services.UserGroups;
 using CottonPrompt.Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +76,7 @@ builder.Services.AddScoped<IPrintColorService, PrintColorService>();
 builder.Services.AddScoped<IOutputSizeService, OutputSizeService>();
 builder.Services.AddScoped<IArtistService, ArtistService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserGroupService, UserGroupService>();
 
 var app = builder.Build();
 

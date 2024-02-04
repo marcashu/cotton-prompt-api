@@ -69,5 +69,7 @@
     <Build Include="Tables\OrderOutputSizes.sql" />
     <Build Include="Tables\Users.sql" />
     <Build Include="Tables\UserRoles.sql" />
+    <Build Include="Tables\UserGroups.sql" />
+    <Build Include="Tables\UserGroupUsers.sql" />
   </ItemGroup>
 </Project>

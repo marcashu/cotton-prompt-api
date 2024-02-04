@@ -48,6 +48,14 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[UserGroups]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserGroupUsers]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[UserRoles]",
          "ObjectType": 0
       },

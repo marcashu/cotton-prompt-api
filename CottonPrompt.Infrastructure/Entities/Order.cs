@@ -21,6 +21,8 @@ public partial class Order
 
     public int OutputSizeId { get; set; }
 
+    public int? UserGroupId { get; set; }
+
     public string CustomerEmail { get; set; }
 
     public string CustomerStatus { get; set; }
@@ -33,11 +35,7 @@ public partial class Order
 
     public string CheckerStatus { get; set; }
 
-    public Guid? ChangeRequestArtistId { get; set; }
-
-    public string ChangeRequestArtistStatus { get; set; }
-
-    public string ChangeRequestCheckerStatus { get; set; }
+    public int? OriginalOrderId { get; set; }
 
     public Guid CreatedBy { get; set; }
 
@@ -49,13 +47,19 @@ public partial class Order
 
     public virtual OrderDesignBracket DesignBracket { get; set; }
 
+    public virtual ICollection<Order> InverseOriginalOrder { get; set; } = new List<Order>();
+
     public virtual ICollection<OrderDesign> OrderDesigns { get; set; } = new List<OrderDesign>();
 
     public virtual ICollection<OrderImageReference> OrderImageReferences { get; set; } = new List<OrderImageReference>();
 
     public virtual ICollection<OrderStatusHistory> OrderStatusHistories { get; set; } = new List<OrderStatusHistory>();
 
+    public virtual Order OriginalOrder { get; set; }
+
     public virtual OrderOutputSize OutputSize { get; set; }
 
     public virtual OrderPrintColor PrintColor { get; set; }
+
+    public virtual UserGroup UserGroup { get; set; }
 }

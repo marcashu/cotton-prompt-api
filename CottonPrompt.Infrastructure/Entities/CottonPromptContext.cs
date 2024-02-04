@@ -31,6 +31,10 @@ public partial class CottonPromptContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserGroup> UserGroups { get; set; }
+
+    public virtual DbSet<UserGroupUser> UserGroupUsers { get; set; }
+
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -40,8 +44,6 @@ public partial class CottonPromptContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_OrderId");
 
             entity.Property(e => e.ArtistStatus).HasMaxLength(50);
-            entity.Property(e => e.ChangeRequestArtistStatus).HasMaxLength(50);
-            entity.Property(e => e.ChangeRequestCheckerStatus).HasMaxLength(50);
             entity.Property(e => e.CheckerStatus).HasMaxLength(50);
             entity.Property(e => e.Concept).IsRequired();
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
@@ -58,6 +60,10 @@ public partial class CottonPromptContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_OrderDesignBrackets");
 
+            entity.HasOne(d => d.OriginalOrder).WithMany(p => p.InverseOriginalOrder)
+                .HasForeignKey(d => d.OriginalOrderId)
+                .HasConstraintName("FK_Orders_OriginalOrder");
+
             entity.HasOne(d => d.OutputSize).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.OutputSizeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -67,6 +73,10 @@ public partial class CottonPromptContext : DbContext
                 .HasForeignKey(d => d.PrintColorId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_OrderPrintColors");
+
+            entity.HasOne(d => d.UserGroup).WithMany(p => p.Orders)
+                .HasForeignKey(d => d.UserGroupId)
+                .HasConstraintName("FK_Orders_UserGroups");
         });
 
         modelBuilder.Entity<OrderDesign>(entity =>
@@ -168,6 +178,31 @@ public partial class CottonPromptContext : DbContext
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<UserGroup>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_UserGroups_Id");
+
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<UserGroupUser>(entity =>
+        {
+            entity.HasKey(e => new { e.UserGroupId, e.UserId }).HasName("PK_UserGroupUsers_UserGroupId_UserId");
+
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.UserGroup).WithMany(p => p.UserGroupUsers)
+                .HasForeignKey(d => d.UserGroupId)
+                .HasConstraintName("FK_UserGroupUsers_UserGroups");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserGroupUsers)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_UserGroupUsers_Users");
         });
 
         modelBuilder.Entity<UserRole>(entity =>

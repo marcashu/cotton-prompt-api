@@ -89,7 +89,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
         {
 			try
 			{
-				var user = await dbContext.Users.Include(u => u.UserRoles).SingleOrDefaultAsync(u => u.Id == id);
+				var user = await dbContext.Users.Include(u => u.UserRoles.Where(ur => ur.Active)).SingleOrDefaultAsync(u => u.Id == id);
 
 				if (user == null)
 				{
