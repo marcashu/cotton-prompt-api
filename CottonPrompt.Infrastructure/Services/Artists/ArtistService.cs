@@ -31,5 +31,18 @@ namespace CottonPrompt.Infrastructure.Services.Artists
 				throw;
 			}
         }
+
+        public async Task<CanDoModel> CanClaimChangeRequestAsync(Guid id)
+        {
+			try
+			{
+				var isChangeRequestArtist = await dbContext.UserGroupUsers.Include(ugu => ugu.UserGroup).AnyAsync(ugu => ugu.UserId == id && ugu.UserGroup.Name == Constants.UserGroups.ChangeRequestArtists);
+				return new CanDoModel(isChangeRequestArtist, string.Empty);
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+        }
     }
 }

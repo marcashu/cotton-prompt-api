@@ -13,6 +13,9 @@ namespace CottonPrompt.Api.Messages.Orders
         [FromQuery(Name = "checkerStatus")]
         public string? CheckerStatus { get; set; }
 
+        [FromQuery(Name = "customerStatus")]
+        public string? CustomerStatus { get; set; }
+
         [FromQuery(Name = "noArtist")]
         public bool NoArtist { get; set; }
 

@@ -16,5 +16,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
         Task UpdateRoleAsync(Guid id, Guid updatedBy, IEnumerable<string> roles);
 
         Task<CanDoModel> CanUpdateRoleAsync(Guid id, IEnumerable<string> roles);
+
+        Task<CanDoModel> CheckerHasWaitingForCustomerAsync(Guid id);
     }
 }

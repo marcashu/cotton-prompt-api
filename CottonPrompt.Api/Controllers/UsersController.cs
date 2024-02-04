@@ -81,6 +81,15 @@ namespace CottonPrompt.Api.Controllers
             await userService.AddAsync(request.Id, request.Name, request.Email, request.Roles, request.CreatedBy);
             return NoContent();
         }
+
+        [AllowAnonymous]
+        [HttpGet("checker/{id}/has-waiting-for-customer")]
+        [ProducesResponseType<IEnumerable<CanDoModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> CheckerHasWaitingForCustomerAsync([FromRoute] Guid id)
+        {
+            var result = await userService.CheckerHasWaitingForCustomerAsync(id);
+            return Ok(result);
+        }
     }
 }
     

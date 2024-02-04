@@ -11,6 +11,5 @@ namespace CottonPrompt.Infrastructure.Constants
         internal static string Admin = "Admin";
         internal static string Checker = "Checker";
         internal static string Artist = "Artist";
-        internal static string ChangeRequestArtist = "Change Request Artist";
     }
 }

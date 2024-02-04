@@ -20,8 +20,8 @@ namespace CottonPrompt.Infrastructure.Extensions
 
         internal static GetOrderModel AsGetOrderModel(this Order entity, IEnumerable<DesignModel> designs)
         {
-            var currentDesign = designs.Any() ? designs.Last() : null;
-            var previousDesigns = designs.Any() ? designs.Take(designs.Count() - 1) : Enumerable.Empty<DesignModel>();
+            var currentDesign = ((entity.OriginalOrderId == null && designs.Any()) || (entity.OriginalOrderId != null && designs.Count() > 1)) ? designs.Last() : null;
+            var previousDesigns = designs.Where(d => currentDesign == null || d.Id != currentDesign.Id);
             var result = new GetOrderModel(entity.Id, entity.OrderNumber, entity.Priority, entity.Concept, entity.PrintColor.AsModel(), entity.DesignBracket.AsModel(), entity.OutputSize.AsModel(), entity.UserGroupId, entity.CustomerEmail, entity.OrderImageReferences.Select(oir => oir.Url), currentDesign, previousDesigns, entity.ArtistStatus, entity.CheckerStatus, entity.CustomerStatus, entity.ArtistId, entity.CheckerId);
             return result;
         }

@@ -16,6 +16,14 @@ namespace CottonPrompt.Api.Controllers
             var result = await artistService.CanClaimAsync(id);
             return Ok(result);
         }
+
+        [HttpGet("{id}/can-claim-change-request")]
+        [ProducesResponseType<IEnumerable<CanDoModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> CanClaimChangeRequestAsnyc([FromRoute] Guid id)
+        {
+            var result = await artistService.CanClaimChangeRequestAsync(id);
+            return Ok(result);
+        }
     }
 }
     

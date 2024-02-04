@@ -184,5 +184,18 @@ namespace CottonPrompt.Infrastructure.Services.Users
 				throw;
 			}
         }
+
+        public async Task<CanDoModel> CheckerHasWaitingForCustomerAsync(Guid id)
+        {
+			try
+			{
+                var hasWaitingForCustomer = await dbContext.Orders.AnyAsync(o => o.CheckerId == id && o.CheckerStatus == OrderStatuses.Approved && o.CustomerStatus == OrderStatuses.ForReview);
+				return new CanDoModel(hasWaitingForCustomer, string.Empty);
+            }
+			catch (Exception)
+			{
+				throw;
+			}
+        }
     }
 }

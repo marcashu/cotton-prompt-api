@@ -24,7 +24,13 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 if (order is null || order.CheckerId is null || order.ArtistId is null) return;
 
                 await UpdateCheckerStatusAsync(id, OrderStatuses.Approved, order.CheckerId.Value);
-                await UpdateArtistStatusAsync(id, OrderStatuses.Completed, order.ArtistId.Value);
+
+                if (order.OriginalOrderId is null)
+                {
+                    await UpdateArtistStatusAsync(id, OrderStatuses.Completed, order.ArtistId.Value);
+                }
+
+                await UpdateCustomerStatusAsync(id, OrderStatuses.ForReview);
 
                 //var currentDesign = order.OrderDesigns.Last();
                 //var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
@@ -127,7 +133,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<IEnumerable<GetOrdersModel>> GetAsync(bool? priority, string? artistStatus, string? checkerStatus, Guid? artistId, Guid? checkerId, bool noArtist = false, bool noChecker = false)
+        public async Task<IEnumerable<GetOrdersModel>> GetAsync(bool? priority, string? artistStatus, string? checkerStatus, string? customerStatus, Guid? artistId, Guid? checkerId, bool noArtist = false, bool noChecker = false)
         {
             try
             {
@@ -169,6 +175,11 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     var statuses = checkerStatus.Split(',');
                     queryableOrders = queryableOrders.Where(o => statuses.Contains(o.CheckerStatus));
                 }
+                if (!string.IsNullOrEmpty(customerStatus))
+                {
+                    var statuses = customerStatus.Split(',');
+                    queryableOrders = queryableOrders.Where(o => statuses.Contains(o.CustomerStatus));
+                }
 
                 var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
                 var result = orders.AsGetOrdersModel();
@@ -194,7 +205,11 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 if (changeRequest)
                 {
-                    queryableOrders = queryableOrders.Where(o => o.OriginalOrderId != null);
+                    queryableOrders = queryableOrders.Where(o => o.OriginalOrderId != null && o.CheckerId != artistId);
+                }
+                else
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OriginalOrderId == null);
                 }
 
                 if (priority != null)
@@ -325,7 +340,14 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
+                var order = await dbContext.Orders.FindAsync(id);
+
                 await UpdateCustomerStatusAsync(id, OrderStatuses.Accepted);
+
+                if (order != null && order.OriginalOrderId != null && order.ArtistId != null)
+                {
+                    await UpdateArtistStatusAsync(id, OrderStatuses.Completed, order.ArtistId.Value);
+                }
             }
             catch (Exception)
             {
@@ -337,71 +359,94 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                //await UpdateCustomerStatusAsync(id, OrderStatuses.ChangeRequested);
+                await UpdateCustomerStatusAsync(id, OrderStatuses.ChangeRequested);
 
                 var order = await dbContext.Orders
                     .Include(o => o.OrderDesigns)
                     .Include(o => o.OrderImageReferences)
                     .SingleOrDefaultAsync(o => o.Id == id);
 
-                var changeRequestGroup = await dbContext.UserGroups.SingleOrDefaultAsync(ug => ug.Name == "Change Request Artists");
+                var changeRequestGroup = await dbContext.UserGroups.SingleOrDefaultAsync(ug => ug.Name == Constants.UserGroups.ChangeRequestArtists);
 
                 if (order is null || changeRequestGroup is null) return;
 
                 var customerId = Guid.Empty;
                 var currentDesign = order.OrderDesigns.Last();
-
-                var newOrder = new Order
+                var customerComment = new OrderDesignComment
                 {
-                    OrderNumber = $"{order.OrderNumber} CR",
-                    Priority = order.Priority,
-                    Concept = order.Concept,
-                    PrintColorId = order.PrintColorId,
-                    DesignBracketId = order.DesignBracketId,
-                    OutputSizeId = order.OutputSizeId,
-                    UserGroupId = changeRequestGroup.Id,
-                    CustomerEmail = order.CustomerEmail,
-                    CheckerId = order.CheckerId,
+                    UserId = customerId,
+                    Comment = comment,
                     CreatedBy = customerId,
-                    OriginalOrderId = order.Id,
-                    OrderDesigns = new List<OrderDesign>
+                };
+
+                if (order.OriginalOrderId is null)
+                {
+                    var newOrder = new Order
                     {
-                        new() 
+                        OrderNumber = $"{order.OrderNumber} CR",
+                        Priority = order.Priority,
+                        Concept = order.Concept,
+                        PrintColorId = order.PrintColorId,
+                        DesignBracketId = order.DesignBracketId,
+                        OutputSizeId = order.OutputSizeId,
+                        UserGroupId = changeRequestGroup.Id,
+                        CustomerEmail = order.CustomerEmail,
+                        CheckerId = order.CheckerId,
+                        CheckerStatus = OrderStatuses.Claimed,
+                        CreatedBy = customerId,
+                        OriginalOrderId = order.Id,
+                        OrderDesigns = new List<OrderDesign>
+                    {
+                        new()
                         {
                             Name = currentDesign.Name,
                             OrderDesignComments = new List<OrderDesignComment>
                             {
-                                new()
-                                {
-                                    UserId = customerId,
-                                    Comment = comment,
-                                    CreatedBy = customerId,
-                                },
+                                customerComment,
                             },
                             CreatedBy = customerId,
                         }
                     },
-                    OrderImageReferences = order.OrderImageReferences.Select(oir => new OrderImageReference
-                    {
-                        LineId = oir.LineId,
-                        Url = oir.Url,
-                        CreatedBy = customerId,
-                    }).ToList(),
-                };
-
-                foreach (var imageRef in imageReferences)
-                {
-                    var orderImageRef = new OrderImageReference
-                    {
-                        LineId = newOrder.OrderImageReferences.Count() + 1,
-                        Url = imageRef,
-                        CreatedBy = customerId,
+                        OrderImageReferences = order.OrderImageReferences.Select(oir => new OrderImageReference
+                        {
+                            LineId = oir.LineId,
+                            Url = oir.Url,
+                            CreatedBy = customerId,
+                        }).ToList(),
                     };
 
-                    newOrder.OrderImageReferences.Add(orderImageRef);
+                    foreach (var imageRef in imageReferences)
+                    {
+                        var orderImageRef = new OrderImageReference
+                        {
+                            LineId = newOrder.OrderImageReferences.Count() + 1,
+                            Url = imageRef,
+                            CreatedBy = customerId,
+                        };
+
+                        newOrder.OrderImageReferences.Add(orderImageRef);
+                    }
+
+                    await dbContext.Orders.AddAsync(newOrder);
+                }
+                else
+                {
+                    order.ArtistStatus = OrderStatuses.ForReupload;
+                    order.CheckerStatus = OrderStatuses.Claimed;
+                    currentDesign.OrderDesignComments.Add(customerComment);
+                    foreach (var imageRef in imageReferences)
+                    {
+                        var orderImageRef = new OrderImageReference
+                        {
+                            LineId = order.OrderImageReferences.Count() + 1,
+                            Url = imageRef,
+                            CreatedBy = customerId,
+                        };
+
+                        order.OrderImageReferences.Add(orderImageRef);
+                    }
                 }
 
-                await dbContext.Orders.AddAsync(newOrder);
                 await dbContext.SaveChangesAsync();
             }
             catch (Exception)
