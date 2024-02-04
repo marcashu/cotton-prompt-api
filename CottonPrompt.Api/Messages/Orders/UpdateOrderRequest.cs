@@ -28,6 +28,9 @@ namespace CottonPrompt.Api.Messages.Orders
         [Required]
         public string CustomerEmail { get; set; }
 
+        [Required]
+        public int UserGroupId { get; set; }
+
         public IEnumerable<string>? ImageReferences { get; set; }
 
         [Required]

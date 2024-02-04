@@ -21,7 +21,7 @@ public partial class Order
 
     public int OutputSizeId { get; set; }
 
-    public int? UserGroupId { get; set; }
+    public int UserGroupId { get; set; }
 
     public string CustomerEmail { get; set; }
 

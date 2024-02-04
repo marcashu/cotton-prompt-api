@@ -23,6 +23,7 @@ namespace CottonPrompt.Api.Extensions
                     CreatedBy = request.CreatedBy,
                 }).ToList(),
                 CreatedBy = request.CreatedBy,
+                UserGroupId = request.UserGroupId,
             };
             return result;
         }
@@ -48,6 +49,7 @@ namespace CottonPrompt.Api.Extensions
                 }).ToList(),
                 UpdatedBy = request.UpdatedBy,
                 UpdatedOn = DateTime.UtcNow,
+                UserGroupId = request.UserGroupId,
             };
             return result;
         }

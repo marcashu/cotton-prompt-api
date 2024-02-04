@@ -76,6 +76,7 @@ public partial class CottonPromptContext : DbContext
 
             entity.HasOne(d => d.UserGroup).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserGroupId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_UserGroups");
         });
 

@@ -13,6 +13,7 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         PrintColor PrintColor,
         DesignBracket DesignBracket,
         OutputSize OutputSize,
+        int UserGroupId,
         string CustomerEmail,
         IEnumerable<string> ImageReferences,
         DesignModel? Design,

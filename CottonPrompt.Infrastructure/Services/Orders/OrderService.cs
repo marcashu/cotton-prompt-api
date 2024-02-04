@@ -10,7 +10,6 @@ using System.Net.Mail;
 using System.Net;
 using System.Text;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Graph.Models;
 
 namespace CottonPrompt.Infrastructure.Services.Orders
 {
@@ -273,6 +272,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 currentOrder.CustomerEmail = order.CustomerEmail;
                 currentOrder.UpdatedBy = order.UpdatedBy;
                 currentOrder.UpdatedOn = order.UpdatedOn;
+                currentOrder.UserGroupId = order.UserGroupId;
 
                 currentOrder.OrderImageReferences.Clear();
                 foreach (var imageRef in order.OrderImageReferences)
