@@ -73,5 +73,38 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
                 throw;
             }
         }
+
+        public async Task UpdateAsync(int id, string name, IEnumerable<Guid> userIds, Guid updatedBy)
+        {
+            try
+            {
+                var userGroup = await dbContext.UserGroups.Include(ug => ug.UserGroupUsers).SingleOrDefaultAsync(ug => ug.Id == id);
+
+                if (userGroup is null) return;
+
+                userGroup.Name = name;
+                userGroup.UpdatedBy = updatedBy;
+                userGroup.UpdatedOn = DateTime.UtcNow;
+                userGroup.UserGroupUsers.Clear();
+
+                foreach (var userId in userIds)
+                {
+                    var userGroupUser = new UserGroupUser
+                    {
+                        UserGroupId = userGroup.Id,
+                        UserId = userId,
+                        CreatedBy = updatedBy,
+                    };
+
+                    userGroup.UserGroupUsers.Add(userGroupUser);
+                }
+
+                await dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

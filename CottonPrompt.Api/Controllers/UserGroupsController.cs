@@ -33,6 +33,14 @@ namespace CottonPrompt.Api.Controllers
             await userGroupService.CreateAsync(request.Name, request.UserIds, request.CreatedBy);
             return NoContent();
         }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> UpdateAsync([FromRoute] int id, [FromBody] UpdateUserGroupRequest request)
+        {
+            await userGroupService.UpdateAsync(id, request.Name, request.UserIds, request.UpdatedBy);
+            return NoContent();
+        }
     }
 }
     

@@ -1,9 +1,4 @@
 ﻿using CottonPrompt.Infrastructure.Models.UserGroups;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CottonPrompt.Infrastructure.Services.UserGroups
 {
@@ -14,5 +9,7 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
         Task<GetUserGroupModel> GetByIdAsync(int id);
 
         Task CreateAsync(string name, IEnumerable<Guid> userIds, Guid createdBy);
+
+        Task UpdateAsync(int id, string name, IEnumerable<Guid> userIds, Guid updatedBy);
     }
 }

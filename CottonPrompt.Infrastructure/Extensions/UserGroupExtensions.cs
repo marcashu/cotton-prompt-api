@@ -19,7 +19,7 @@ namespace CottonPrompt.Infrastructure.Extensions
 
         internal static GetUserGroupModel AsGetUserGroupModel(this UserGroup entity)
         {
-            var result = new GetUserGroupModel(entity.Id, entity.Name, entity.UserGroupUsers.Select(ugu => ugu.User.AsModel()));
+            var result = new GetUserGroupModel(entity.Id, entity.Name, entity.UserGroupUsers.Select(ugu => ugu.User.AsModel()).OrderBy(u => u.Name));
             return result;
         }
     }
