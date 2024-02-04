@@ -14,6 +14,8 @@
 
         public static string Approved = "Approved";
 
+        public static string Completed = "Completed";
+
         public static string Accepted = "Accepted";
 
         public static string ChangeRequested = "Change Requested";

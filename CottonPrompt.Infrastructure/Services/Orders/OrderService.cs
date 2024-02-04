@@ -21,9 +21,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 var order = await dbContext.Orders.Include(o => o.OrderDesigns).SingleOrDefaultAsync(o => o.Id == id);
 
-                if (order is null || order.CheckerId is null) return;
+                if (order is null || order.CheckerId is null || order.ArtistId is null) return;
 
                 await UpdateCheckerStatusAsync(id, OrderStatuses.Approved, order.CheckerId.Value);
+                await UpdateArtistStatusAsync(id, OrderStatuses.Completed, order.ArtistId.Value);
 
                 //var currentDesign = order.OrderDesigns.Last();
                 //var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
