@@ -99,7 +99,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> ChangeRequestAsync([FromRoute] int id, [FromBody] ChangeRequestRequest request)
         {
-            await orderService.ChangeRequestAsync(id, request.DesignId, request.Comment);
+            await orderService.ChangeRequestAsync(id, request.DesignId, request.Comment, request.ImageReferences);
             return NoContent();
         }
     }

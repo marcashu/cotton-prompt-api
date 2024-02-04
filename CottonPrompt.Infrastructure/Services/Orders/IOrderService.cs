@@ -25,6 +25,6 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
         Task AcceptAsync(int id);
 
-        Task ChangeRequestAsync(int id, int designId, string comment);
+        Task ChangeRequestAsync(int id, int designId, string comment, IEnumerable<string> imageReferences);
     }
 }

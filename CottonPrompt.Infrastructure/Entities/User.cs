@@ -23,7 +23,5 @@ public partial class User
 
     public DateTime? UpdatedOn { get; set; }
 
-    public virtual ICollection<OrderDesignComment> OrderDesignComments { get; set; } = new List<OrderDesignComment>();
-
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

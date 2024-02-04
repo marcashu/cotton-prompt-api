@@ -20,6 +20,4 @@ public partial class OrderDesignComment
     public DateTime CreatedOn { get; set; }
 
     public virtual OrderDesign OrderDesign { get; set; }
-
-    public virtual User User { get; set; }
 }

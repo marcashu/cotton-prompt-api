@@ -189,7 +189,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Include(o => o.PrintColor)
                     .Include(o => o.OutputSize)
                     .Include(o => o.OrderImageReferences)
-                    .Include(o => o.OrderDesigns).ThenInclude(od => od.OrderDesignComments.Where(odc => odc.CreatedBy != Guid.Empty))
+                    .Include(o => o.OrderDesigns).ThenInclude(od => od.OrderDesignComments)
                     .SingleAsync(o => o.Id == id);
 
                 var designs = new List<DesignModel>();
@@ -300,7 +300,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task ChangeRequestAsync(int id, int designId, string comment)
+        public async Task ChangeRequestAsync(int id, int designId, string comment, IEnumerable<string> imageReferences)
         {
             try
             {
@@ -314,6 +314,18 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     CreatedBy = Guid.Empty,
                 };
                 await dbContext.OrderDesignComments.AddAsync(orderComment);
+
+                foreach (var imageRef in imageReferences)
+                {
+                    var orderImageRef = new OrderImageReference
+                    {
+                        OrderId = id,
+                        Url = imageRef,
+                        CreatedBy = Guid.Empty,
+                    };
+                    await dbContext.OrderImageReferences.AddAsync(orderImageRef);
+                }
+
                 await dbContext.SaveChangesAsync();
             }
             catch (Exception)

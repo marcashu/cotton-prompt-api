@@ -13,5 +13,9 @@ public partial class OrderImageReference
 
     public string Url { get; set; }
 
+    public Guid CreatedBy { get; set; }
+
+    public DateTime CreatedOn { get; set; }
+
     public virtual Order Order { get; set; }
 }

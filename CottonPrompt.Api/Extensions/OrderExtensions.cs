@@ -20,6 +20,7 @@ namespace CottonPrompt.Api.Extensions
                 {
                     LineId = i + 1,
                     Url = r,
+                    CreatedBy = request.CreatedBy,
                 }).ToList(),
                 CreatedBy = request.CreatedBy,
             };
@@ -43,6 +44,7 @@ namespace CottonPrompt.Api.Extensions
                     OrderId = request.Id,
                     LineId = i + 1,
                     Url = r,
+                    CreatedBy = request.UpdatedBy,
                 }).ToList(),
                 UpdatedBy = request.UpdatedBy,
                 UpdatedOn = DateTime.UtcNow,

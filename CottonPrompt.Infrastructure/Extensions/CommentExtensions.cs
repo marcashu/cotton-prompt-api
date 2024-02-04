@@ -1,4 +1,5 @@
-﻿using CottonPrompt.Infrastructure.Entities;
+﻿using CottonPrompt.Infrastructure.Constants;
+using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Models.Comments;
 
 namespace CottonPrompt.Infrastructure.Extensions
@@ -7,7 +8,7 @@ namespace CottonPrompt.Infrastructure.Extensions
     {
         internal static CommentModel AsModel(this OrderDesignComment entity)
         {
-            var result = new CommentModel(entity.Comment, entity.CreatedOn);
+            var result = new CommentModel(entity.Comment, entity.CreatedBy != Guid.Empty ? UserRoles.Checker : "Customer", entity.CreatedOn);
             return result;
         }
 
