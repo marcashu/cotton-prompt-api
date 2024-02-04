@@ -179,6 +179,38 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
+        public async Task<IEnumerable<GetOrdersModel>> GetAvailableAsArtistAsync(Guid artistId, bool? priority, bool changeRequest = false)
+        {
+            try
+            {
+                var userGroupIds = await dbContext.UserGroupUsers
+                    .Include(ugu => ugu.UserGroup)
+                    .Where(ugu => ugu.UserId == artistId)
+                    .Select(ugu => ugu.UserGroupId)
+                    .ToListAsync();
+
+                var queryableOrders = dbContext.Orders.Where(o => o.ArtistId == null && userGroupIds.Contains(o.UserGroupId));
+
+                if (changeRequest)
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OriginalOrderId != null);
+                }
+
+                if (priority != null)
+                {
+                    queryableOrders = queryableOrders.Where (o => o.Priority == priority);
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<GetOrderModel> GetByIdAsync(int id)
         {
             try
@@ -195,7 +227,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 if (order.OrderDesigns.Any())
                 {
-                    var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
+                    var container = blobServiceClient.GetBlobContainerClient("order-designs");
 
                     foreach (var orderDesign in order.OrderDesigns)
                     {
@@ -226,10 +258,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 if (order is null || order.ArtistId is null) return;
 
-                var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
+                var container = blobServiceClient.GetBlobContainerClient("order-designs");
                 await container.CreateIfNotExistsAsync();
 
-                var saltedDesignName = SaltDesignName(designName);
+                var saltedDesignName = SaltDesignName(order.OrderNumber, designName);
 
                 var blob = container.GetBlobClient(saltedDesignName);
                 await blob.UploadAsync(designContent);
@@ -304,28 +336,71 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                await UpdateCustomerStatusAsync(id, OrderStatuses.ChangeRequested);
+                //await UpdateCustomerStatusAsync(id, OrderStatuses.ChangeRequested);
 
-                var orderComment = new OrderDesignComment
+                var order = await dbContext.Orders
+                    .Include(o => o.OrderDesigns)
+                    .Include(o => o.OrderImageReferences)
+                    .SingleOrDefaultAsync(o => o.Id == id);
+
+                var changeRequestGroup = await dbContext.UserGroups.SingleOrDefaultAsync(ug => ug.Name == "Change Request Artists");
+
+                if (order is null || changeRequestGroup is null) return;
+
+                var customerId = Guid.Empty;
+                var currentDesign = order.OrderDesigns.Last();
+
+                var newOrder = new Order
                 {
-                    OrderDesignId = designId,
-                    UserId = Guid.Empty,
-                    Comment = comment,
-                    CreatedBy = Guid.Empty,
+                    OrderNumber = $"{order.OrderNumber} CR",
+                    Priority = order.Priority,
+                    Concept = order.Concept,
+                    PrintColorId = order.PrintColorId,
+                    DesignBracketId = order.DesignBracketId,
+                    OutputSizeId = order.OutputSizeId,
+                    UserGroupId = changeRequestGroup.Id,
+                    CustomerEmail = order.CustomerEmail,
+                    CheckerId = order.CheckerId,
+                    CreatedBy = customerId,
+                    OriginalOrderId = order.Id,
+                    OrderDesigns = new List<OrderDesign>
+                    {
+                        new() 
+                        {
+                            Name = currentDesign.Name,
+                            OrderDesignComments = new List<OrderDesignComment>
+                            {
+                                new()
+                                {
+                                    UserId = customerId,
+                                    Comment = comment,
+                                    CreatedBy = customerId,
+                                },
+                            },
+                            CreatedBy = customerId,
+                        }
+                    },
+                    OrderImageReferences = order.OrderImageReferences.Select(oir => new OrderImageReference
+                    {
+                        LineId = oir.LineId,
+                        Url = oir.Url,
+                        CreatedBy = customerId,
+                    }).ToList(),
                 };
-                await dbContext.OrderDesignComments.AddAsync(orderComment);
 
                 foreach (var imageRef in imageReferences)
                 {
                     var orderImageRef = new OrderImageReference
                     {
-                        OrderId = id,
+                        LineId = newOrder.OrderImageReferences.Count() + 1,
                         Url = imageRef,
-                        CreatedBy = Guid.Empty,
+                        CreatedBy = customerId,
                     };
-                    await dbContext.OrderImageReferences.AddAsync(orderImageRef);
+
+                    newOrder.OrderImageReferences.Add(orderImageRef);
                 }
 
+                await dbContext.Orders.AddAsync(newOrder);
                 await dbContext.SaveChangesAsync();
             }
             catch (Exception)
@@ -411,12 +486,12 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        private string SaltDesignName(string designName)
+        private string SaltDesignName(string orderNumber, string designName)
         {
             var lastDotIndex = designName.LastIndexOf('.');
             var fileName  = designName.Substring(0, lastDotIndex);
             var fileExtension = designName.Substring(lastDotIndex);
-            var result = $"{fileName}_{Guid.NewGuid().ToString()[..5]}{fileExtension}";
+            var result = $"{orderNumber}_{fileName}_{Guid.NewGuid().ToString()[..5]}{fileExtension}";
 
             if (result.Length > 100) result = result.Substring(result.Length - 100); // max length is 100
 

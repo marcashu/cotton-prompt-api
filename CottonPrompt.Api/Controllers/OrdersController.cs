@@ -19,6 +19,14 @@ namespace CottonPrompt.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("available-as-artist")]
+        [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetAvailableAsArtistAsync([FromQuery] GetAvailableAsArtistOrdersRequest request)
+        {
+            var result = await orderService.GetAvailableAsArtistAsync(request.ArtistId, request.Priority, request.ChangeRequest);
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType<GetOrderModel>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetByIdAsync([FromRoute] int id)
