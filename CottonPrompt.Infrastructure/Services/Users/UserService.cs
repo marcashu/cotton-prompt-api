@@ -189,7 +189,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
         {
 			try
 			{
-                var hasWaitingForCustomer = await dbContext.Orders.AnyAsync(o => o.CheckerId == id && o.CheckerStatus == OrderStatuses.Approved && o.CustomerStatus == OrderStatuses.ForReview);
+                var hasWaitingForCustomer = await dbContext.Orders.AnyAsync(o => o.CheckerId == id && o.CheckerStatus == OrderStatuses.Approved && o.CustomerStatus == OrderStatuses.ForReview && o.OriginalOrderId != null);
 				return new CanDoModel(hasWaitingForCustomer, string.Empty);
             }
 			catch (Exception)
