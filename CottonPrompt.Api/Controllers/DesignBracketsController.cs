@@ -30,7 +30,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> UpdateAsync([FromRoute] int id, [FromBody] UpdateDesignBracketRequest request)
         {
-            await designBracketService.UpdateAsync(id, request.Value, request.UserId);
+            await designBracketService.UpdateAsync(id, request.Name, request.Value, request.UserId);
             return NoContent();
         }
 
@@ -70,7 +70,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> CreateAsync([FromBody] CreateDesignBracketRequest request)
         {
-            await designBracketService.CreateAsync(request.Value, request.UserId);
+            await designBracketService.CreateAsync(request.Name, request.Value, request.UserId);
             return NoContent();
         }
     }

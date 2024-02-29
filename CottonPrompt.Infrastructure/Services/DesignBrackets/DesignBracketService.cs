@@ -7,7 +7,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
 {
     public class DesignBracketService(CottonPromptContext dbContext) : IDesignBracketService
     {
-        public async Task CreateAsync(string value, Guid userId)
+        public async Task CreateAsync(string name, decimal value, Guid userId)
         {
             try
             {
@@ -18,6 +18,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
 
                 var designBracket = new OrderDesignBracket
                 {
+                    Name = name,
                     Value = value,
                     CreatedBy = userId,
                     SortOrder = sortOrder,
@@ -136,13 +137,14 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
             }
         }
 
-        public async Task UpdateAsync(int id, string value, Guid userId)
+        public async Task UpdateAsync(int id, string name, decimal value, Guid userId)
         {
             try
             {
                 await dbContext.OrderDesignBrackets
                     .Where(db => db.Id == id)
                     .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(db => db.Name, name)
                         .SetProperty(db => db.Value, value)
                         .SetProperty(db => db.UpdatedBy, userId)
                         .SetProperty(db => db.UpdatedOn, DateTime.UtcNow));

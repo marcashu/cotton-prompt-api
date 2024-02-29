@@ -100,9 +100,10 @@ public partial class CottonPromptContext : DbContext
 
             entity.Property(e => e.Active).HasDefaultValue(true);
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.Value)
+            entity.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(50);
+            entity.Property(e => e.Value).HasColumnType("decimal(18, 2)");
         });
 
         modelBuilder.Entity<OrderDesignComment>(entity =>
