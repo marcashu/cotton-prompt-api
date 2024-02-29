@@ -7,7 +7,7 @@ namespace CottonPrompt.Infrastructure.Extensions
     {
         internal static DesignBracket AsModel(this OrderDesignBracket entity)
         {
-            var result = new DesignBracket(entity.Id, entity.Value);
+            var result = new DesignBracket(entity.Id, entity.Name, entity.Value);
             return result;
         }
 

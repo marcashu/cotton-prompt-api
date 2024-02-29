@@ -8,7 +8,7 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
 
         Task SwapAsync(int id1, int id2, Guid userId);
 
-        Task UpdateAsync(int id, string value, Guid userId);
+        Task UpdateAsync(int id, string name, decimal value, Guid userId);
 
         Task<GetDesignBracketOrdersCountModel> GetOrdersCountAsync(int id);
 
@@ -18,6 +18,6 @@ namespace CottonPrompt.Infrastructure.Services.DesignBrackets
 
         Task EnableAsync(int id, Guid userId);
 
-        Task CreateAsync(string value, Guid userId);
+        Task CreateAsync(string name, decimal value, Guid userId);
     }
 }
