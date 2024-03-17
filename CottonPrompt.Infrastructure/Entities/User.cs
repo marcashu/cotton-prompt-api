@@ -23,6 +23,8 @@ public partial class User
 
     public DateTime? UpdatedOn { get; set; }
 
+    public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+
     public virtual ICollection<UserGroupUser> UserGroupUsers { get; set; } = new List<UserGroupUser>();
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();

@@ -16,6 +16,18 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "[dbo].[Invoices]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InvoiceSectionOrders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InvoiceSections]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[OrderDesignBrackets]",
          "ObjectType": 0
       },
