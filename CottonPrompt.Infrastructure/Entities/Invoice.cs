@@ -13,9 +13,9 @@ public partial class Invoice
 
     public decimal Amount { get; set; }
 
-    public DateOnly StartDate { get; set; }
+    public DateTime StartDate { get; set; }
 
-    public DateOnly EndDate { get; set; }
+    public DateTime EndDate { get; set; }
 
     public DateTime CreatedOn { get; set; }
 

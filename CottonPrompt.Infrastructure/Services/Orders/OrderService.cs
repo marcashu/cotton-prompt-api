@@ -572,142 +572,86 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             // record artist invoice
             var artistInvoice = await dbContext.Invoices
                 .Include(i => i.InvoiceSections)
-                .SingleOrDefaultAsync(i => i.StartDate == DateOnly.FromDateTime(startDate) && i.UserId == order.ArtistId);
+                .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.ArtistId);
 
-            if (artistInvoice is null)
-            {
-                artistInvoice = new()
-                {
-                    UserId = order.ArtistId.Value,
-                    Amount = order.DesignBracket.Value,
-                    StartDate = DateOnly.FromDateTime(startDate),
-                    EndDate = DateOnly.FromDateTime(endDate),
-                    InvoiceSections =
-                    [
-                        new() 
-                        {
-                            Name = order.DesignBracket.Name,
-                            Amount = order.DesignBracket.Value,
-                            Quantity = 1,
-                            InvoiceSectionOrders =
-                            [
-                                new()
-                                {
-                                    OrderId = order.Id,
-                                },
-                            ],
-                        },
-                    ],
-                };
-
-                await dbContext.Invoices.AddAsync(artistInvoice);
-            }
-            else
-            {
-                var invoiceSection = artistInvoice.InvoiceSections.SingleOrDefault(s => s.Name == order.DesignBracket.Name);
-
-                if (invoiceSection is null)
-                {
-                    invoiceSection = new()
-                    {
-                        Name = order.DesignBracket.Name,
-                        Amount = order.DesignBracket.Value,
-                        Quantity = 1,
-                        InvoiceSectionOrders =
-                        [
-                            new()
-                            {
-                                OrderId = order.Id,
-                            },
-                        ],
-                    };
-
-                    artistInvoice.InvoiceSections.Add(invoiceSection);
-                    artistInvoice.Amount += invoiceSection.Amount;
-                }
-                else
-                {
-                    invoiceSection.InvoiceSectionOrders.Add(new()
-                    {
-                        OrderId = order.Id,
-                    });
-
-                    invoiceSection.Amount += order.DesignBracket.Value;
-                    artistInvoice.Amount += order.DesignBracket.Value;
-                }
-            }
+            await RecordInvoice(artistInvoice, order.ArtistId.Value, order.DesignBracket.Name, order.DesignBracket.Value, startDate, endDate, order.Id);
 
             // record checker invoice
             var checkerInvoice = await dbContext.Invoices
                 .Include(i => i.InvoiceSections)
-                .SingleOrDefaultAsync(i => i.StartDate == DateOnly.FromDateTime(startDate) && i.UserId == order.CheckerId);
+                .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.CheckerId);
             var checkerSectionName = "QC";
             var checkerSectionValue = Convert.ToDecimal(0.20);
 
-            if (checkerInvoice is null)
+            await RecordInvoice(checkerInvoice, order.CheckerId.Value, checkerSectionName, checkerSectionValue, startDate, endDate, order.Id);
+
+            await dbContext.SaveChangesAsync();
+        }
+
+        private async Task RecordInvoice(Invoice? invoice, Guid userId, string sectionName, decimal sectionValue, DateTime startDate, DateTime endDate, int orderId)
+        {
+            if (invoice is null)
             {
-                checkerInvoice = new()
+                invoice = new()
                 {
-                    UserId = order.CheckerId.Value,
-                    Amount = checkerSectionValue,
-                    StartDate = DateOnly.FromDateTime(startDate),
-                    EndDate = DateOnly.FromDateTime(endDate),
+                    UserId = userId,
+                    Amount = sectionValue,
+                    StartDate = startDate,
+                    EndDate = endDate,
                     InvoiceSections =
                     [
                         new()
                         {
-                            Name = checkerSectionName,
-                            Amount = checkerSectionValue,
+                            Name = sectionName,
+                            Amount = sectionValue,
                             Quantity = 1,
                             InvoiceSectionOrders =
                             [
                                 new()
                                 {
-                                    OrderId = order.Id,
+                                    OrderId = orderId,
                                 },
                             ],
                         },
                     ],
                 };
 
-                await dbContext.Invoices.AddAsync(checkerInvoice);
+                await dbContext.Invoices.AddAsync(invoice);
             }
             else
             {
-                var invoiceSection = checkerInvoice.InvoiceSections.SingleOrDefault(s => s.Name == checkerSectionName);
+                var invoiceSection = invoice.InvoiceSections.SingleOrDefault(s => s.Name == sectionName);
 
                 if (invoiceSection is null)
                 {
                     invoiceSection = new()
                     {
-                        Name = checkerSectionName,
-                        Amount = checkerSectionValue,
+                        Name = sectionName,
+                        Amount = sectionValue,
                         Quantity = 1,
                         InvoiceSectionOrders =
                         [
                             new()
                             {
-                                OrderId = order.Id,
+                                OrderId = orderId,
                             },
                         ],
                     };
 
-                    checkerInvoice.InvoiceSections.Add(invoiceSection);
-                    checkerInvoice.Amount += invoiceSection.Amount;
+                    invoice.InvoiceSections.Add(invoiceSection);
+                    invoice.Amount += invoiceSection.Amount;
                 }
                 else
                 {
                     invoiceSection.InvoiceSectionOrders.Add(new()
                     {
-                        OrderId = order.Id,
+                        OrderId = orderId,
                     });
 
-                    invoiceSection.Amount += checkerSectionValue;
-                    checkerInvoice.Amount += checkerSectionValue;
+                    invoiceSection.Amount += sectionValue;
+                    invoice.Amount += sectionValue;
                 }
             }
-
-            await dbContext.SaveChangesAsync();
         }
     }
 }
