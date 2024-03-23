@@ -245,6 +245,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Include(o => o.OutputSize)
                     .Include(o => o.OrderImageReferences)
                     .Include(o => o.OrderDesigns).ThenInclude(od => od.OrderDesignComments)
+                    .Include(o => o.UserGroup)
                     .SingleAsync(o => o.Id == id);
 
                 var designs = new List<DesignModel>();
