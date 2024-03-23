@@ -17,6 +17,14 @@ namespace CottonPrompt.Api.Controllers
             var result = await invoiceService.GetAsync(request.UserId);
             return Ok(result);
         }
+
+        [HttpGet("{id}")]
+        [ProducesResponseType<GetInvoiceModel>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetByIdAsync([FromRoute] Guid id)
+        {
+            var result = await invoiceService.GetByIdAsync(id);
+            return Ok(result);
+        }
     }
 }
     

@@ -19,5 +19,23 @@ namespace CottonPrompt.Infrastructure.Extensions
             var result = entities.Select(AsGetInvoicesModel);
             return result;
         }
+
+        internal static GetInvoiceModel AsGetInvoiceModel(this Invoice entity)
+        {
+            var result = new GetInvoiceModel(entity.Id, entity.EndDate, entity.Amount, entity.InvoiceSections.AsModel());
+            return result;
+        }
+
+        private static GetInvoiceSectionModel AsModel(this InvoiceSection entity)
+        {
+            var result = new GetInvoiceSectionModel(entity.Name, entity.Rate, entity.Amount, entity.Quantity, entity.InvoiceSectionOrders.Select(iso => iso.OrderNumber));
+            return result;
+        }
+
+        private static IEnumerable<GetInvoiceSectionModel> AsModel(this IEnumerable<InvoiceSection> entities)
+        {
+            var result = entities.Select(AsModel);
+            return result;
+        }
     }
 }

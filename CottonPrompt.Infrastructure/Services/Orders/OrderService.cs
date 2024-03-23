@@ -249,7 +249,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 var designs = new List<DesignModel>();
 
-                if (order.OrderDesigns.Any())
+                if (order.OrderDesigns.Count != 0)
                 {
                     var container = blobServiceClient.GetBlobContainerClient("order-designs");
 
@@ -574,7 +574,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 .Include(i => i.InvoiceSections)
                 .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.ArtistId);
 
-            await RecordInvoice(artistInvoice, order.ArtistId.Value, order.DesignBracket.Name, order.DesignBracket.Value, startDate, endDate, order.Id);
+            await RecordInvoice(artistInvoice, order.ArtistId.Value, order.DesignBracket.Name, order.DesignBracket.Value, startDate, endDate, order.Id, order.OrderNumber);
 
             // record checker invoice
             var checkerInvoice = await dbContext.Invoices
@@ -583,12 +583,12 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             var checkerSectionName = "QC";
             var checkerSectionValue = Convert.ToDecimal(0.20);
 
-            await RecordInvoice(checkerInvoice, order.CheckerId.Value, checkerSectionName, checkerSectionValue, startDate, endDate, order.Id);
+            await RecordInvoice(checkerInvoice, order.CheckerId.Value, checkerSectionName, checkerSectionValue, startDate, endDate, order.Id, order.OrderNumber);
 
             await dbContext.SaveChangesAsync();
         }
 
-        private async Task RecordInvoice(Invoice? invoice, Guid userId, string sectionName, decimal sectionValue, DateTime startDate, DateTime endDate, int orderId)
+        private async Task RecordInvoice(Invoice? invoice, Guid userId, string sectionName, decimal sectionValue, DateTime startDate, DateTime endDate, int orderId, string orderNumber)
         {
             if (invoice is null)
             {
@@ -610,6 +610,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                                 new()
                                 {
                                     OrderId = orderId,
+                                    OrderNumber = orderNumber,
                                 },
                             ],
                         },
@@ -620,7 +621,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
             else
             {
-                var invoiceSection = invoice.InvoiceSections.SingleOrDefault(s => s.Name == sectionName);
+                var invoiceSection = invoice.InvoiceSections.SingleOrDefault(s => s.Name == sectionName && s.Rate == sectionValue);
 
                 if (invoiceSection is null)
                 {
@@ -634,6 +635,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                             new()
                             {
                                 OrderId = orderId,
+                                OrderNumber = orderNumber,
                             },
                         ],
                     };
@@ -646,6 +648,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     invoiceSection.InvoiceSectionOrders.Add(new()
                     {
                         OrderId = orderId,
+                        OrderNumber = orderNumber,
                     });
 
                     invoiceSection.Amount += sectionValue;

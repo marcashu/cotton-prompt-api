@@ -67,6 +67,7 @@ public partial class CottonPromptContext : DbContext
             entity.Property(e => e.Name)
                 .IsRequired()
                 .HasMaxLength(50);
+            entity.Property(e => e.Rate).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Invoice).WithMany(p => p.InvoiceSections)
                 .HasForeignKey(d => d.InvoiceId)
@@ -76,6 +77,10 @@ public partial class CottonPromptContext : DbContext
         modelBuilder.Entity<InvoiceSectionOrder>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_InvoiceSectionOrderId");
+
+            entity.Property(e => e.OrderNumber)
+                .IsRequired()
+                .HasMaxLength(50);
 
             entity.HasOne(d => d.InvoiceSection).WithMany(p => p.InvoiceSectionOrders)
                 .HasForeignKey(d => d.InvoiceSectionId)

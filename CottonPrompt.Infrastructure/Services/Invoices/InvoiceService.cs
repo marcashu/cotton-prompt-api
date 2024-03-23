@@ -23,5 +23,22 @@ namespace CottonPrompt.Infrastructure.Services.Invoices
                 throw;
             }
         }
+
+        public async Task<GetInvoiceModel> GetByIdAsync(Guid id)
+        {
+            try
+            {
+                var invoice = await dbContext.Invoices
+                    .Include(i => i.InvoiceSections.OrderBy(s => s.Name))
+                    .ThenInclude(s => s.InvoiceSectionOrders.OrderBy(o => o.OrderNumber))
+                    .SingleAsync(i => i.Id == id);
+                var result = invoice.AsGetInvoiceModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -13,6 +13,8 @@ public partial class InvoiceSectionOrder
 
     public int OrderId { get; set; }
 
+    public string OrderNumber { get; set; }
+
     public virtual InvoiceSection InvoiceSection { get; set; }
 
     public virtual Order Order { get; set; }
