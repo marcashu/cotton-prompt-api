@@ -133,6 +133,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
+                var order = await dbContext.Orders.FindAsync(id);
+
+                if (order is null || order.CompletedOn is not null) return;
+
                 await dbContext.Orders.Where(o => o.Id == id).ExecuteDeleteAsync();
             }
             catch (Exception)
@@ -318,7 +322,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 var currentOrder = await dbContext.Orders.Include(o => o.OrderImageReferences).SingleOrDefaultAsync(o => o.Id == order.Id);
 
-                if (currentOrder is null) return;
+                if (currentOrder is null || currentOrder.CompletedOn is not null) return;
 
                 currentOrder.OrderNumber = order.OrderNumber;
                 currentOrder.Priority = order.Priority;
