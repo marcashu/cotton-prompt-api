@@ -569,33 +569,42 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             var startDate = completedOn.AddDays((daysOffset - (int)DayOfWeek.Monday) * -1).Date + new TimeSpan(0, 0, 0);
             var endDate = completedOn.AddDays(7 - daysOffset).Date + new TimeSpan(23, 59, 59);
 
-            // record artist invoice
             var artistInvoice = await dbContext.Invoices
                 .Include(i => i.InvoiceSections)
                 .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.ArtistId);
 
-            await RecordInvoice(artistInvoice, order.ArtistId.Value, order.DesignBracket.Name, order.DesignBracket.Value, startDate, endDate, order.Id, order.OrderNumber);
+            if (order.OriginalOrderId is null)
+            {
+                // record artist invoice
+                await RecordInvoice(artistInvoice, order.ArtistId.Value, order.DesignBracket.Name, order.DesignBracket.Value, startDate, endDate, order.Id, order.OrderNumber);
 
-            // record checker invoice
-            var checkerInvoice = await dbContext.Invoices
-                .Include(i => i.InvoiceSections)
-                .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.CheckerId);
-            var checkerSectionName = "QC";
-            var checkerSectionValue = Convert.ToDecimal(0.20);
-
-            await RecordInvoice(checkerInvoice, order.CheckerId.Value, checkerSectionName, checkerSectionValue, startDate, endDate, order.Id, order.OrderNumber);
+                // record checker invoice
+                var checkerInvoice = await dbContext.Invoices
+                    .Include(i => i.InvoiceSections)
+                    .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.CheckerId);
+                var checkerSectionName = "QC";
+                var checkerSectionRate = Convert.ToDecimal(0.20);
+                await RecordInvoice(checkerInvoice, order.CheckerId.Value, checkerSectionName, checkerSectionRate, startDate, endDate, order.Id, order.OrderNumber);
+            }
+            else
+            {
+                // record change request artist invoice
+                var changeRequestSectionName = "CR";
+                var changeRequestSectionRate = Convert.ToDecimal(2);
+                await RecordInvoice(artistInvoice, order.ArtistId.Value, changeRequestSectionName, changeRequestSectionRate, startDate, endDate, order.Id, order.OrderNumber);
+            }
 
             await dbContext.SaveChangesAsync();
         }
 
-        private async Task RecordInvoice(Invoice? invoice, Guid userId, string sectionName, decimal sectionValue, DateTime startDate, DateTime endDate, int orderId, string orderNumber)
+        private async Task RecordInvoice(Invoice? invoice, Guid userId, string sectionName, decimal sectionRate, DateTime startDate, DateTime endDate, int orderId, string orderNumber)
         {
             if (invoice is null)
             {
                 invoice = new()
                 {
                     UserId = userId,
-                    Amount = sectionValue,
+                    Amount = sectionRate,
                     StartDate = startDate,
                     EndDate = endDate,
                     InvoiceSections =
@@ -603,7 +612,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         new()
                         {
                             Name = sectionName,
-                            Amount = sectionValue,
+                            Amount = sectionRate,
                             Quantity = 1,
                             InvoiceSectionOrders =
                             [
@@ -621,14 +630,14 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
             else
             {
-                var invoiceSection = invoice.InvoiceSections.SingleOrDefault(s => s.Name == sectionName && s.Rate == sectionValue);
+                var invoiceSection = invoice.InvoiceSections.SingleOrDefault(s => s.Name == sectionName && s.Rate == sectionRate);
 
                 if (invoiceSection is null)
                 {
                     invoiceSection = new()
                     {
                         Name = sectionName,
-                        Amount = sectionValue,
+                        Amount = sectionRate,
                         Quantity = 1,
                         InvoiceSectionOrders =
                         [
@@ -651,8 +660,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         OrderNumber = orderNumber,
                     });
 
-                    invoiceSection.Amount += sectionValue;
-                    invoice.Amount += sectionValue;
+                    invoiceSection.Quantity += 1;
+                    invoiceSection.Amount += sectionRate;
+                    invoice.Amount += sectionRate;
                 }
             }
         }
