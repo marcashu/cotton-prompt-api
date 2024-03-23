@@ -60,6 +60,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[Rates]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[UserGroups]",
          "ObjectType": 0
       },

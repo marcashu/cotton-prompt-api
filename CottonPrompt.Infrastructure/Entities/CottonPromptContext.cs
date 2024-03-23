@@ -35,6 +35,8 @@ public partial class CottonPromptContext : DbContext
 
     public virtual DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
 
+    public virtual DbSet<Rate> Rates { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserGroup> UserGroups { get; set; }
@@ -219,6 +221,18 @@ public partial class CottonPromptContext : DbContext
             entity.HasOne(d => d.Order).WithMany(p => p.OrderStatusHistories)
                 .HasForeignKey(d => d.OrderId)
                 .HasConstraintName("FK_OrderStatusHistory_Orders");
+        });
+
+        modelBuilder.Entity<Rate>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_RateId");
+
+            entity.Property(e => e.ChangeRequestRate)
+                .HasDefaultValue(2m)
+                .HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.QualityControlRate)
+                .HasDefaultValue(0.2m)
+                .HasColumnType("decimal(18, 2)");
         });
 
         modelBuilder.Entity<User>(entity =>

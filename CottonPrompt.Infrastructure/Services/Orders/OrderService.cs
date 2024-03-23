@@ -568,6 +568,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             var daysOffset = completedOn.DayOfWeek != DayOfWeek.Sunday ? (int)completedOn.DayOfWeek : 7;
             var startDate = completedOn.AddDays((daysOffset - (int)DayOfWeek.Monday) * -1).Date + new TimeSpan(0, 0, 0);
             var endDate = completedOn.AddDays(7 - daysOffset).Date + new TimeSpan(23, 59, 59);
+            var rates = await dbContext.Rates.FirstAsync();
 
             var artistInvoice = await dbContext.Invoices
                 .Include(i => i.InvoiceSections)
@@ -582,16 +583,14 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 var checkerInvoice = await dbContext.Invoices
                     .Include(i => i.InvoiceSections)
                     .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.CheckerId);
-                var checkerSectionName = "QC";
-                var checkerSectionRate = Convert.ToDecimal(0.20);
-                await RecordInvoice(checkerInvoice, order.CheckerId.Value, checkerSectionName, checkerSectionRate, startDate, endDate, order.Id, order.OrderNumber);
+                var checkerSectionName = "Quality Control";
+                await RecordInvoice(checkerInvoice, order.CheckerId.Value, checkerSectionName, rates.QualityControlRate, startDate, endDate, order.Id, order.OrderNumber);
             }
             else
             {
                 // record change request artist invoice
-                var changeRequestSectionName = "CR";
-                var changeRequestSectionRate = Convert.ToDecimal(2);
-                await RecordInvoice(artistInvoice, order.ArtistId.Value, changeRequestSectionName, changeRequestSectionRate, startDate, endDate, order.Id, order.OrderNumber);
+                var changeRequestSectionName = "Change Request";
+                await RecordInvoice(artistInvoice, order.ArtistId.Value, changeRequestSectionName, rates.ChangeRequestRate, startDate, endDate, order.Id, order.OrderNumber);
             }
 
             await dbContext.SaveChangesAsync();
@@ -612,6 +611,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         new()
                         {
                             Name = sectionName,
+                            Rate = sectionRate,
                             Amount = sectionRate,
                             Quantity = 1,
                             InvoiceSectionOrders =
@@ -637,6 +637,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     invoiceSection = new()
                     {
                         Name = sectionName,
+                        Rate = sectionRate,
                         Amount = sectionRate,
                         Quantity = 1,
                         InvoiceSectionOrders =
