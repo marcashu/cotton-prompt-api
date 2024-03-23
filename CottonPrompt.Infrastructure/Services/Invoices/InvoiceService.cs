@@ -7,12 +7,13 @@ namespace CottonPrompt.Infrastructure.Services.Invoices
 {
     public class InvoiceService(CottonPromptContext dbContext) : IInvoiceService
     {
-        public async Task<IEnumerable<GetInvoicesModel>> GetAsync(Guid userId)
+        public async Task<IEnumerable<GetInvoicesModel>> GetAsync(Guid? userId)
         {
             try
             {
                 var invoices = await dbContext.Invoices
-                    .Where(i => i.UserId == userId)
+                    .Include(i => i.User)
+                    .Where(i => userId == null || i.UserId == userId)
                     .OrderByDescending(db => db.StartDate)
                     .ToListAsync();
                 var result = invoices.AsGetInvoicesModel();

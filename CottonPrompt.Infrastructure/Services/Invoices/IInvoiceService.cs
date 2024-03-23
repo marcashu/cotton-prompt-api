@@ -4,7 +4,7 @@ namespace CottonPrompt.Infrastructure.Services.Invoices
 {
     public interface IInvoiceService
     {
-        Task<IEnumerable<GetInvoicesModel>> GetAsync(Guid userId);
+        Task<IEnumerable<GetInvoicesModel>> GetAsync(Guid? userId);
 
         Task<GetInvoiceModel> GetByIdAsync(Guid id);
     }
