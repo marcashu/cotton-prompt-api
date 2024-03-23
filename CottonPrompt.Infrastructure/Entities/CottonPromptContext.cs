@@ -13,6 +13,12 @@ public partial class CottonPromptContext : DbContext
     {
     }
 
+    public virtual DbSet<Invoice> Invoices { get; set; }
+
+    public virtual DbSet<InvoiceSection> InvoiceSections { get; set; }
+
+    public virtual DbSet<InvoiceSectionOrder> InvoiceSectionOrders { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderDesign> OrderDesigns { get; set; }
@@ -39,6 +45,53 @@ public partial class CottonPromptContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Invoice>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_Invoices_Id");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Amount).HasColumnType("decimal(19, 2)");
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Invoices)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Invoices_Users");
+        });
+
+        modelBuilder.Entity<InvoiceSection>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_InvoiceSectionId");
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.Rate).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.Invoice).WithMany(p => p.InvoiceSections)
+                .HasForeignKey(d => d.InvoiceId)
+                .HasConstraintName("FK_InvoiceSections_Invoices");
+        });
+
+        modelBuilder.Entity<InvoiceSectionOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_InvoiceSectionOrderId");
+
+            entity.Property(e => e.OrderNumber)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.InvoiceSection).WithMany(p => p.InvoiceSectionOrders)
+                .HasForeignKey(d => d.InvoiceSectionId)
+                .HasConstraintName("FK_InvoiceSectionOrders_InvoiceSections");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.InvoiceSectionOrders)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_InvoiceSectionOrders_Orders");
+        });
+
         modelBuilder.Entity<Order>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_OrderId");

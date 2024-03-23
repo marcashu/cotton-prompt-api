@@ -71,5 +71,8 @@
     <Build Include="Tables\UserRoles.sql" />
     <Build Include="Tables\UserGroups.sql" />
     <Build Include="Tables\UserGroupUsers.sql" />
+    <Build Include="Tables\Invoices.sql" />
+    <Build Include="Tables\InvoiceSections.sql" />
+    <Build Include="Tables\InvoiceSectionOrders.sql" />
   </ItemGroup>
 </Project>

@@ -35,6 +35,8 @@ public partial class Order
 
     public string CheckerStatus { get; set; }
 
+    public DateTime? CompletedOn { get; set; }
+
     public int? OriginalOrderId { get; set; }
 
     public Guid CreatedBy { get; set; }
@@ -48,6 +50,8 @@ public partial class Order
     public virtual OrderDesignBracket DesignBracket { get; set; }
 
     public virtual ICollection<Order> InverseOriginalOrder { get; set; } = new List<Order>();
+
+    public virtual ICollection<InvoiceSectionOrder> InvoiceSectionOrders { get; set; } = new List<InvoiceSectionOrder>();
 
     public virtual ICollection<OrderDesign> OrderDesigns { get; set; } = new List<OrderDesign>();
 
