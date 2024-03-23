@@ -22,6 +22,7 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         string CheckerStatus,
         string CustomerStatus,
         Guid? ArtistId,
-        Guid? CheckerId
+        Guid? CheckerId,
+        string UserGroup
     );
 }
