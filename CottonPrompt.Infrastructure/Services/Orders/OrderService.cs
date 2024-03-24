@@ -135,7 +135,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 var order = await dbContext.Orders.FindAsync(id);
 
-                if (order is null || order.CompletedOn is not null) return;
+                if (order is null || order.ArtistStatus == OrderStatuses.Completed) return;
 
                 await dbContext.Orders.Where(o => o.Id == id).ExecuteDeleteAsync();
             }
@@ -322,7 +322,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 var currentOrder = await dbContext.Orders.Include(o => o.OrderImageReferences).SingleOrDefaultAsync(o => o.Id == order.Id);
 
-                if (currentOrder is null || currentOrder.CompletedOn is not null) return;
+                if (currentOrder is null || currentOrder.ArtistStatus == OrderStatuses.Completed) return;
 
                 currentOrder.OrderNumber = order.OrderNumber;
                 currentOrder.Priority = order.Priority;
@@ -670,6 +670,48 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     invoiceSection.Amount += sectionRate;
                     invoice.Amount += sectionRate;
                 }
+            }
+        }
+
+        public async Task<IEnumerable<GetOrdersModel>> GetOngoingAsync(string? orderNumber)
+        {
+            try
+            {
+                IQueryable<Order> queryableOrders = dbContext.Orders.Where(o => o.ArtistStatus != OrderStatuses.Completed);
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<GetOrdersModel>> GetCompletedAsync(string? orderNumber)
+        {
+            try
+            {
+                IQueryable<Order> queryableOrders = dbContext.Orders.Where(o => o.ArtistStatus == OrderStatuses.Completed);
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }
