@@ -19,7 +19,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                var order = await dbContext.Orders.Include(o => o.OrderDesigns).SingleOrDefaultAsync(o => o.Id == id);
+                var order = await dbContext.Orders
+                    .Include(o => o.OrderDesigns)
+                    .Include(o => o.DesignBracket)
+                    .SingleOrDefaultAsync(o => o.Id == id);
 
                 if (order is null || order.CheckerId is null || order.ArtistId is null) return;
 
@@ -28,6 +31,11 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 if (order.OriginalOrderId is null)
                 {
                     await UpdateArtistStatusAsync(id, OrderStatuses.Completed, order.ArtistId.Value);
+
+                    order.CompletedOn = DateTime.UtcNow;
+                    await dbContext.SaveChangesAsync();
+
+                    await RecordInvoice(order);
                 }
 
                 await UpdateCustomerStatusAsync(id, OrderStatuses.ForReview);
@@ -125,6 +133,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
+                var order = await dbContext.Orders.FindAsync(id);
+
+                if (order is null || order.ArtistStatus == OrderStatuses.Completed) return;
+
                 await dbContext.Orders.Where(o => o.Id == id).ExecuteDeleteAsync();
             }
             catch (Exception)
@@ -237,11 +249,12 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Include(o => o.OutputSize)
                     .Include(o => o.OrderImageReferences)
                     .Include(o => o.OrderDesigns).ThenInclude(od => od.OrderDesignComments)
+                    .Include(o => o.UserGroup)
                     .SingleAsync(o => o.Id == id);
 
                 var designs = new List<DesignModel>();
 
-                if (order.OrderDesigns.Any())
+                if (order.OrderDesigns.Count != 0)
                 {
                     var container = blobServiceClient.GetBlobContainerClient("order-designs");
 
@@ -309,7 +322,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 var currentOrder = await dbContext.Orders.Include(o => o.OrderImageReferences).SingleOrDefaultAsync(o => o.Id == order.Id);
 
-                if (currentOrder is null) return;
+                if (currentOrder is null || currentOrder.ArtistStatus == OrderStatuses.Completed) return;
 
                 currentOrder.OrderNumber = order.OrderNumber;
                 currentOrder.Priority = order.Priority;
@@ -340,13 +353,20 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                var order = await dbContext.Orders.FindAsync(id);
+                var order = await dbContext.Orders
+                    .Include(o => o.DesignBracket)
+                    .SingleOrDefaultAsync(o => o.Id == id);
 
                 await UpdateCustomerStatusAsync(id, OrderStatuses.Accepted);
 
                 if (order != null && order.OriginalOrderId != null && order.ArtistId != null)
                 {
                     await UpdateArtistStatusAsync(id, OrderStatuses.Completed, order.ArtistId.Value);
+
+                    order.CompletedOn = DateTime.UtcNow;
+                    await dbContext.SaveChangesAsync();
+
+                    await RecordInvoice(order);
                 }
             }
             catch (Exception)
@@ -542,6 +562,157 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             if (result.Length > 100) result = result.Substring(result.Length - 100); // max length is 100
 
             return result;
+        }
+
+        private async Task RecordInvoice(Order order)
+        {
+            if (order.CompletedOn is null || order.ArtistId is null || order.CheckerId is null) return;
+
+            var phTimeOffset = 8;
+            var completedOn = order.CompletedOn.Value.AddHours(phTimeOffset);
+            var daysOffset = completedOn.DayOfWeek != DayOfWeek.Sunday ? (int)completedOn.DayOfWeek : 7;
+            var startDate = completedOn.AddDays((daysOffset - (int)DayOfWeek.Monday) * -1).Date + new TimeSpan(0, 0, 0);
+            var endDate = completedOn.AddDays(7 - daysOffset).Date + new TimeSpan(23, 59, 59);
+            var rates = await dbContext.Rates.FirstAsync();
+
+            var artistInvoice = await dbContext.Invoices
+                .Include(i => i.InvoiceSections)
+                .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.ArtistId);
+
+            if (order.OriginalOrderId is null)
+            {
+                // record artist invoice
+                await RecordInvoice(artistInvoice, order.ArtistId.Value, order.DesignBracket.Name, order.DesignBracket.Value, startDate, endDate, order.Id, order.OrderNumber);
+
+                // record checker invoice
+                var checkerInvoice = await dbContext.Invoices
+                    .Include(i => i.InvoiceSections)
+                    .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.CheckerId);
+                var checkerSectionName = "Quality Control";
+                await RecordInvoice(checkerInvoice, order.CheckerId.Value, checkerSectionName, rates.QualityControlRate, startDate, endDate, order.Id, order.OrderNumber);
+            }
+            else
+            {
+                // record change request artist invoice
+                var changeRequestSectionName = "Change Request";
+                await RecordInvoice(artistInvoice, order.ArtistId.Value, changeRequestSectionName, rates.ChangeRequestRate, startDate, endDate, order.Id, order.OrderNumber);
+            }
+
+            await dbContext.SaveChangesAsync();
+        }
+
+        private async Task RecordInvoice(Invoice? invoice, Guid userId, string sectionName, decimal sectionRate, DateTime startDate, DateTime endDate, int orderId, string orderNumber)
+        {
+            if (invoice is null)
+            {
+                invoice = new()
+                {
+                    UserId = userId,
+                    Amount = sectionRate,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    InvoiceSections =
+                    [
+                        new()
+                        {
+                            Name = sectionName,
+                            Rate = sectionRate,
+                            Amount = sectionRate,
+                            Quantity = 1,
+                            InvoiceSectionOrders =
+                            [
+                                new()
+                                {
+                                    OrderId = orderId,
+                                    OrderNumber = orderNumber,
+                                },
+                            ],
+                        },
+                    ],
+                };
+
+                await dbContext.Invoices.AddAsync(invoice);
+            }
+            else
+            {
+                var invoiceSection = invoice.InvoiceSections.SingleOrDefault(s => s.Name == sectionName && s.Rate == sectionRate);
+
+                if (invoiceSection is null)
+                {
+                    invoiceSection = new()
+                    {
+                        Name = sectionName,
+                        Rate = sectionRate,
+                        Amount = sectionRate,
+                        Quantity = 1,
+                        InvoiceSectionOrders =
+                        [
+                            new()
+                            {
+                                OrderId = orderId,
+                                OrderNumber = orderNumber,
+                            },
+                        ],
+                    };
+
+                    invoice.InvoiceSections.Add(invoiceSection);
+                    invoice.Amount += invoiceSection.Amount;
+                }
+                else
+                {
+                    invoiceSection.InvoiceSectionOrders.Add(new()
+                    {
+                        OrderId = orderId,
+                        OrderNumber = orderNumber,
+                    });
+
+                    invoiceSection.Quantity += 1;
+                    invoiceSection.Amount += sectionRate;
+                    invoice.Amount += sectionRate;
+                }
+            }
+        }
+
+        public async Task<IEnumerable<GetOrdersModel>> GetOngoingAsync(string? orderNumber)
+        {
+            try
+            {
+                IQueryable<Order> queryableOrders = dbContext.Orders.Where(o => o.ArtistStatus != OrderStatuses.Completed);
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<GetOrdersModel>> GetCompletedAsync(string? orderNumber)
+        {
+            try
+            {
+                IQueryable<Order> queryableOrders = dbContext.Orders.Where(o => o.ArtistStatus == OrderStatuses.Completed);
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

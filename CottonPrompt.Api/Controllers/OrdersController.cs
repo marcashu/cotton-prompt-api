@@ -19,6 +19,22 @@ namespace CottonPrompt.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("ongoing")]
+        [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetOngoingAsync([FromQuery] GetOngoingOrdersRequest request)
+        {
+            var result = await orderService.GetOngoingAsync(request.OrderNumber);
+            return Ok(result);
+        }
+
+        [HttpGet("completed")]
+        [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetCompletedAsync([FromQuery] GetCompletedOrdersRequest request)
+        {
+            var result = await orderService.GetCompletedAsync(request.OrderNumber);
+            return Ok(result);
+        }
+
         [HttpGet("available-as-artist")]
         [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailableAsArtistAsync([FromQuery] GetAvailableAsArtistOrdersRequest request)
