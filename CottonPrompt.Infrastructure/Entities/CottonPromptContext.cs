@@ -13,6 +13,8 @@ public partial class CottonPromptContext : DbContext
     {
     }
 
+    public virtual DbSet<EmailTemplate> EmailTemplates { get; set; }
+
     public virtual DbSet<Invoice> Invoices { get; set; }
 
     public virtual DbSet<InvoiceSection> InvoiceSections { get; set; }
@@ -47,6 +49,13 @@ public partial class CottonPromptContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<EmailTemplate>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_EmailTemplateId");
+
+            entity.Property(e => e.OrderProofReadyEmail).IsRequired();
+        });
+
         modelBuilder.Entity<Invoice>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Invoices_Id");

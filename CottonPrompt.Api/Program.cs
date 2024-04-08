@@ -4,6 +4,7 @@ using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Services.Artists;
 using CottonPrompt.Infrastructure.Services.DesignBrackets;
 using CottonPrompt.Infrastructure.Services.Designs;
+using CottonPrompt.Infrastructure.Services.EmailTemplates;
 using CottonPrompt.Infrastructure.Services.Invoices;
 using CottonPrompt.Infrastructure.Services.Orders;
 using CottonPrompt.Infrastructure.Services.OutputSizes;
@@ -81,6 +82,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserGroupService, UserGroupService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IRatesService, RatesService>();
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
 var app = builder.Build();
 
