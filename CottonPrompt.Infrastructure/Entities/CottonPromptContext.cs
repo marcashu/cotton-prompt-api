@@ -285,11 +285,10 @@ public partial class CottonPromptContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_UserRoles_Id");
+            entity.HasKey(e => new { e.UserId, e.Role });
 
-            entity.Property(e => e.Active).HasDefaultValue(true);
-            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.Role).HasMaxLength(50);
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
                 .HasForeignKey(d => d.UserId)

@@ -8,7 +8,7 @@ namespace CottonPrompt.Infrastructure.Extensions
     {
         internal static CommentModel AsModel(this OrderDesignComment entity)
         {
-            var result = new CommentModel(entity.Comment, entity.CreatedBy != Guid.Empty ? UserRoles.Checker : "Customer", entity.CreatedOn);
+            var result = new CommentModel(entity.Comment, entity.CreatedBy != Guid.Empty ? UserRoles.Checker.GetDisplayName() : "Customer", entity.CreatedOn);
             return result;
         }
 
