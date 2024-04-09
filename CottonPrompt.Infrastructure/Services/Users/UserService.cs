@@ -15,11 +15,11 @@ namespace CottonPrompt.Infrastructure.Services.Users
         {
 			try
 			{
-				var userRoles = await dbContext.UserRoles.Where(ur => ur.UserId == id && ur.Active).Select(ur => ur.Role).ToListAsync();
+				var userRoles = await dbContext.UserRoles.Where(ur => ur.UserId == id).Select(ur => ur.Role).ToListAsync();
 				var rolesToRemove = userRoles.Except(roles);
 				var rolesToAdd = roles.Except(userRoles);
 
-				if (rolesToRemove.Contains(UserRoles.Checker))
+				if (rolesToRemove.Contains(UserRoles.Checker.GetDisplayName()))
                 {
                     var hasPendingOrdersAsChecker = await dbContext.Orders.AnyAsync(o => o.CheckerId == id && o.CheckerStatus != OrderStatuses.Approved);
 
@@ -29,7 +29,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
                     }
                 }
 
-                if (rolesToRemove.Contains(UserRoles.Artist))
+                if (rolesToRemove.Contains(UserRoles.Artist.GetDisplayName()))
                 {
                     var hasPendingOrdersAsArtist = await dbContext.Orders.AnyAsync(o => o.ArtistId == id && o.CheckerStatus != OrderStatuses.Approved);
 
@@ -75,7 +75,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
         {
 			try
 			{
-				var users = await dbContext.Users.Include(u => u.UserRoles.Where(ur => ur.Active)).OrderBy(u => u.Name).ToListAsync();
+				var users = await dbContext.Users.Include(u => u.UserRoles.OrderBy(ur => ur.SortOrder)).OrderBy(u => u.Name).ToListAsync();
 				var result = users.AsModel();
 				return result;
 			}
@@ -89,11 +89,11 @@ namespace CottonPrompt.Infrastructure.Services.Users
         {
 			try
 			{
-				var user = await dbContext.Users.Include(u => u.UserRoles.Where(ur => ur.Active)).SingleOrDefaultAsync(u => u.Id == id);
+				var user = await dbContext.Users.Include(u => u.UserRoles.OrderBy(ur => ur.SortOrder)).SingleOrDefaultAsync(u => u.Id == id);
 
 				if (user == null)
 				{
-					return new GetUsersModel(id, name, email, Enumerable.Empty<string>());
+                    return new GetUsersModel(id, name, email, []);
                 }
 				else
 				{
@@ -116,38 +116,19 @@ namespace CottonPrompt.Infrastructure.Services.Users
         {
 			try
 			{
-				var userRoles = await dbContext.UserRoles.Where(ur => ur.UserId == id).ToListAsync();
+				await dbContext.UserRoles.Where(ur => ur.UserId == id).ExecuteDeleteAsync();
 
-				var allRoles = userRoles.Select(ur => ur.Role).Union(roles);
-
-				foreach (var role in allRoles)
+				foreach (var role in roles)
 				{
-					var currentRole = userRoles.SingleOrDefault(ur => ur.Role == role);
-					var inNewRole = roles.Contains(role);
-
-					if (currentRole != null)
+					var newRole = new UserRole
 					{
-						if (currentRole.Active == inNewRole)
-						{
-							continue;
-						}
+						UserId = id,
+						Role = role,
+						SortOrder = (int)EnumExtensions.GetEnumFromName<UserRoles>(role),
+						CreatedBy = updatedBy,
+					};
 
-						currentRole.Active = inNewRole;
-						currentRole.UpdatedBy = updatedBy;
-						currentRole.UpdatedOn = DateTime.UtcNow;
-					}
-					else if (currentRole == null && inNewRole)
-					{
-						var newRole = new UserRole
-						{
-							UserId = id,
-							Role = role,
-							Active = true,
-							CreatedBy = updatedBy,
-						};
-
-						await dbContext.UserRoles.AddAsync(newRole);
-					}
+					await dbContext.UserRoles.AddAsync(newRole);
 				}
 
 				await dbContext.SaveChangesAsync();
@@ -171,7 +152,6 @@ namespace CottonPrompt.Infrastructure.Services.Users
                     UserRoles = roles.Select(r => new UserRole
                     {
                         Role = r,
-                        Active = true,
                         CreatedBy = createdBy,
                     }).ToList()
                 };

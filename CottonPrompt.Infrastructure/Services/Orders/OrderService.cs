@@ -48,6 +48,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 //var contentType = result.Details.ContentType;
                 //var contentStream = result.Content.ToStream();
 
+                var emailTemplates = await dbContext.EmailTemplates.FirstAsync();
                 var smtpConfig = config.GetSection("Smtp");
                 var client = new SmtpClient(smtpConfig["Host"], Convert.ToInt32(smtpConfig["Port"]))
                 {
@@ -56,11 +57,13 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 };
                 var from = new MailAddress(smtpConfig["SenderEmail"]!, smtpConfig["SenderName"]);
                 var to = new MailAddress(order.CustomerEmail);
-                var message = new MailMessage(from, to);
-                message.Body = $"Dear Customer,\r\n\r\nHere is the proof of your order {config["FrontendUrl"]}/order-proof/{order.Id}.\r\nPlease let us know if you'd like any changes! Thank you so much for your order, We hope your custom artwork! 😄\r\n\r\nBest Regards,\r\nTeam CP";
-                message.BodyEncoding = Encoding.UTF8;
-                message.IsBodyHtml = false;
-                message.Subject = "Order Proof Ready";
+                var message = new MailMessage(from, to)
+                {
+                    Body = emailTemplates.OrderProofReadyEmail.Replace("{link}", $"{config["FrontendUrl"]}/order-proof/{order.Id}").Replace("<p style=\"margin: 0\"></p>", "<br/>"),
+                    BodyEncoding = Encoding.UTF8,
+                    IsBodyHtml = true,
+                    Subject = "Order Proof Ready"
+                };
                 await client.SendMailAsync(message);
             }
             catch (Exception)

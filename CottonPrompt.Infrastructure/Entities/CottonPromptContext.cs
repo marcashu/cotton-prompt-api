@@ -13,6 +13,8 @@ public partial class CottonPromptContext : DbContext
     {
     }
 
+    public virtual DbSet<EmailTemplate> EmailTemplates { get; set; }
+
     public virtual DbSet<Invoice> Invoices { get; set; }
 
     public virtual DbSet<InvoiceSection> InvoiceSections { get; set; }
@@ -47,6 +49,13 @@ public partial class CottonPromptContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<EmailTemplate>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_EmailTemplateId");
+
+            entity.Property(e => e.OrderProofReadyEmail).IsRequired();
+        });
+
         modelBuilder.Entity<Invoice>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_Invoices_Id");
@@ -276,11 +285,10 @@ public partial class CottonPromptContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_UserRoles_Id");
+            entity.HasKey(e => new { e.UserId, e.Role });
 
-            entity.Property(e => e.Active).HasDefaultValue(true);
-            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.Role).HasMaxLength(50);
+            entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
 
             entity.HasOne(d => d.User).WithMany(p => p.UserRoles)
                 .HasForeignKey(d => d.UserId)

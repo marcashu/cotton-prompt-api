@@ -7,21 +7,15 @@ namespace CottonPrompt.Infrastructure.Entities;
 
 public partial class UserRole
 {
-    public int Id { get; set; }
-
     public Guid UserId { get; set; }
 
     public string Role { get; set; }
 
-    public bool Active { get; set; }
+    public int SortOrder { get; set; }
 
     public Guid CreatedBy { get; set; }
 
     public DateTime CreatedOn { get; set; }
-
-    public Guid? UpdatedBy { get; set; }
-
-    public DateTime? UpdatedOn { get; set; }
 
     public virtual User User { get; set; }
 }

@@ -63,7 +63,7 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
                 var userGroup = await dbContext.UserGroups
                     .Include(ug => ug.UserGroupUsers)
                     .ThenInclude(ugu => ugu.User)
-                    .ThenInclude(u => u.UserRoles.Where(ur => ur.Active))
+                    .ThenInclude(u => u.UserRoles)
                     .SingleAsync(ug => ug.Id == id);
                 var result = userGroup.AsGetUserGroupModel();
                 return result;
