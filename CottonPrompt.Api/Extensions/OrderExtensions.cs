@@ -12,14 +12,18 @@ namespace CottonPrompt.Api.Extensions
                 OrderNumber = request.OrderNumber,
                 Priority = request.Priority,
                 Concept = request.Concept,
-                PrintColor = request.PrintColor,
+                PrintColorId = request.PrintColorId,
                 DesignBracketId = request.DesignBracketId,
+                OutputSizeId = request.OutputSizeId,
+                CustomerEmail = request.CustomerEmail,
                 OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
                 {
                     LineId = i + 1,
                     Url = r,
+                    CreatedBy = request.CreatedBy,
                 }).ToList(),
                 CreatedBy = request.CreatedBy,
+                UserGroupId = request.UserGroupId,
             };
             return result;
         }
@@ -32,16 +36,20 @@ namespace CottonPrompt.Api.Extensions
                 OrderNumber = request.OrderNumber,
                 Priority = request.Priority,
                 Concept = request.Concept,
-                PrintColor = request.PrintColor,
+                PrintColorId = request.PrintColorId,
                 DesignBracketId = request.DesignBracketId,
+                OutputSizeId = request.OutputSizeId,
+                CustomerEmail = request.CustomerEmail,
                 OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
                 {
                     OrderId = request.Id,
                     LineId = i + 1,
                     Url = r,
+                    CreatedBy = request.UpdatedBy,
                 }).ToList(),
                 UpdatedBy = request.UpdatedBy,
                 UpdatedOn = DateTime.UtcNow,
+                UserGroupId = request.UserGroupId,
             };
             return result;
         }

@@ -16,7 +16,31 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "[dbo].[EmailTemplates]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Invoices]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InvoiceSectionOrders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[InvoiceSections]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[OrderDesignBrackets]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderDesignComments]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderDesigns]",
          "ObjectType": 0
       },
       {
@@ -24,7 +48,39 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[OrderOutputSizes]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderPrintColors]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[Orders]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OrderStatusHistory]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Rates]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserGroups]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserGroupUsers]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[UserRoles]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Users]",
          "ObjectType": 0
       }
    ],

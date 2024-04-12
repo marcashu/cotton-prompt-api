@@ -1,5 +1,12 @@
 ﻿CREATE TABLE [dbo].[OrderDesignBrackets]
 (
 	[Id] INT CONSTRAINT PK_OrderDesignBracketId PRIMARY KEY IDENTITY(1,1),
-	[Value] DECIMAL(19,4) NOT NULL
+	[Name] NVARCHAR(50) NOT NULL, 
+    [SortOrder] INT NOT NULL,
+	[Active] BIT NOT NULL CONSTRAINT DF_OrderDesignBrackets_Active DEFAULT 1,
+	[Value] DECIMAL(18, 2) NOT NULL,
+	[CreatedBy] UNIQUEIDENTIFIER NOT NULL,
+	[CreatedOn] DATETIME2 NOT NULL CONSTRAINT DF_OrderDesignBrackets_CreatedOn DEFAULT GETUTCDATE(),
+	[UpdatedBy] UNIQUEIDENTIFIER NULL, 
+    [UpdatedOn] DATETIME2 NULL
 )

@@ -2,6 +2,7 @@
 {
     public record DesignBracket(
         int Id,
+        string Name,
         decimal Value
     );
 }

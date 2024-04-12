@@ -15,21 +15,33 @@ public partial class Order
 
     public string Concept { get; set; }
 
-    public string PrintColor { get; set; }
+    public int PrintColorId { get; set; }
 
     public int DesignBracketId { get; set; }
+
+    public int OutputSizeId { get; set; }
+
+    public int UserGroupId { get; set; }
+
+    public string CustomerEmail { get; set; }
+
+    public string CustomerStatus { get; set; }
+
+    public Guid? ArtistId { get; set; }
+
+    public string ArtistStatus { get; set; }
+
+    public Guid? CheckerId { get; set; }
+
+    public string CheckerStatus { get; set; }
+
+    public DateTime? CompletedOn { get; set; }
+
+    public int? OriginalOrderId { get; set; }
 
     public Guid CreatedBy { get; set; }
 
     public DateTime CreatedOn { get; set; }
-
-    public Guid? ArtistClaimedBy { get; set; }
-
-    public DateTime? ArtistClaimedOn { get; set; }
-
-    public Guid? CheckerClaimedBy { get; set; }
-
-    public DateTime? CheckerClaimedOn { get; set; }
 
     public Guid? UpdatedBy { get; set; }
 
@@ -37,5 +49,21 @@ public partial class Order
 
     public virtual OrderDesignBracket DesignBracket { get; set; }
 
+    public virtual ICollection<Order> InverseOriginalOrder { get; set; } = new List<Order>();
+
+    public virtual ICollection<InvoiceSectionOrder> InvoiceSectionOrders { get; set; } = new List<InvoiceSectionOrder>();
+
+    public virtual ICollection<OrderDesign> OrderDesigns { get; set; } = new List<OrderDesign>();
+
     public virtual ICollection<OrderImageReference> OrderImageReferences { get; set; } = new List<OrderImageReference>();
+
+    public virtual ICollection<OrderStatusHistory> OrderStatusHistories { get; set; } = new List<OrderStatusHistory>();
+
+    public virtual Order OriginalOrder { get; set; }
+
+    public virtual OrderOutputSize OutputSize { get; set; }
+
+    public virtual OrderPrintColor PrintColor { get; set; }
+
+    public virtual UserGroup UserGroup { get; set; }
 }

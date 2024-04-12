@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{7712499e-74b2-45d0-bca4-b8a56b430d70}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -62,5 +62,19 @@
     <Build Include="Tables\Orders.sql" />
     <Build Include="Tables\OrderDesignBrackets.sql" />
     <Build Include="Tables\OrderImageReferences.sql" />
+    <Build Include="Tables\OrderDesigns.sql" />
+    <Build Include="Tables\OrderDesignComments.sql" />
+    <Build Include="Tables\OrderStatusHistory.sql" />
+    <Build Include="Tables\OrderPrintColors.sql" />
+    <Build Include="Tables\OrderOutputSizes.sql" />
+    <Build Include="Tables\Users.sql" />
+    <Build Include="Tables\UserRoles.sql" />
+    <Build Include="Tables\UserGroups.sql" />
+    <Build Include="Tables\UserGroupUsers.sql" />
+    <Build Include="Tables\Invoices.sql" />
+    <Build Include="Tables\InvoiceSections.sql" />
+    <Build Include="Tables\InvoiceSectionOrders.sql" />
+    <Build Include="Tables\Rates.sql" />
+    <Build Include="Tables\EmailTemplates.sql" />
   </ItemGroup>
 </Project>

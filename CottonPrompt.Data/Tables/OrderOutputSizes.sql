@@ -1,0 +1,11 @@
+﻿CREATE TABLE [dbo].[OrderOutputSizes]
+(
+	[Id] INT CONSTRAINT PK_OrderOutputSizes_Id PRIMARY KEY IDENTITY(1,1),
+	[Value] NVARCHAR(50) NOT NULL, 
+    [SortOrder] INT NOT NULL,
+	[Active] BIT NOT NULL CONSTRAINT DF_OrderOutputSizes_Active DEFAULT 1,
+	[CreatedBy] UNIQUEIDENTIFIER NOT NULL,
+	[CreatedOn] DATETIME2 NOT NULL CONSTRAINT DF_OrderOutputSizes_CreatedOn DEFAULT GETUTCDATE(),
+	[UpdatedBy] UNIQUEIDENTIFIER NULL, 
+    [UpdatedOn] DATETIME2 NULL
+)

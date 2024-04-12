@@ -1,4 +1,7 @@
 ﻿using CottonPrompt.Infrastructure.Models.DesignBrackets;
+using CottonPrompt.Infrastructure.Models.Designs;
+using CottonPrompt.Infrastructure.Models.OutputSizes;
+using CottonPrompt.Infrastructure.Models.PrintColors;
 
 namespace CottonPrompt.Infrastructure.Models.Orders
 {
@@ -7,8 +10,19 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         string OrderNumber,
         bool Priority,
         string Concept,
-        string PrintColor,
+        PrintColor PrintColor,
         DesignBracket DesignBracket,
-        IEnumerable<string> ImageReferences
+        OutputSize OutputSize,
+        int UserGroupId,
+        string CustomerEmail,
+        IEnumerable<string> ImageReferences,
+        DesignModel? Design,
+        IEnumerable<DesignModel> PreviousDesigns,
+        string ArtistStatus,
+        string CheckerStatus,
+        string CustomerStatus,
+        Guid? ArtistId,
+        Guid? CheckerId,
+        string UserGroup
     );
 }
