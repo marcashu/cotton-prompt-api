@@ -152,6 +152,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
                     UserRoles = roles.Select(r => new UserRole
                     {
                         Role = r,
+                        SortOrder = (int)EnumExtensions.GetEnumFromName<UserRoles>(r),
                         CreatedBy = createdBy,
                     }).ToList()
                 };
