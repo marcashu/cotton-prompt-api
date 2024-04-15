@@ -47,6 +47,10 @@ public partial class Order
 
     public DateTime? UpdatedOn { get; set; }
 
+    public virtual User Artist { get; set; }
+
+    public virtual User Checker { get; set; }
+
     public virtual OrderDesignBracket DesignBracket { get; set; }
 
     public virtual ICollection<Order> InverseOriginalOrder { get; set; } = new List<Order>();
