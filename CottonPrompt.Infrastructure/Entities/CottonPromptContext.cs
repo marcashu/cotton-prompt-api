@@ -119,6 +119,14 @@ public partial class CottonPromptContext : DbContext
                 .IsRequired()
                 .HasMaxLength(50);
 
+            entity.HasOne(d => d.Artist).WithMany(p => p.OrderArtists)
+                .HasForeignKey(d => d.ArtistId)
+                .HasConstraintName("FK_Orders_Artists");
+
+            entity.HasOne(d => d.Checker).WithMany(p => p.OrderCheckers)
+                .HasForeignKey(d => d.CheckerId)
+                .HasConstraintName("FK_Orders_Checkers");
+
             entity.HasOne(d => d.DesignBracket).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.DesignBracketId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

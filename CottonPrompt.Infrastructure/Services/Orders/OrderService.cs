@@ -680,7 +680,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                IQueryable<Order> queryableOrders = dbContext.Orders.Where(o => o.ArtistStatus != OrderStatuses.Completed);
+                IQueryable<Order> queryableOrders = dbContext.Orders
+                    .Include(o => o.Artist)
+                    .Include(o => o.Checker)
+                    .Where(o => o.ArtistStatus != OrderStatuses.Completed);
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {
@@ -701,7 +704,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                IQueryable<Order> queryableOrders = dbContext.Orders.Where(o => o.ArtistStatus == OrderStatuses.Completed);
+                IQueryable<Order> queryableOrders = dbContext.Orders
+                    .Include(o => o.Artist)
+                    .Include(o => o.Checker)
+                    .Where(o => o.ArtistStatus == OrderStatuses.Completed);
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {
