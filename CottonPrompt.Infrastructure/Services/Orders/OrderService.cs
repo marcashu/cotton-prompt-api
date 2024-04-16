@@ -40,14 +40,6 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 await UpdateCustomerStatusAsync(id, OrderStatuses.ForReview);
 
-                //var currentDesign = order.OrderDesigns.Last();
-                //var container = blobServiceClient.GetBlobContainerClient(order.ArtistId.ToString());
-                //var blob = container.GetBlobClient(currentDesign.Name);
-                //var response = await blob.DownloadContentAsync();
-                //var result = response.Value;
-                //var contentType = result.Details.ContentType;
-                //var contentStream = result.Content.ToStream();
-
                 var emailTemplates = await dbContext.EmailTemplates.FirstAsync();
                 var smtpConfig = config.GetSection("Smtp");
                 var client = new SmtpClient(smtpConfig["Host"], Convert.ToInt32(smtpConfig["Port"]))
@@ -716,6 +708,28 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
                 var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<DownloadOrderModel> DownloadAsync(int id)
+        {
+            try
+            {
+                var order = await dbContext.Orders
+                    .Include(o => o.OrderDesigns)
+                    .SingleAsync(o => o.Id == id);
+
+                var currentDesign = order.OrderDesigns.Last();
+                var container = blobServiceClient.GetBlobContainerClient("order-designs");
+                var blob = container.GetBlobClient(currentDesign.Name);
+                var response = await blob.DownloadContentAsync();
+                var responseValue = response.Value;
+                var result = new DownloadOrderModel(responseValue.Content.ToStream(), responseValue.Details.ContentType, currentDesign.Name);
                 return result;
             }
             catch (Exception)

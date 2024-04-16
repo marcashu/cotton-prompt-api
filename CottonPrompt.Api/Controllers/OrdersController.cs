@@ -126,5 +126,13 @@ namespace CottonPrompt.Api.Controllers
             await orderService.ChangeRequestAsync(id, request.DesignId, request.Comment, request.ImageReferences);
             return NoContent();
         }
+
+        [HttpGet("{id}/download")]
+        [ProducesResponseType<FileResult>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> DownloadOrderAsync([FromRoute] int id)
+        {
+            var result = await orderService.DownloadAsync(id);
+            return File(result.Content, result.ContentType, result.FileName);
+        }
     }
 }
