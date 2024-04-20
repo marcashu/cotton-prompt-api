@@ -675,7 +675,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 IQueryable<Order> queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
-                    .Where(o => o.ArtistStatus != OrderStatuses.Completed);
+                    .Where(o => o.CustomerStatus == null || o.CustomerStatus == OrderStatuses.ForReview);
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {
@@ -699,7 +699,31 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 IQueryable<Order> queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
-                    .Where(o => o.ArtistStatus == OrderStatuses.Completed);
+                    .Where(o => o.CustomerStatus == OrderStatuses.Accepted);
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<GetOrdersModel>> GetRejectedAsync(string? orderNumber)
+        {
+            try
+            {
+                IQueryable<Order> queryableOrders = dbContext.Orders
+                    .Include(o => o.Artist)
+                    .Include(o => o.Checker)
+                    .Where(o => o.ArtistStatus == OrderStatuses.Completed && o.CustomerStatus == OrderStatuses.ChangeRequested);
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {

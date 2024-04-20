@@ -27,6 +27,14 @@ namespace CottonPrompt.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("rejected")]
+        [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetRejectedAsync([FromQuery] GetRejectedOrdersRequest request)
+        {
+            var result = await orderService.GetRejectedAsync(request.OrderNumber);
+            return Ok(result);
+        }
+
         [HttpGet("completed")]
         [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetCompletedAsync([FromQuery] GetCompletedOrdersRequest request)
