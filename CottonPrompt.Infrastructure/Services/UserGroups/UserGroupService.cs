@@ -77,6 +77,20 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
             }
         }
 
+        public async Task RemoveUserAsync(int id, Guid userId)
+        {
+            try
+            {
+                await dbContext.UserGroupUsers
+                    .Where(ugu => ugu.UserGroupId == id && ugu.UserId == userId)
+                    .ExecuteDeleteAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task UpdateAsync(int id, string name, IEnumerable<Guid> userIds, Guid updatedBy)
         {
             try

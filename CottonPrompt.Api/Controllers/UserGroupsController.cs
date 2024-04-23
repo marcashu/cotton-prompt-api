@@ -41,6 +41,15 @@ namespace CottonPrompt.Api.Controllers
             await userGroupService.UpdateAsync(id, request.Name, request.UserIds, request.UpdatedBy);
             return NoContent();
         }
+
+        [HttpDelete("{id}/users/{userId}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> RemoveUserAsync([FromRoute] int id, [FromRoute] Guid userId)
+        {
+            await userGroupService.RemoveUserAsync(id, userId);
+            return NoContent();
+        }
+
     }
 }
     
