@@ -102,7 +102,8 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
                 userGroup.Name = name;
                 userGroup.UpdatedBy = updatedBy;
                 userGroup.UpdatedOn = DateTime.UtcNow;
-                userGroup.UserGroupUsers.Clear();
+
+                var newUserIds = userIds.Except(userGroup.UserGroupUsers.Select(ugu => ugu.UserId));
 
                 foreach (var userId in userIds)
                 {
