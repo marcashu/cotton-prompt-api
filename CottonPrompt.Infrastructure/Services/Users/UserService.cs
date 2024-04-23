@@ -183,7 +183,10 @@ namespace CottonPrompt.Infrastructure.Services.Users
         {
 			try
 			{
-				var users = await dbContext.Users.Where(u => !u.UserGroupUsers.Any(ugu => ugu.UserGroupId == userGroupId)).ToListAsync();
+				var users = await dbContext.Users
+					.Where(u => !u.UserGroupUsers.Any(ugu => ugu.UserGroupId == userGroupId))
+					.OrderBy(u => u.Name)
+					.ToListAsync();
 				var result = users.AsModel();
 				return result;
 			}
