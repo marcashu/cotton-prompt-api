@@ -18,5 +18,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
         Task<CanDoModel> CanUpdateRoleAsync(Guid id, IEnumerable<string> roles);
 
         Task<CanDoModel> CheckerHasWaitingForCustomerAsync(Guid id);
+
+        Task<IEnumerable<GetUsersModel>> GetNotMemberOfGroupAsync(int userGroupId);
     }
 }

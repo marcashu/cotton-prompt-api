@@ -46,7 +46,10 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
         {
             try
             {
-                var userGroups = await dbContext.UserGroups.Include(ug => ug.UserGroupUsers).ToListAsync();
+                var userGroups = await dbContext.UserGroups
+                    .Include(ug => ug.UserGroupUsers)
+                    .OrderBy(ug => ug.Name)
+                    .ToListAsync();
                 var result = userGroups.AsModel();
                 return result;
             }
@@ -61,12 +64,26 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
             try
             {
                 var userGroup = await dbContext.UserGroups
-                    .Include(ug => ug.UserGroupUsers)
+                    .Include(ug => ug.UserGroupUsers.OrderBy(ugu => ugu.User.Name))
                     .ThenInclude(ugu => ugu.User)
-                    .ThenInclude(u => u.UserRoles)
+                    .ThenInclude(u => u.UserRoles.OrderBy(ur => ur.SortOrder))
                     .SingleAsync(ug => ug.Id == id);
                 var result = userGroup.AsGetUserGroupModel();
                 return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task RemoveUserAsync(int id, Guid userId)
+        {
+            try
+            {
+                await dbContext.UserGroupUsers
+                    .Where(ugu => ugu.UserGroupId == id && ugu.UserId == userId)
+                    .ExecuteDeleteAsync();
             }
             catch (Exception)
             {
@@ -85,7 +102,8 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
                 userGroup.Name = name;
                 userGroup.UpdatedBy = updatedBy;
                 userGroup.UpdatedOn = DateTime.UtcNow;
-                userGroup.UserGroupUsers.Clear();
+
+                var newUserIds = userIds.Except(userGroup.UserGroupUsers.Select(ugu => ugu.UserId));
 
                 foreach (var userId in userIds)
                 {

@@ -90,6 +90,15 @@ namespace CottonPrompt.Api.Controllers
             var result = await userService.CheckerHasWaitingForCustomerAsync(id);
             return Ok(result);
         }
+
+        [AllowAnonymous]
+        [HttpGet("not-member-of-group/{userGroupId}")]
+        [ProducesResponseType<IEnumerable<GetUsersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetNotMemberOfGroupAsync([FromRoute] int userGroupId)
+        {
+            var result = await userService.GetNotMemberOfGroupAsync(userGroupId);
+            return Ok(result);
+        }
     }
 }
     

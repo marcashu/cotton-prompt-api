@@ -178,5 +178,19 @@ namespace CottonPrompt.Infrastructure.Services.Users
 				throw;
 			}
         }
+
+        public async Task<IEnumerable<GetUsersModel>> GetNotMemberOfGroupAsync(int userGroupId)
+        {
+			try
+			{
+				var users = await dbContext.Users.Where(u => !u.UserGroupUsers.Any(ugu => ugu.UserGroupId == userGroupId)).ToListAsync();
+				var result = users.AsModel();
+				return result;
+			}
+			catch (Exception)
+			{
+				throw;
+			}
+        }
     }
 }

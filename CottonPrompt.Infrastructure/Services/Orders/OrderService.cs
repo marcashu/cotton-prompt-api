@@ -10,6 +10,7 @@ using System.Net.Mail;
 using System.Net;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using CottonPrompt.Infrastructure.Models;
 
 namespace CottonPrompt.Infrastructure.Services.Orders
 {
@@ -740,7 +741,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<DownloadOrderModel> DownloadAsync(int id)
+        public async Task<DownloadModel> DownloadAsync(int id)
         {
             try
             {
@@ -753,7 +754,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 var blob = container.GetBlobClient(currentDesign.Name);
                 var response = await blob.DownloadContentAsync();
                 var responseValue = response.Value;
-                var result = new DownloadOrderModel(responseValue.Content.ToStream(), responseValue.Details.ContentType, currentDesign.Name);
+                var result = new DownloadModel(responseValue.Content.ToStream(), responseValue.Details.ContentType, currentDesign.Name);
                 return result;
             }
             catch (Exception)

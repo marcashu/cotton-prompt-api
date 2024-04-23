@@ -1,4 +1,5 @@
 ﻿using CottonPrompt.Infrastructure.Entities;
+using CottonPrompt.Infrastructure.Models;
 using CottonPrompt.Infrastructure.Models.Orders;
 
 namespace CottonPrompt.Infrastructure.Services.Orders
@@ -35,6 +36,6 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
         Task ChangeRequestAsync(int id, int designId, string comment, IEnumerable<string> imageReferences);
 
-        Task<DownloadOrderModel> DownloadAsync(int id);
+        Task<DownloadModel> DownloadAsync(int id);
     }
 }

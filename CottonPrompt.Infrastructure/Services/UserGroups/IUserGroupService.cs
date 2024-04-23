@@ -11,5 +11,7 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
         Task CreateAsync(string name, IEnumerable<Guid> userIds, Guid createdBy);
 
         Task UpdateAsync(int id, string name, IEnumerable<Guid> userIds, Guid updatedBy);
+
+        Task RemoveUserAsync(int id, Guid userId);
     }
 }
