@@ -1,11 +1,33 @@
-﻿using CottonPrompt.Infrastructure.Constants;
+﻿using Azure.Storage.Blobs;
+using CottonPrompt.Infrastructure.Constants;
 using CottonPrompt.Infrastructure.Entities;
+using CottonPrompt.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CottonPrompt.Infrastructure.Services.Designs
 {
-    public class DesignService(CottonPromptContext dbContext) : IDesignService
+    public class DesignService(CottonPromptContext dbContext, BlobServiceClient blobServiceClient) : IDesignService
     {
+        public async Task<DownloadModel> DownloadAsync(int id)
+        {
+            try
+            {
+                var design = await dbContext.OrderDesigns
+                    .FindAsync(id);
+
+                var container = blobServiceClient.GetBlobContainerClient("order-designs");
+                var blob = container.GetBlobClient(design!.Name);
+                var response = await blob.DownloadContentAsync();
+                var responseValue = response.Value;
+                var result = new DownloadModel(responseValue.Content.ToStream(), responseValue.Details.ContentType, design.Name);
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task PostCommentAsync(int id, string comment, Guid userId)
         {
             try
