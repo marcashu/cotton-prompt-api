@@ -54,9 +54,13 @@ namespace CottonPrompt.Infrastructure.Services.Users
                 var result = Enumerable.Empty<GetUsersModel>();
                 
 				var graphClient = serviceProvider.GetRequiredService<GraphServiceClient>();
-				var msUsersResponse = await graphClient.Users.GetAsync();
+				var msUsersResponse = await graphClient.Users.GetAsync((config) =>
+				{
+					config.QueryParameters.Top = 500;
+					config.QueryParameters.Orderby = ["displayName"];
+                });
 
-				if (msUsersResponse is null || msUsersResponse.Value is null) return result;
+                if (msUsersResponse is null || msUsersResponse.Value is null) return result;
 
 				var msUsers = msUsersResponse.Value;
                 var dbUserIds = await dbContext.Users.OrderBy(u => u.Name).Select(u => u.Id.ToString().ToLower()).ToListAsync();
