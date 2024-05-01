@@ -37,5 +37,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         Task ChangeRequestAsync(int id, int designId, string comment, IEnumerable<string> imageReferences);
 
         Task<DownloadModel> DownloadAsync(int id);
+
+        Task ResendForCustomerReviewAsync(int id);
     }
 }
