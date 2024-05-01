@@ -40,24 +40,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 }
 
                 await UpdateCustomerStatusAsync(id, OrderStatuses.ForReview);
-
-                var emailTemplates = await dbContext.EmailTemplates.FirstAsync();
-                var smtpConfig = config.GetSection("Smtp");
-                var client = new SmtpClient(smtpConfig["Host"], Convert.ToInt32(smtpConfig["Port"]))
-                {
-                    Credentials = new NetworkCredential(smtpConfig["Username"], smtpConfig["Password"]),
-                    EnableSsl = true
-                };
-                var from = new MailAddress(smtpConfig["SenderEmail"]!, smtpConfig["SenderName"]);
-                var to = new MailAddress(order.CustomerEmail);
-                var message = new MailMessage(from, to)
-                {
-                    Body = emailTemplates.OrderProofReadyEmail.Replace("{link}", $"{config["FrontendUrl"]}/order-proof/{order.Id}").Replace("<p style=\"margin: 0\"></p>", "<br/>"),
-                    BodyEncoding = Encoding.UTF8,
-                    IsBodyHtml = true,
-                    Subject = "Order Proof Ready"
-                };
-                await client.SendMailAsync(message);
+                await SendOrderProof(id, order.CustomerEmail);
             }
             catch (Exception)
             {
@@ -471,6 +454,121 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
+        public async Task<IEnumerable<GetOrdersModel>> GetOngoingAsync(string? orderNumber)
+        {
+            try
+            {
+                IQueryable<Order> queryableOrders = dbContext.Orders
+                    .Include(o => o.Artist)
+                    .Include(o => o.Checker)
+                    .Where(o => o.CustomerStatus == null || o.CustomerStatus == OrderStatuses.ForReview);
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<GetOrdersModel>> GetCompletedAsync(string? orderNumber)
+        {
+            try
+            {
+                IQueryable<Order> queryableOrders = dbContext.Orders
+                    .Include(o => o.Artist)
+                    .Include(o => o.Checker)
+                    .Where(o => o.CustomerStatus == OrderStatuses.Accepted);
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<GetOrdersModel>> GetRejectedAsync(string? orderNumber)
+        {
+            try
+            {
+                IQueryable<Order> queryableOrders = dbContext.Orders
+                    .Include(o => o.Artist)
+                    .Include(o => o.Checker)
+                    .Where(o => o.ArtistStatus == OrderStatuses.Completed && o.CustomerStatus == OrderStatuses.ChangeRequested);
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<DownloadModel> DownloadAsync(int id)
+        {
+            try
+            {
+                var order = await dbContext.Orders
+                    .Include(o => o.OrderDesigns)
+                    .SingleAsync(o => o.Id == id);
+
+                var currentDesign = order.OrderDesigns.Last();
+                var container = blobServiceClient.GetBlobContainerClient("order-designs");
+                var blob = container.GetBlobClient(currentDesign.Name);
+                var response = await blob.DownloadContentAsync();
+                var responseValue = response.Value;
+                var result = new DownloadModel(responseValue.Content.ToStream(), responseValue.Details.ContentType, currentDesign.Name);
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ResendForCustomerReviewAsync(int id)
+        {
+            try
+            {
+                var order = await dbContext.Orders.FindAsync(id);
+
+                if (order is null) return;
+
+                if (order.CustomerStatus == OrderStatuses.Accepted)
+                {
+                    await UpdateCustomerStatusAsync(id, OrderStatuses.ForReview);
+                }
+
+                await SendOrderProof(id, order.CustomerEmail);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private async Task UpdateArtistStatusAsync(int id, string status, Guid artistId)
         {
             try
@@ -551,7 +649,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         private string SaltDesignName(string orderNumber, string designName)
         {
             var lastDotIndex = designName.LastIndexOf('.');
-            var fileName  = designName.Substring(0, lastDotIndex);
+            var fileName = designName.Substring(0, lastDotIndex);
             var fileExtension = designName.Substring(lastDotIndex);
             var result = $"{orderNumber}_{fileName}_{Guid.NewGuid().ToString()[..5]}{fileExtension}";
 
@@ -669,98 +767,25 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<IEnumerable<GetOrdersModel>> GetOngoingAsync(string? orderNumber)
+        private async Task SendOrderProof(int id, string customerEmail)
         {
-            try
+            var emailTemplates = await dbContext.EmailTemplates.FirstAsync();
+            var smtpConfig = config.GetSection("Smtp");
+            var client = new SmtpClient(smtpConfig["Host"], Convert.ToInt32(smtpConfig["Port"]))
             {
-                IQueryable<Order> queryableOrders = dbContext.Orders
-                    .Include(o => o.Artist)
-                    .Include(o => o.Checker)
-                    .Where(o => o.CustomerStatus == null || o.CustomerStatus == OrderStatuses.ForReview);
-
-                if (!string.IsNullOrEmpty(orderNumber))
-                {
-                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
-                }
-
-                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
-                var result = orders.AsGetOrdersModel();
-                return result;
-            }
-            catch (Exception)
+                Credentials = new NetworkCredential(smtpConfig["Username"], smtpConfig["Password"]),
+                EnableSsl = true
+            };
+            var from = new MailAddress(smtpConfig["SenderEmail"]!, smtpConfig["SenderName"]);
+            var to = new MailAddress(customerEmail);
+            var message = new MailMessage(from, to)
             {
-                throw;
-            }
-        }
-
-        public async Task<IEnumerable<GetOrdersModel>> GetCompletedAsync(string? orderNumber)
-        {
-            try
-            {
-                IQueryable<Order> queryableOrders = dbContext.Orders
-                    .Include(o => o.Artist)
-                    .Include(o => o.Checker)
-                    .Where(o => o.CustomerStatus == OrderStatuses.Accepted);
-
-                if (!string.IsNullOrEmpty(orderNumber))
-                {
-                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
-                }
-
-                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
-                var result = orders.AsGetOrdersModel();
-                return result;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<IEnumerable<GetOrdersModel>> GetRejectedAsync(string? orderNumber)
-        {
-            try
-            {
-                IQueryable<Order> queryableOrders = dbContext.Orders
-                    .Include(o => o.Artist)
-                    .Include(o => o.Checker)
-                    .Where(o => o.ArtistStatus == OrderStatuses.Completed && o.CustomerStatus == OrderStatuses.ChangeRequested);
-
-                if (!string.IsNullOrEmpty(orderNumber))
-                {
-                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
-                }
-
-                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
-                var result = orders.AsGetOrdersModel();
-                return result;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<DownloadModel> DownloadAsync(int id)
-        {
-            try
-            {
-                var order = await dbContext.Orders
-                    .Include(o => o.OrderDesigns)
-                    .SingleAsync(o => o.Id == id);
-
-                var currentDesign = order.OrderDesigns.Last();
-                var container = blobServiceClient.GetBlobContainerClient("order-designs");
-                var blob = container.GetBlobClient(currentDesign.Name);
-                var response = await blob.DownloadContentAsync();
-                var responseValue = response.Value;
-                var result = new DownloadModel(responseValue.Content.ToStream(), responseValue.Details.ContentType, currentDesign.Name);
-                return result;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+                Body = emailTemplates.OrderProofReadyEmail.Replace("{link}", $"{config["FrontendUrl"]}/order-proof/{id}").Replace("<p style=\"margin: 0\"></p>", "<br/>"),
+                BodyEncoding = Encoding.UTF8,
+                IsBodyHtml = true,
+                Subject = "Order Proof Ready"
+            };
+            await client.SendMailAsync(message);
         }
     }
 }

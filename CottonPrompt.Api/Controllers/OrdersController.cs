@@ -142,5 +142,13 @@ namespace CottonPrompt.Api.Controllers
             var result = await orderService.DownloadAsync(id);
             return File(result.Content, result.ContentType, result.FileName);
         }
+
+        [HttpPost("{id}/resend-for-customer-review")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> ResendForCustomerReviewAsync([FromRoute] int id)
+        {
+            await orderService.ResendForCustomerReviewAsync(id);
+            return NoContent();
+        }
     }
 }
