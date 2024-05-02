@@ -485,7 +485,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 IQueryable<Order> queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
-                    .Where(o => o.CustomerStatus == null || o.CustomerStatus == OrderStatuses.ForReview);
+                    .Where(o => o.CustomerStatus == null 
+                    || o.CustomerStatus == OrderStatuses.ForReview
+                    || (o.OriginalOrderId != null && o.CustomerStatus == OrderStatuses.ChangeRequested)); // double CR'ed orders
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {
@@ -533,7 +535,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 IQueryable<Order> queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
-                    .Where(o => o.ArtistStatus == OrderStatuses.Completed && o.CustomerStatus == OrderStatuses.ChangeRequested);
+                    .Where(o => o.ArtistStatus == OrderStatuses.Completed 
+                    && o.CustomerStatus == OrderStatuses.ChangeRequested
+                    && o.OriginalOrderId == null);
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {
