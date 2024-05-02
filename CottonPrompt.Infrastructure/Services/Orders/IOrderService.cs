@@ -24,9 +24,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
         Task DeleteAsync(int id);
 
-        Task AssignArtistAsync(int id, Guid artistId);
+        Task<CanDoModel> AssignArtistAsync(int id, Guid artistId);
 
-        Task AssignCheckerAsync(int id, Guid checkerId);
+        Task<CanDoModel> AssignCheckerAsync(int id, Guid checkerId);
 
         Task SubmitDesignAsync(int id, string designName, Stream designContent);
 
