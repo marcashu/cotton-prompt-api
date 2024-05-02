@@ -48,11 +48,23 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task AssignArtistAsync(int id, Guid artistId)
+        public async Task<CanDoModel> AssignArtistAsync(int id, Guid artistId)
         {
             try
             {
-                var order = await dbContext.Orders
+                var order = await dbContext.Orders.FindAsync(id); 
+                
+                if (order is null)
+                {
+                    return new CanDoModel(false, "The order is not found");
+                }
+
+                if (order.ArtistId.HasValue)
+                {
+                    return new CanDoModel(false, "The order is already claimed by another Artist");
+                }
+                    
+                await dbContext.Orders
                     .Where(o => o.Id == id)
                     .ExecuteUpdateAsync(setters => setters
                         .SetProperty(o => o.ArtistId, artistId)
@@ -61,6 +73,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
 
                 await CreateOrderHistory(id, OrderStatuses.Claimed, artistId);
+
+                var result = new CanDoModel(true, string.Empty);
+                return result;
             }
             catch (Exception)
             {
@@ -68,7 +83,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task AssignCheckerAsync(int id, Guid checkerId)
+        public async Task<CanDoModel> AssignCheckerAsync(int id, Guid checkerId)
         {
             try
             {
@@ -76,7 +91,15 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Include(o => o.OrderDesigns)
                     .SingleOrDefaultAsync(o => o.Id == id);
 
-                if (order is null) return;
+                if (order is null)
+                {
+                    return new CanDoModel(false, "The order is not found");
+                }
+
+                if (order.CheckerId.HasValue)
+                {
+                    return new CanDoModel(false, "The order is already claimed by another Checker");
+                }
 
                 var status = order.OrderDesigns.Count > 0 ? OrderStatuses.ForReview : OrderStatuses.Claimed;
 
@@ -88,6 +111,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 await dbContext.SaveChangesAsync();
 
                 await CreateOrderHistory(id, status, checkerId);
+
+                var result = new CanDoModel(true, string.Empty);
+                return result;
             }
             catch (Exception)
             {

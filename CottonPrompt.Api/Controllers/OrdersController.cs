@@ -1,5 +1,6 @@
 ﻿using CottonPrompt.Api.Extensions;
 using CottonPrompt.Api.Messages.Orders;
+using CottonPrompt.Infrastructure.Models;
 using CottonPrompt.Infrastructure.Models.Orders;
 using CottonPrompt.Infrastructure.Services.Orders;
 using Microsoft.AspNetCore.Mvc;
@@ -85,19 +86,19 @@ namespace CottonPrompt.Api.Controllers
         }
 
         [HttpPost("{id}/artist")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType<CanDoModel>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> AssignArtistAsync([FromRoute] int id, [FromBody] AssignArtristRequest request)
         {
-            await orderService.AssignArtistAsync(id, request.ArtistId);
-            return NoContent();
+            var result = await orderService.AssignArtistAsync(id, request.ArtistId);
+            return Ok(result);
         }
 
         [HttpPost("{id}/checker")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType<CanDoModel>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> AssignCheckerAsync([FromRoute] int id, [FromBody] AssignCheckerRequest request)
         {
-            await orderService.AssignCheckerAsync(id, request.CheckerId);
-            return NoContent();
+            var result = await orderService.AssignCheckerAsync(id, request.CheckerId);
+            return Ok(result);
         }
 
         [HttpPost("{id}/designs")]
