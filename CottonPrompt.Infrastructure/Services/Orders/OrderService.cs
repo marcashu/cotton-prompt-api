@@ -32,10 +32,13 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 if (order.OriginalOrderId is null)
                 {
                     await UpdateArtistStatusAsync(id, OrderStatuses.Completed, order.ArtistId.Value);
+                }
 
+                var isRecordedAlready = await dbContext.InvoiceSectionOrders.AnyAsync(iso => iso.OrderId == id);
+                if (!isRecordedAlready)
+                {
                     order.CompletedOn = DateTime.UtcNow;
                     await dbContext.SaveChangesAsync();
-
                     await RecordInvoice(order);
                 }
 
@@ -367,11 +370,6 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 if (order != null && order.OriginalOrderId != null && order.ArtistId != null)
                 {
                     await UpdateArtistStatusAsync(id, OrderStatuses.Completed, order.ArtistId.Value);
-
-                    order.CompletedOn = DateTime.UtcNow;
-                    await dbContext.SaveChangesAsync();
-
-                    await RecordInvoice(order);
                 }
             }
             catch (Exception)
@@ -487,7 +485,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 IQueryable<Order> queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
-                    .Where(o => o.CustomerStatus == null || o.CustomerStatus == OrderStatuses.ForReview);
+                    .Where(o => o.CustomerStatus == null 
+                    || o.CustomerStatus == OrderStatuses.ForReview
+                    || (o.OriginalOrderId != null && o.CustomerStatus == OrderStatuses.ChangeRequested)); // double CR'ed orders
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {
@@ -535,7 +535,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 IQueryable<Order> queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
-                    .Where(o => o.ArtistStatus == OrderStatuses.Completed && o.CustomerStatus == OrderStatuses.ChangeRequested);
+                    .Where(o => o.ArtistStatus == OrderStatuses.Completed 
+                    && o.CustomerStatus == OrderStatuses.ChangeRequested
+                    && o.OriginalOrderId == null);
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {
@@ -703,13 +705,6 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 // record artist invoice
                 await RecordInvoice(artistInvoice, order.ArtistId.Value, order.DesignBracket.Name, order.DesignBracket.Value, startDate, endDate, order.Id, order.OrderNumber);
-
-                // record checker invoice
-                var checkerInvoice = await dbContext.Invoices
-                    .Include(i => i.InvoiceSections)
-                    .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.CheckerId);
-                var checkerSectionName = "Quality Control";
-                await RecordInvoice(checkerInvoice, order.CheckerId.Value, checkerSectionName, rates.QualityControlRate, startDate, endDate, order.Id, order.OrderNumber);
             }
             else
             {
@@ -717,6 +712,13 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 var changeRequestSectionName = "Change Request";
                 await RecordInvoice(artistInvoice, order.ArtistId.Value, changeRequestSectionName, rates.ChangeRequestRate, startDate, endDate, order.Id, order.OrderNumber);
             }
+
+            // record checker invoice
+            var checkerInvoice = await dbContext.Invoices
+                .Include(i => i.InvoiceSections)
+                .SingleOrDefaultAsync(i => i.StartDate == startDate && i.UserId == order.CheckerId);
+            var checkerSectionName = "Quality Control";
+            await RecordInvoice(checkerInvoice, order.CheckerId.Value, checkerSectionName, rates.QualityControlRate, startDate, endDate, order.Id, order.OrderNumber);
 
             await dbContext.SaveChangesAsync();
         }
