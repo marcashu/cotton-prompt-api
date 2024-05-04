@@ -454,8 +454,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 }
                 else
                 {
-                    order.ArtistStatus = OrderStatuses.ForReupload;
-                    order.CheckerStatus = OrderStatuses.Claimed;
+                    await UpdateArtistStatusAsync(id, OrderStatuses.ForReupload, order.ArtistId!.Value);
+                    await UpdateCheckerStatusAsync(id, OrderStatuses.Claimed, order.CheckerId!.Value);
                     currentDesign.OrderDesignComments.Add(customerComment);
                     foreach (var imageRef in imageReferences)
                     {
