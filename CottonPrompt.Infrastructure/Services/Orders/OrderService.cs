@@ -454,8 +454,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 }
                 else
                 {
-                    order.ArtistStatus = OrderStatuses.ForReupload;
-                    order.CheckerStatus = OrderStatuses.Claimed;
+                    await UpdateArtistStatusAsync(id, OrderStatuses.ForReupload, order.ArtistId!.Value);
+                    await UpdateCheckerStatusAsync(id, OrderStatuses.Claimed, order.CheckerId!.Value);
                     currentDesign.OrderDesignComments.Add(customerComment);
                     foreach (var imageRef in imageReferences)
                     {
@@ -535,9 +535,11 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 IQueryable<Order> queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
-                    .Where(o => o.ArtistStatus == OrderStatuses.Completed 
+                    .Include(o => o.ChangeRequestOrder)
+                    .Where(o => o.ArtistStatus == OrderStatuses.Completed
                     && o.CustomerStatus == OrderStatuses.ChangeRequested
-                    && o.OriginalOrderId == null);
+                    && o.OriginalOrderId == null
+                    && o.ChangeRequestOrder.CustomerStatus != OrderStatuses.Accepted);
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {

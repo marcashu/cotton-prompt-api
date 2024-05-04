@@ -39,6 +39,8 @@ public partial class Order
 
     public int? OriginalOrderId { get; set; }
 
+    public int? ChangeRequestOrderId { get; set; }
+
     public Guid CreatedBy { get; set; }
 
     public DateTime CreatedOn { get; set; }
@@ -49,9 +51,13 @@ public partial class Order
 
     public virtual User Artist { get; set; }
 
+    public virtual Order ChangeRequestOrder { get; set; }
+
     public virtual User Checker { get; set; }
 
     public virtual OrderDesignBracket DesignBracket { get; set; }
+
+    public virtual ICollection<Order> InverseChangeRequestOrder { get; set; } = new List<Order>();
 
     public virtual ICollection<Order> InverseOriginalOrder { get; set; } = new List<Order>();
 
