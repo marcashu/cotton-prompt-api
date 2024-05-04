@@ -55,6 +55,8 @@ namespace CottonPrompt.Infrastructure.Services.Designs
                     order.CheckerStatus = OrderStatuses.ReuploadRequested;
                     order.UpdatedBy = userId;
                     order.UpdatedOn = DateTime.UtcNow;
+
+                    await CreateOrderHistory(order.Id, order.CheckerStatus, order.CheckerId);
                 }
 
                 if (order.ArtistStatus == OrderStatuses.DesignSubmitted)
@@ -62,9 +64,31 @@ namespace CottonPrompt.Infrastructure.Services.Designs
                     order.ArtistStatus = OrderStatuses.ForReupload;
                     order.UpdatedBy = userId;
                     order.UpdatedOn = DateTime.UtcNow;
+
+                    await CreateOrderHistory(order.Id, order.ArtistStatus, order.ArtistId);
                 }
                 
                 await dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private async Task CreateOrderHistory(int orderId, string status, Guid? userId)
+        {
+            if (!userId.HasValue) return;
+
+            try
+            {
+                await dbContext.OrderStatusHistories.AddAsync(new OrderStatusHistory
+                {
+                    OrderId = orderId,
+                    Status = status,
+                    CreatedBy = userId.Value,
+                    CreatedOn = DateTime.UtcNow,
+                });
             }
             catch (Exception)
             {
