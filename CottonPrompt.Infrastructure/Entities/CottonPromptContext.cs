@@ -123,6 +123,10 @@ public partial class CottonPromptContext : DbContext
                 .HasForeignKey(d => d.ArtistId)
                 .HasConstraintName("FK_Orders_Artists");
 
+            entity.HasOne(d => d.ChangeRequestOrder).WithMany(p => p.InverseChangeRequestOrder)
+                .HasForeignKey(d => d.ChangeRequestOrderId)
+                .HasConstraintName("FK_Orders_ChangeRequestOrder");
+
             entity.HasOne(d => d.Checker).WithMany(p => p.OrderCheckers)
                 .HasForeignKey(d => d.CheckerId)
                 .HasConstraintName("FK_Orders_Checkers");

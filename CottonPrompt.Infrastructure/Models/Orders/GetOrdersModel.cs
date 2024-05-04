@@ -13,6 +13,8 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         string? ArtistName,
         string? CheckerName,
         string CustomerStatus,
-        string CustomerName
+        string CustomerName,
+        int? OriginalOrderId,
+        int? ChangeRequestOrderId
     );
 }
