@@ -8,7 +8,7 @@ namespace CottonPrompt.Infrastructure.Extensions
     {
         internal static GetOrdersModel AsGetOrdersModel(this Order entity)
         {
-            var result = new GetOrdersModel(entity.Id, entity.OrderNumber, entity.Priority, entity.CreatedOn, entity.ArtistStatus, entity.CheckerStatus, entity.ArtistId, entity.Artist?.Name, entity.Checker?.Name, entity.CustomerStatus, entity.CustomerEmail, entity.OriginalOrderId, entity.ChangeRequestOrderId);
+            var result = new GetOrdersModel(entity.Id, entity.OrderNumber, entity.Priority, entity.CreatedOn, entity.ArtistStatus, entity.CheckerStatus, entity.ArtistId, entity.Artist?.Name, entity.Checker?.Name, entity.CustomerStatus, entity.CustomerEmail, entity.OriginalOrderId, entity.ChangeRequestOrderId, entity.OrderReports.FirstOrDefault()?.Reason);
             return result;
         }
 

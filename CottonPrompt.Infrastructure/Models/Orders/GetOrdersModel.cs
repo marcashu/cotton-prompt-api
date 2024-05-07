@@ -15,6 +15,7 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         string CustomerStatus,
         string CustomerName,
         int? OriginalOrderId,
-        int? ChangeRequestOrderId
+        int? ChangeRequestOrderId,
+        string? Reason
     );
 }

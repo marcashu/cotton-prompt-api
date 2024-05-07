@@ -559,6 +559,29 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
+        public async Task<IEnumerable<GetOrdersModel>> GetReportedAsync(string? orderNumber)
+        {
+            try
+            {
+                IQueryable<Order> queryableOrders = dbContext.Orders
+                    .Include(o => o.OrderReports.Where(r => r.ResolvedBy == null))
+                    .Where(o => o.OrderReports.Any(r => r.ResolvedBy == null));
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<DownloadModel> DownloadAsync(int id)
         {
             try

@@ -14,6 +14,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
         Task<IEnumerable<GetOrdersModel>> GetCompletedAsync(string? orderNumber);
 
+        Task<IEnumerable<GetOrdersModel>> GetReportedAsync(string? orderNumber);
+
         Task<IEnumerable<GetOrdersModel>> GetAvailableAsArtistAsync(Guid artistId, bool? priority, bool changeRequest = false);
 
         Task<GetOrderModel> GetByIdAsync(int id);
