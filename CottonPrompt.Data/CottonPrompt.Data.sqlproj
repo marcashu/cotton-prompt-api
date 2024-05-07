@@ -76,5 +76,6 @@
     <Build Include="Tables\InvoiceSectionOrders.sql" />
     <Build Include="Tables\Rates.sql" />
     <Build Include="Tables\EmailTemplates.sql" />
+    <Build Include="Tables\OrderReports.sql" />
   </ItemGroup>
 </Project>

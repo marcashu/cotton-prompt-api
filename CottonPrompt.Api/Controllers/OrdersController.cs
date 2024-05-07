@@ -138,7 +138,7 @@ namespace CottonPrompt.Api.Controllers
 
         [HttpGet("{id}/download")]
         [ProducesResponseType<FileResult>((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> DownloadOrderAsync([FromRoute] int id)
+        public async Task<IActionResult> DownloadAsync([FromRoute] int id)
         {
             var result = await orderService.DownloadAsync(id);
             return File(result.Content, result.ContentType, result.FileName);
@@ -149,6 +149,14 @@ namespace CottonPrompt.Api.Controllers
         public async Task<IActionResult> ResendForCustomerReviewAsync([FromRoute] int id)
         {
             await orderService.ResendForCustomerReviewAsync(id);
+            return NoContent();
+        }
+
+        [HttpPost("{id}/report")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> ReportAsync([FromRoute] int id, [FromBody] ReportRequest request)
+        {
+            await orderService.ReportAsync(id, request.Reason, request.UserId);
             return NoContent();
         }
     }

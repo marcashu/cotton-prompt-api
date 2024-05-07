@@ -67,6 +67,8 @@ public partial class Order
 
     public virtual ICollection<OrderImageReference> OrderImageReferences { get; set; } = new List<OrderImageReference>();
 
+    public virtual ICollection<OrderReport> OrderReports { get; set; } = new List<OrderReport>();
+
     public virtual ICollection<OrderStatusHistory> OrderStatusHistories { get; set; } = new List<OrderStatusHistory>();
 
     public virtual Order OriginalOrder { get; set; }

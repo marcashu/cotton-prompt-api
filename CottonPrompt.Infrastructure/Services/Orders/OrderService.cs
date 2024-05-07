@@ -221,7 +221,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Select(ugu => ugu.UserGroupId)
                     .ToListAsync();
 
-                var queryableOrders = dbContext.Orders.Where(o => o.ArtistId == null && userGroupIds.Contains(o.UserGroupId));
+                var queryableOrders = dbContext.Orders.Where(o => o.ArtistId == null
+                    && userGroupIds.Contains(o.UserGroupId)
+                    && (!o.OrderReports.Any(r => r.ResolvedBy == null)));
 
                 if (changeRequest)
                 {
@@ -485,9 +487,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 IQueryable<Order> queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
-                    .Where(o => o.CustomerStatus == null 
+                    .Where(o => (o.CustomerStatus == null 
                     || o.CustomerStatus == OrderStatuses.ForReview
-                    || (o.OriginalOrderId != null && o.CustomerStatus == OrderStatuses.ChangeRequested)); // double CR'ed orders
+                    || (o.OriginalOrderId != null && o.CustomerStatus == OrderStatuses.ChangeRequested)) // multi-CR'ed orders
+                    && !o.OrderReports.Any(r => r.ResolvedBy == null));  // exclude reported orders 
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {
@@ -592,6 +595,36 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 }
 
                 await SendOrderProof(id, order.CustomerEmail);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ReportAsync(int id, string reason, Guid userId)
+        {
+            try
+            {
+                var order = await dbContext.Orders.FindAsync(id);
+
+                if (order is null) return;
+
+                order.ArtistId = null;
+                order.ArtistStatus = null;
+                order.CheckerId = null;
+                order.CheckerStatus = null;
+                order.CustomerStatus = null;
+
+                var orderReport = new OrderReport
+                {
+                    OrderId = id,
+                    Reason = reason,
+                    ReportedBy = userId,
+                };
+
+                await dbContext.OrderReports.AddAsync(orderReport);
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception)
             {

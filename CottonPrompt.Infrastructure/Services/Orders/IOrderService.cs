@@ -39,5 +39,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         Task<DownloadModel> DownloadAsync(int id);
 
         Task ResendForCustomerReviewAsync(int id);
+
+        Task ReportAsync(int id, string reason, Guid userId);
     }
 }
