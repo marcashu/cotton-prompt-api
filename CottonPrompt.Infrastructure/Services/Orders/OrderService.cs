@@ -655,6 +655,27 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
+        public async Task ResolveAsync(int id, Guid resolvedBy)
+        {
+            try
+            {
+                await dbContext.OrderReports.Where(or => or.OrderId == id && or.ResolvedBy == null)
+                    .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(or => or.ResolvedBy, resolvedBy)
+                        .SetProperty(or => or.ResolvedOn, DateTime.UtcNow));
+
+                await dbContext.Orders.Where(o => o.Id == id)
+                    .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(o => o.CreatedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.UpdatedBy, resolvedBy)
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private async Task UpdateArtistStatusAsync(int id, string status, Guid artistId)
         {
             try

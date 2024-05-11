@@ -167,5 +167,13 @@ namespace CottonPrompt.Api.Controllers
             await orderService.ReportAsync(id, request.Reason, request.UserId);
             return NoContent();
         }
+
+        [HttpPost("{id}/resolve")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> ResolveAsync([FromRoute] int id, [FromBody] ResolveRequest request)
+        {
+            await orderService.ResolveAsync(id, request.ResolvedBy);
+            return NoContent();
+        }
     }
 }
