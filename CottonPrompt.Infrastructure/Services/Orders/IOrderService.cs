@@ -14,6 +14,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
         Task<IEnumerable<GetOrdersModel>> GetCompletedAsync(string? orderNumber);
 
+        Task<IEnumerable<GetOrdersModel>> GetReportedAsync(string? orderNumber);
+
         Task<IEnumerable<GetOrdersModel>> GetAvailableAsArtistAsync(Guid artistId, bool? priority, bool changeRequest = false);
 
         Task<GetOrderModel> GetByIdAsync(int id);
@@ -39,5 +41,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         Task<DownloadModel> DownloadAsync(int id);
 
         Task ResendForCustomerReviewAsync(int id);
+
+        Task ReportAsync(int id, string reason, Guid userId);
+
+        Task ResolveAsync(int id, Guid resolvedBy);
     }
 }

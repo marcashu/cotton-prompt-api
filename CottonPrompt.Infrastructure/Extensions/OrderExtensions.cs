@@ -6,15 +6,33 @@ namespace CottonPrompt.Infrastructure.Extensions
 {
     internal static class OrderExtensions
     {
-        internal static GetOrdersModel AsGetOrdersModel(this Order entity)
+        internal static GetOrdersModel AsGetOrdersModel(this Order entity, DateTime? date = null)
         {
-            var result = new GetOrdersModel(entity.Id, entity.OrderNumber, entity.Priority, entity.CreatedOn, entity.ArtistStatus, entity.CheckerStatus, entity.ArtistId, entity.Artist?.Name, entity.Checker?.Name, entity.CustomerStatus, entity.CustomerEmail, entity.OriginalOrderId, entity.ChangeRequestOrderId);
+            var result = new GetOrdersModel(entity.Id, entity.OrderNumber, entity.Priority, date ?? entity.CreatedOn, entity.ArtistStatus, entity.CheckerStatus, entity.ArtistId, entity.Artist?.Name, entity.Checker?.Name, entity.CustomerStatus, entity.CustomerEmail, entity.OriginalOrderId, entity.ChangeRequestOrderId, entity.OrderReports.FirstOrDefault()?.Reason, entity.AcceptedOn, entity.ChangeRequestedOn, entity.ReportedOn, entity.OrderReports.FirstOrDefault()?.ReportedByNavigation.Name);
             return result;
         }
 
         internal static IEnumerable<GetOrdersModel> AsGetOrdersModel(this IEnumerable<Order> entities)
         {
-            var result = entities.Select(AsGetOrdersModel);
+            var result = entities.Select(e => e.AsGetOrdersModel(e.CreatedOn));
+            return result;
+        }
+
+        internal static IEnumerable<GetOrdersModel> AsGetCompletedOrdersModel(this IEnumerable<Order> entities)
+        {
+            var result = entities.Select(e => e.AsGetOrdersModel(e.AcceptedOn));
+            return result;
+        }
+
+        internal static IEnumerable<GetOrdersModel> AsGetRejectedOrdersModel(this IEnumerable<Order> entities)
+        {
+            var result = entities.Select(e => e.AsGetOrdersModel(e.ChangeRequestedOn));
+            return result;
+        }
+
+        internal static IEnumerable<GetOrdersModel> AsGetReportedOrdersModel(this IEnumerable<Order> entities)
+        {
+            var result = entities.Select(e => e.AsGetOrdersModel(e.ReportedOn));
             return result;
         }
 

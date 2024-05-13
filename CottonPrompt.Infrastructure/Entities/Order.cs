@@ -37,6 +37,12 @@ public partial class Order
 
     public DateTime? CompletedOn { get; set; }
 
+    public DateTime? AcceptedOn { get; set; }
+
+    public DateTime? ChangeRequestedOn { get; set; }
+
+    public DateTime? ReportedOn { get; set; }
+
     public int? OriginalOrderId { get; set; }
 
     public int? ChangeRequestOrderId { get; set; }
@@ -66,6 +72,8 @@ public partial class Order
     public virtual ICollection<OrderDesign> OrderDesigns { get; set; } = new List<OrderDesign>();
 
     public virtual ICollection<OrderImageReference> OrderImageReferences { get; set; } = new List<OrderImageReference>();
+
+    public virtual ICollection<OrderReport> OrderReports { get; set; } = new List<OrderReport>();
 
     public virtual ICollection<OrderStatusHistory> OrderStatusHistories { get; set; } = new List<OrderStatusHistory>();
 

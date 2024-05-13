@@ -221,7 +221,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Select(ugu => ugu.UserGroupId)
                     .ToListAsync();
 
-                var queryableOrders = dbContext.Orders.Where(o => o.ArtistId == null && userGroupIds.Contains(o.UserGroupId));
+                var queryableOrders = dbContext.Orders.Where(o => o.ArtistId == null
+                    && userGroupIds.Contains(o.UserGroupId)
+                    && (!o.OrderReports.Any(r => r.ResolvedBy == null)));
 
                 if (changeRequest)
                 {
@@ -485,9 +487,10 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 IQueryable<Order> queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
-                    .Where(o => o.CustomerStatus == null 
+                    .Where(o => (o.CustomerStatus == null 
                     || o.CustomerStatus == OrderStatuses.ForReview
-                    || (o.OriginalOrderId != null && o.CustomerStatus == OrderStatuses.ChangeRequested)); // double CR'ed orders
+                    || (o.OriginalOrderId != null && o.CustomerStatus == OrderStatuses.ChangeRequested)) // multi-CR'ed orders
+                    && !o.OrderReports.Any(r => r.ResolvedBy == null));  // exclude reported orders 
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {
@@ -518,8 +521,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
                 }
 
-                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
-                var result = orders.AsGetOrdersModel();
+                var orders = await queryableOrders.OrderByDescending(o => o.AcceptedOn).ToListAsync();
+                var result = orders.AsGetCompletedOrdersModel();
                 return result;
             }
             catch (Exception)
@@ -546,8 +549,32 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
                 }
 
-                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
-                var result = orders.AsGetOrdersModel();
+                var orders = await queryableOrders.OrderByDescending(o => o.ChangeRequestedOn).ToListAsync();
+                var result = orders.AsGetRejectedOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<GetOrdersModel>> GetReportedAsync(string? orderNumber)
+        {
+            try
+            {
+                IQueryable<Order> queryableOrders = dbContext.Orders
+                    .Include(o => o.OrderReports.Where(r => r.ResolvedBy == null))
+                    .ThenInclude(or => or.ReportedByNavigation)
+                    .Where(o => o.OrderReports.Any(r => r.ResolvedBy == null));
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.ReportedOn).ToListAsync();
+                var result = orders.AsGetReportedOrdersModel();
                 return result;
             }
             catch (Exception)
@@ -592,6 +619,58 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 }
 
                 await SendOrderProof(id, order.CustomerEmail);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ReportAsync(int id, string reason, Guid userId)
+        {
+            try
+            {
+                var order = await dbContext.Orders.FindAsync(id);
+
+                if (order is null) return;
+
+                order.ArtistId = null;
+                order.ArtistStatus = null;
+                order.CheckerId = null;
+                order.CheckerStatus = null;
+                order.CustomerStatus = null;
+                order.ReportedOn = DateTime.UtcNow;
+
+                var orderReport = new OrderReport
+                {
+                    OrderId = id,
+                    Reason = reason,
+                    ReportedBy = userId,
+                };
+
+                await dbContext.OrderReports.AddAsync(orderReport);
+                await dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ResolveAsync(int id, Guid resolvedBy)
+        {
+            try
+            {
+                await dbContext.OrderReports.Where(or => or.OrderId == id && or.ResolvedBy == null)
+                    .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(or => or.ResolvedBy, resolvedBy)
+                        .SetProperty(or => or.ResolvedOn, DateTime.UtcNow));
+
+                await dbContext.Orders.Where(o => o.Id == id)
+                    .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(o => o.CreatedOn, DateTime.UtcNow)
+                        .SetProperty(o => o.UpdatedBy, resolvedBy)
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
             }
             catch (Exception)
             {
@@ -646,7 +725,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .ExecuteUpdateAsync(setter => setter
                         .SetProperty(o => o.CustomerStatus, status)
                         .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
-                        .SetProperty(o => o.UpdatedBy, Guid.Empty));
+                        .SetProperty(o => o.UpdatedBy, Guid.Empty)
+                        .SetProperty(o => status == OrderStatuses.Accepted ? o.AcceptedOn : o.ChangeRequestedOn, DateTime.UtcNow));
 
                 await CreateOrderHistory(id, status, Guid.Empty);
             }

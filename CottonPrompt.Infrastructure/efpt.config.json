@@ -56,6 +56,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[OrderReports]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[Orders]",
          "ObjectType": 0
       },

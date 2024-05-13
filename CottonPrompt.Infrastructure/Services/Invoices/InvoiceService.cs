@@ -14,7 +14,7 @@ namespace CottonPrompt.Infrastructure.Services.Invoices
                 var invoices = await dbContext.Invoices
                     .Include(i => i.User)
                     .Where(i => userId == null || i.UserId == userId)
-                    .OrderByDescending(db => db.StartDate)
+                    .OrderByDescending(i => i.StartDate).ThenBy(i => i.User.Name)
                     .ToListAsync();
                 var result = invoices.AsGetInvoicesModel();
                 return result;

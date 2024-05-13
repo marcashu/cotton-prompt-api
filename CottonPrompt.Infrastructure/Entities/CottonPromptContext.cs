@@ -35,6 +35,8 @@ public partial class CottonPromptContext : DbContext
 
     public virtual DbSet<OrderPrintColor> OrderPrintColors { get; set; }
 
+    public virtual DbSet<OrderReport> OrderReports { get; set; }
+
     public virtual DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
 
     public virtual DbSet<Rate> Rates { get; set; }
@@ -226,6 +228,27 @@ public partial class CottonPromptContext : DbContext
             entity.Property(e => e.Value)
                 .IsRequired()
                 .HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<OrderReport>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_OrderReports_Id");
+
+            entity.Property(e => e.Reason).IsRequired();
+            entity.Property(e => e.ReportedOn).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.OrderReports)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("FK_OrderReports_Orders");
+
+            entity.HasOne(d => d.ReportedByNavigation).WithMany(p => p.OrderReportReportedByNavigations)
+                .HasForeignKey(d => d.ReportedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_OrderReports_Reporters");
+
+            entity.HasOne(d => d.ResolvedByNavigation).WithMany(p => p.OrderReportResolvedByNavigations)
+                .HasForeignKey(d => d.ResolvedBy)
+                .HasConstraintName("FK_OrderReports_Resolvers");
         });
 
         modelBuilder.Entity<OrderStatusHistory>(entity =>

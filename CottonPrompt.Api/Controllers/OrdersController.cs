@@ -44,6 +44,14 @@ namespace CottonPrompt.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("reported")]
+        [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetReportedAsync([FromQuery] GetReportedOrdersRequest request)
+        {
+            var result = await orderService.GetReportedAsync(request.OrderNumber);
+            return Ok(result);
+        }
+
         [HttpGet("available-as-artist")]
         [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailableAsArtistAsync([FromQuery] GetAvailableAsArtistOrdersRequest request)
@@ -138,7 +146,7 @@ namespace CottonPrompt.Api.Controllers
 
         [HttpGet("{id}/download")]
         [ProducesResponseType<FileResult>((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> DownloadOrderAsync([FromRoute] int id)
+        public async Task<IActionResult> DownloadAsync([FromRoute] int id)
         {
             var result = await orderService.DownloadAsync(id);
             return File(result.Content, result.ContentType, result.FileName);
@@ -149,6 +157,22 @@ namespace CottonPrompt.Api.Controllers
         public async Task<IActionResult> ResendForCustomerReviewAsync([FromRoute] int id)
         {
             await orderService.ResendForCustomerReviewAsync(id);
+            return NoContent();
+        }
+
+        [HttpPost("{id}/report")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> ReportAsync([FromRoute] int id, [FromBody] ReportRequest request)
+        {
+            await orderService.ReportAsync(id, request.Reason, request.UserId);
+            return NoContent();
+        }
+
+        [HttpPost("{id}/resolve")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> ResolveAsync([FromRoute] int id, [FromBody] ResolveRequest request)
+        {
+            await orderService.ResolveAsync(id, request.ResolvedBy);
             return NoContent();
         }
     }
