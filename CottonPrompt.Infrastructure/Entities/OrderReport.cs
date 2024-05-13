@@ -22,4 +22,8 @@ public partial class OrderReport
     public DateTime? ResolvedOn { get; set; }
 
     public virtual Order Order { get; set; }
+
+    public virtual User ReportedByNavigation { get; set; }
+
+    public virtual User ResolvedByNavigation { get; set; }
 }

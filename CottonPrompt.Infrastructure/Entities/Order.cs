@@ -37,6 +37,12 @@ public partial class Order
 
     public DateTime? CompletedOn { get; set; }
 
+    public DateTime? AcceptedOn { get; set; }
+
+    public DateTime? ChangeRequestedOn { get; set; }
+
+    public DateTime? ReportedOn { get; set; }
+
     public int? OriginalOrderId { get; set; }
 
     public int? ChangeRequestOrderId { get; set; }

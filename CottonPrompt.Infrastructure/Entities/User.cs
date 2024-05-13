@@ -29,6 +29,10 @@ public partial class User
 
     public virtual ICollection<Order> OrderCheckers { get; set; } = new List<Order>();
 
+    public virtual ICollection<OrderReport> OrderReportReportedByNavigations { get; set; } = new List<OrderReport>();
+
+    public virtual ICollection<OrderReport> OrderReportResolvedByNavigations { get; set; } = new List<OrderReport>();
+
     public virtual ICollection<UserGroupUser> UserGroupUsers { get; set; } = new List<UserGroupUser>();
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();

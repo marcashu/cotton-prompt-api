@@ -521,8 +521,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
                 }
 
-                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
-                var result = orders.AsGetOrdersModel();
+                var orders = await queryableOrders.OrderByDescending(o => o.AcceptedOn).ToListAsync();
+                var result = orders.AsGetCompletedOrdersModel();
                 return result;
             }
             catch (Exception)
@@ -549,8 +549,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
                 }
 
-                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
-                var result = orders.AsGetOrdersModel();
+                var orders = await queryableOrders.OrderByDescending(o => o.ChangeRequestedOn).ToListAsync();
+                var result = orders.AsGetRejectedOrdersModel();
                 return result;
             }
             catch (Exception)
@@ -565,6 +565,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 IQueryable<Order> queryableOrders = dbContext.Orders
                     .Include(o => o.OrderReports.Where(r => r.ResolvedBy == null))
+                    .ThenInclude(or => or.ReportedByNavigation)
                     .Where(o => o.OrderReports.Any(r => r.ResolvedBy == null));
 
                 if (!string.IsNullOrEmpty(orderNumber))
@@ -572,8 +573,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
                 }
 
-                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
-                var result = orders.AsGetOrdersModel();
+                var orders = await queryableOrders.OrderByDescending(o => o.ReportedOn).ToListAsync();
+                var result = orders.AsGetReportedOrdersModel();
                 return result;
             }
             catch (Exception)
@@ -638,6 +639,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 order.CheckerId = null;
                 order.CheckerStatus = null;
                 order.CustomerStatus = null;
+                order.ReportedOn = DateTime.UtcNow;
 
                 var orderReport = new OrderReport
                 {
@@ -723,7 +725,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .ExecuteUpdateAsync(setter => setter
                         .SetProperty(o => o.CustomerStatus, status)
                         .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
-                        .SetProperty(o => o.UpdatedBy, Guid.Empty));
+                        .SetProperty(o => o.UpdatedBy, Guid.Empty)
+                        .SetProperty(o => status == OrderStatuses.Accepted ? o.AcceptedOn : o.ChangeRequestedOn, DateTime.UtcNow));
 
                 await CreateOrderHistory(id, status, Guid.Empty);
             }

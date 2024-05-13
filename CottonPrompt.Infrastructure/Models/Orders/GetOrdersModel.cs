@@ -1,12 +1,10 @@
-﻿using CottonPrompt.Infrastructure.Models.DesignBrackets;
-
-namespace CottonPrompt.Infrastructure.Models.Orders
+﻿namespace CottonPrompt.Infrastructure.Models.Orders
 {
     public record GetOrdersModel(
         int Id, 
         string OrderNumber, 
         bool Priority,
-        DateTime CreatedOn,
+        DateTime Date,
         string ArtistStatus,
         string CheckerStatus,
         Guid? ArtistId,
@@ -16,6 +14,10 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         string CustomerName,
         int? OriginalOrderId,
         int? ChangeRequestOrderId,
-        string? Reason
+        string? Reason,
+        DateTime? AcceptedOn,
+        DateTime? ChangeRequestedOn,
+        DateTime? ReportedOn,
+        string? ReporterName
     );
 }
