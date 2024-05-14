@@ -18,6 +18,7 @@
         DateTime? AcceptedOn,
         DateTime? ChangeRequestedOn,
         DateTime? ReportedOn,
-        string? ReporterName
+        string? ReporterName,
+        DateTime? SentForPrintingOn
     );
 }

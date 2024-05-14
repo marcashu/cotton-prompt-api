@@ -484,7 +484,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                IQueryable<Order> queryableOrders = dbContext.Orders
+                var queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
                     .Where(o => (o.CustomerStatus == null 
@@ -511,10 +511,11 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                IQueryable<Order> queryableOrders = dbContext.Orders
+                var queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
-                    .Where(o => o.CustomerStatus == OrderStatuses.Accepted);
+                    .Where(o => o.CustomerStatus == OrderStatuses.Accepted
+                        && o.SentForPrintingOn == null);
 
                 if (!string.IsNullOrEmpty(orderNumber))
                 {
@@ -535,7 +536,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                IQueryable<Order> queryableOrders = dbContext.Orders
+                var queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
                     .Include(o => o.ChangeRequestOrder)
@@ -563,7 +564,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                IQueryable<Order> queryableOrders = dbContext.Orders
+                var queryableOrders = dbContext.Orders
                     .Include(o => o.OrderReports.Where(r => r.ResolvedBy == null))
                     .ThenInclude(or => or.ReportedByNavigation)
                     .Where(o => o.OrderReports.Any(r => r.ResolvedBy == null));
@@ -575,6 +576,31 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 var orders = await queryableOrders.OrderByDescending(o => o.ReportedOn).ToListAsync();
                 var result = orders.AsGetReportedOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<GetOrdersModel>> GetSentForPrintingAsync(string? orderNumber)
+        {
+            try
+            {
+                var queryableOrders = dbContext.Orders
+                    .Include(o => o.Artist)
+                    .Include(o => o.Checker)
+                    .Where(o => o.CustomerStatus == OrderStatuses.Accepted
+                        && o.SentForPrintingOn != null);
+
+                if (!string.IsNullOrEmpty(orderNumber))
+                {
+                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.SentForPrintingOn).ToListAsync();
+                var result = orders.AsGetCompletedOrdersModel();
                 return result;
             }
             catch (Exception)
@@ -670,6 +696,22 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .ExecuteUpdateAsync(setter => setter
                         .SetProperty(o => o.CreatedOn, DateTime.UtcNow)
                         .SetProperty(o => o.UpdatedBy, resolvedBy)
+                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task SendForPrintingAsync(int id, Guid userId)
+        {
+            try
+            {
+                await dbContext.Orders.Where(o => o.Id == id)
+                    .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(o => o.SentForPrintingOn, DateTime.UtcNow)
+                        .SetProperty(o => o.UpdatedBy, userId)
                         .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
             }
             catch (Exception)
