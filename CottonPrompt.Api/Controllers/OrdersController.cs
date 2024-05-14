@@ -52,6 +52,14 @@ namespace CottonPrompt.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("sent-for-printing")]
+        [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetSentForPrintingAsync([FromQuery] GetSentForPrintingOrdersRequest request)
+        {
+            var result = await orderService.GetSentForPrintingAsync(request.OrderNumber);
+            return Ok(result);
+        }
+
         [HttpGet("available-as-artist")]
         [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailableAsArtistAsync([FromQuery] GetAvailableAsArtistOrdersRequest request)
@@ -173,6 +181,14 @@ namespace CottonPrompt.Api.Controllers
         public async Task<IActionResult> ResolveAsync([FromRoute] int id, [FromBody] ResolveRequest request)
         {
             await orderService.ResolveAsync(id, request.ResolvedBy);
+            return NoContent();
+        }
+
+        [HttpPost("{id}/send-for-printing")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        public async Task<IActionResult> SendForPrintingAsync([FromRoute] int id, [FromBody] SendForPrintingRequest request)
+        {
+            await orderService.SendForPrintingAsync(id, request.UserId);
             return NoContent();
         }
     }

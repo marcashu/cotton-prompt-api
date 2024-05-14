@@ -35,17 +35,19 @@ public partial class Order
 
     public string CheckerStatus { get; set; }
 
+    public int? OriginalOrderId { get; set; }
+
+    public int? ChangeRequestOrderId { get; set; }
+
     public DateTime? CompletedOn { get; set; }
 
     public DateTime? AcceptedOn { get; set; }
 
     public DateTime? ChangeRequestedOn { get; set; }
 
+    public DateTime? SentForPrintingOn { get; set; }
+
     public DateTime? ReportedOn { get; set; }
-
-    public int? OriginalOrderId { get; set; }
-
-    public int? ChangeRequestOrderId { get; set; }
 
     public Guid CreatedBy { get; set; }
 
