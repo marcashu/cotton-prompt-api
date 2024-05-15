@@ -453,6 +453,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     }
 
                     await dbContext.Orders.AddAsync(newOrder);
+
+                    order.ChangeRequestOrderId = newOrder.Id;
                 }
                 else
                 {
