@@ -642,7 +642,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 if (order is null) return;
 
-                if (order.CustomerStatus == OrderStatuses.Accepted)
+                if (order.CustomerStatus == OrderStatuses.Accepted
+                    || (order.CustomerStatus == OrderStatuses.ChangeRequested && order.ChangeRequestOrderId is null))
                 {
                     await UpdateCustomerStatusAsync(id, OrderStatuses.ForReview);
                 }
