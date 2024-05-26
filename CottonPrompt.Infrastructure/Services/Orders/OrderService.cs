@@ -332,7 +332,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 var currentOrder = await dbContext.Orders.Include(o => o.OrderImageReferences).SingleOrDefaultAsync(o => o.Id == order.Id);
 
-                if (currentOrder is null || currentOrder.ArtistStatus == OrderStatuses.Completed) return;
+                if (currentOrder is null) return;
 
                 currentOrder.OrderNumber = order.OrderNumber;
                 currentOrder.Priority = order.Priority;
