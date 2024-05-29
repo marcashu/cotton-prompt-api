@@ -145,6 +145,13 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 if (order is null || order.ArtistStatus == OrderStatuses.Completed) return;
 
+                if (order.OriginalOrderId != null)
+                {
+                    await dbContext.Orders.Where(o => o.Id == order.OriginalOrderId)
+                        .ExecuteUpdateAsync(setter => setter
+                            .SetProperty(o => o.ChangeRequestOrderId, (int?)null));
+                }
+
                 await dbContext.Orders.Where(o => o.Id == id).ExecuteDeleteAsync();
             }
             catch (Exception)
