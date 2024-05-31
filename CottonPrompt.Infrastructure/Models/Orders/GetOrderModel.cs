@@ -15,7 +15,7 @@ namespace CottonPrompt.Infrastructure.Models.Orders
         OutputSize OutputSize,
         int UserGroupId,
         string CustomerEmail,
-        IEnumerable<string> ImageReferences,
+        IEnumerable<ImageReferenceModel> ImageReferences,
         DesignModel? Design,
         IEnumerable<DesignModel> PreviousDesigns,
         string ArtistStatus,

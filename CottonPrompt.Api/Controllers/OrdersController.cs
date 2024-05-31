@@ -121,10 +121,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> SubmitDesignAsync([FromRoute] int id, [FromBody] SubmitDesignRequest request)
         {
-            var base64 = request.Design.Substring(request.Design.IndexOf("base64,") + 7);
-            var bytes = Convert.FromBase64String(base64);
-            var designStream = new MemoryStream(bytes);
-            await orderService.SubmitDesignAsync(id, request.FileName, designStream);
+            await orderService.SubmitDesignAsync(id, request.FileName, request.Design);
             return NoContent();
         }
 
@@ -148,7 +145,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> ChangeRequestAsync([FromRoute] int id, [FromBody] ChangeRequestRequest request)
         {
-            await orderService.ChangeRequestAsync(id, request.DesignId, request.Comment, request.ImageReferences);
+            await orderService.ChangeRequestAsync(id, request.DesignId, request.Comment, request.ImageReferences.AsEntity(Guid.Empty, id));
             return NoContent();
         }
 

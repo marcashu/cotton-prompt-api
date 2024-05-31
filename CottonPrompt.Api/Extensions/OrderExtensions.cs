@@ -16,12 +16,7 @@ namespace CottonPrompt.Api.Extensions
                 DesignBracketId = request.DesignBracketId,
                 OutputSizeId = request.OutputSizeId,
                 CustomerEmail = request.CustomerEmail,
-                OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
-                {
-                    LineId = i + 1,
-                    Url = r,
-                    CreatedBy = request.CreatedBy,
-                }).ToList(),
+                OrderImageReferences = request.ImageReferences?.AsEntity(request.CreatedBy).ToList(),
                 CreatedBy = request.CreatedBy,
                 UserGroupId = request.UserGroupId,
             };
@@ -40,17 +35,31 @@ namespace CottonPrompt.Api.Extensions
                 DesignBracketId = request.DesignBracketId,
                 OutputSizeId = request.OutputSizeId,
                 CustomerEmail = request.CustomerEmail,
-                OrderImageReferences = request.ImageReferences?.Select((r, i) => new OrderImageReference
-                {
-                    OrderId = request.Id,
-                    LineId = i + 1,
-                    Url = r,
-                    CreatedBy = request.UpdatedBy,
-                }).ToList(),
+                OrderImageReferences = request.ImageReferences?.AsEntity(request.UpdatedBy, request.Id).ToList(),
                 UpdatedBy = request.UpdatedBy,
                 UpdatedOn = DateTime.UtcNow,
                 UserGroupId = request.UserGroupId,
             };
+            return result;
+        }
+
+        public static OrderImageReference AsEntity(this ImageReferenceRequest request, Guid createdBy, int index, int orderId = 0)
+        {
+            var result = new OrderImageReference
+            {
+                OrderId = orderId,
+                LineId = index + 1,
+                Type = request.Type,
+                Url = request.Value,
+                Name = request.Name,
+                CreatedBy = createdBy,
+            };
+            return result;
+        }
+
+        public static IEnumerable<OrderImageReference> AsEntity(this IEnumerable<ImageReferenceRequest> request, Guid createdBy, int orderId = 0)
+        {
+            var result = request.Select((r, i) => r.AsEntity(createdBy, i, orderId));
             return result;
         }
     }

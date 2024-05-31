@@ -2,7 +2,9 @@
 (
 	[OrderId] INT NOT NULL,
 	[LineId] INT NOT NULL,
+	[Type] NVARCHAR(4) NOT NULL,
 	[Url] NVARCHAR(MAX) NOT NULL,
+	[Name] NVARCHAR(250) NOT NULL,
     [CreatedBy] UNIQUEIDENTIFIER NOT NULL,
 	[CreatedOn] DATETIME2 NOT NULL CONSTRAINT DF_OrderImageReferences_CreatedOn DEFAULT GETUTCDATE()
 	CONSTRAINT PK_OrderImageReferences_OrderID_LineId PRIMARY KEY ([OrderId], [LineId]),
