@@ -128,6 +128,18 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
+                foreach (var imageRef in order.OrderImageReferences)
+                {
+                    if (imageRef.Type == "File" && imageRef.Url.StartsWith("data"))
+                    {
+                        var containerName = "order-references";
+                        var name = SaltDesignName(imageRef.Name);
+                        await UploadFile(name, imageRef.Url, containerName);
+                        imageRef.Name = name;
+                        imageRef.Url = GetFileUrl(name, containerName, DateTimeOffset.UtcNow.AddYears(100));
+                    }
+                }
+
                 await dbContext.Orders.AddAsync(order);
                 await dbContext.SaveChangesAsync();
             }
@@ -271,17 +283,11 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 var designs = new List<DesignModel>();
 
-                if (order.OrderDesigns.Count != 0)
+                foreach (var orderDesign in order.OrderDesigns)
                 {
-                    var container = blobServiceClient.GetBlobContainerClient("order-designs");
-
-                    foreach (var orderDesign in order.OrderDesigns)
-                    {
-                        var blob = container.GetBlobClient(orderDesign.Name);
-                        var url = blob.GenerateSasUri(BlobSasPermissions.Read, DateTimeOffset.UtcNow.AddDays(1)).ToString();
-                        var design = orderDesign.AsModel(url);
-                        designs.Add(design);
-                    }
+                    var url = GetFileUrl(orderDesign.Name, "order-designs", DateTimeOffset.UtcNow.AddHours(1));
+                    var design = orderDesign.AsModel(url);
+                    designs.Add(design);
                 }
 
                 var result = order.AsGetOrderModel(designs);
@@ -294,7 +300,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task SubmitDesignAsync(int id, string designName, Stream designContent)
+        public async Task SubmitDesignAsync(int id, string designName, string designContent)
         {
             try
             {
@@ -304,13 +310,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
                 if (order is null || order.ArtistId is null) return;
 
-                var container = blobServiceClient.GetBlobContainerClient("order-designs");
-                await container.CreateIfNotExistsAsync();
-
                 var saltedDesignName = SaltDesignName(order.OrderNumber, designName);
-
-                var blob = container.GetBlobClient(saltedDesignName);
-                await blob.UploadAsync(designContent);
+                await UploadFile(saltedDesignName, designContent, "order-designs");
 
                 order.OrderDesigns.Add(new OrderDesign
                 {
@@ -355,6 +356,15 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 currentOrder.OrderImageReferences.Clear();
                 foreach (var imageRef in order.OrderImageReferences)
                 {
+                    if (imageRef.Type == "File" && imageRef.Url.StartsWith("data"))
+                    {
+                        var containerName = "order-references";
+                        var name = SaltDesignName(imageRef.Name);
+                        await UploadFile(name, imageRef.Url, containerName);
+                        imageRef.Name = name;
+                        imageRef.Url = GetFileUrl(name, containerName, DateTimeOffset.UtcNow.AddYears(100));
+                    }
+
                     currentOrder.OrderImageReferences.Add(imageRef);
                 }
 
@@ -387,7 +397,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task ChangeRequestAsync(int id, int designId, string comment, IEnumerable<string> imageReferences)
+        public async Task ChangeRequestAsync(int id, int designId, string comment, IEnumerable<OrderImageReference> imageReferences)
         {
             try
             {
@@ -428,35 +438,41 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         CreatedBy = customerId,
                         OriginalOrderId = order.Id,
                         OrderDesigns = new List<OrderDesign>
-                    {
-                        new()
                         {
-                            Name = currentDesign.Name,
-                            OrderDesignComments = new List<OrderDesignComment>
+                            new()
                             {
-                                customerComment,
-                            },
-                            CreatedBy = customerId,
-                        }
-                    },
+                                Name = currentDesign.Name,
+                                OrderDesignComments = new List<OrderDesignComment>
+                                {
+                                    customerComment,
+                                },
+                                CreatedBy = customerId,
+                            }
+                        },
                         OrderImageReferences = order.OrderImageReferences.Select(oir => new OrderImageReference
                         {
                             LineId = oir.LineId,
+                            Type = oir.Type,
                             Url = oir.Url,
+                            Name = oir.Name,
                             CreatedBy = customerId,
                         }).ToList(),
                     };
 
                     foreach (var imageRef in imageReferences)
                     {
-                        var orderImageRef = new OrderImageReference
-                        {
-                            LineId = newOrder.OrderImageReferences.Count() + 1,
-                            Url = imageRef,
-                            CreatedBy = customerId,
-                        };
+                        imageRef.LineId = newOrder.OrderImageReferences.Count() + 1;
 
-                        newOrder.OrderImageReferences.Add(orderImageRef);
+                        if (imageRef.Type == "File" && imageRef.Url.StartsWith("data"))
+                        {
+                            var containerName = "order-references";
+                            var name = SaltDesignName(imageRef.Name);
+                            await UploadFile(name, imageRef.Url, containerName);
+                            imageRef.Name = name;
+                            imageRef.Url = GetFileUrl(name, containerName, DateTimeOffset.UtcNow.AddYears(100));
+                        }
+
+                        newOrder.OrderImageReferences.Add(imageRef);
                     }
 
                     await dbContext.Orders.AddAsync(newOrder);
@@ -468,17 +484,23 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 {
                     await UpdateArtistStatusAsync(id, OrderStatuses.ForReupload, order.ArtistId!.Value);
                     await UpdateCheckerStatusAsync(id, OrderStatuses.Claimed, order.CheckerId!.Value);
+
                     currentDesign.OrderDesignComments.Add(customerComment);
+
                     foreach (var imageRef in imageReferences)
                     {
-                        var orderImageRef = new OrderImageReference
-                        {
-                            LineId = order.OrderImageReferences.Count() + 1,
-                            Url = imageRef,
-                            CreatedBy = customerId,
-                        };
+                        imageRef.LineId = order.OrderImageReferences.Count() + 1;
 
-                        order.OrderImageReferences.Add(orderImageRef);
+                        if (imageRef.Type == "File" && imageRef.Url.StartsWith("data"))
+                        {
+                            var containerName = "order-references";
+                            var name = SaltDesignName(imageRef.Name);
+                            await UploadFile(name, imageRef.Url, containerName);
+                            imageRef.Name = name;
+                            imageRef.Url = GetFileUrl(name, containerName, DateTimeOffset.UtcNow.AddYears(100));
+                        }
+
+                        order.OrderImageReferences.Add(imageRef);
                     }
                 }
 
@@ -811,10 +833,15 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
         private string SaltDesignName(string orderNumber, string designName)
         {
-            var lastDotIndex = designName.LastIndexOf('.');
-            var fileName = designName.Substring(0, lastDotIndex);
-            var fileExtension = designName.Substring(lastDotIndex);
-            var result = $"{orderNumber}_{fileName}_{Guid.NewGuid().ToString()[..5]}{fileExtension}";
+            var result = SaltDesignName($"{orderNumber}_{designName}");
+            return result;
+        }
+
+        private string SaltDesignName(string designName)
+        {
+            var fileName = Path.GetFileNameWithoutExtension(designName);
+            var fileExtension = Path.GetExtension(designName);
+            var result = $"{fileName}_{Guid.NewGuid().ToString()[..5]}{fileExtension}";
 
             if (result.Length > 100) result = result.Substring(result.Length - 100); // max length is 100
 
@@ -949,6 +976,27 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 Subject = "Order Proof Ready"
             };
             await client.SendMailAsync(message);
+        }
+
+        private async Task UploadFile(string name, string content, string containerName)
+        {
+            var container = blobServiceClient.GetBlobContainerClient(containerName);
+            await container.CreateIfNotExistsAsync();
+
+            var base64 = content.Substring(content.IndexOf("base64,") + 7);
+            var bytes = Convert.FromBase64String(base64);
+            var contentStream = new MemoryStream(bytes);
+            
+            var blob = container.GetBlobClient(name);
+            await blob.UploadAsync(contentStream);
+        }
+
+        private string GetFileUrl(string name, string containerName, DateTimeOffset expiresOn)
+        {
+            var container = blobServiceClient.GetBlobContainerClient(containerName);
+            var blob = container.GetBlobClient(name);
+            var result = blob.GenerateSasUri(BlobSasPermissions.Read, expiresOn).ToString();
+            return result;
         }
     }
 }

@@ -10,6 +10,6 @@ namespace CottonPrompt.Api.Messages.Orders
         [Required]
         public string Comment { get; set; }
 
-        public IEnumerable<string> ImageReferences { get; set; } = Enumerable.Empty<string>();
+        public IEnumerable<ImageReferenceRequest> ImageReferences { get; set; } = Enumerable.Empty<ImageReferenceRequest>();
     }
 }

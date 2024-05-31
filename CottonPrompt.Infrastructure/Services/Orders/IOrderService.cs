@@ -32,13 +32,13 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
         Task<CanDoModel> AssignCheckerAsync(int id, Guid checkerId);
 
-        Task SubmitDesignAsync(int id, string designName, Stream designContent);
+        Task SubmitDesignAsync(int id, string designName, string designContent);
 
         Task ApproveAsync(int id);
 
         Task AcceptAsync(int id);
 
-        Task ChangeRequestAsync(int id, int designId, string comment, IEnumerable<string> imageReferences);
+        Task ChangeRequestAsync(int id, int designId, string comment, IEnumerable<OrderImageReference> imageReferences);
 
         Task<DownloadModel> DownloadAsync(int id);
 

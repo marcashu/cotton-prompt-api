@@ -11,7 +11,11 @@ public partial class OrderImageReference
 
     public int LineId { get; set; }
 
+    public string Type { get; set; }
+
     public string Url { get; set; }
+
+    public string Name { get; set; }
 
     public Guid CreatedBy { get; set; }
 

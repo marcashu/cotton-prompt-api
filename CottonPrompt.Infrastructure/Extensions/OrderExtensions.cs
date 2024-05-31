@@ -46,7 +46,19 @@ namespace CottonPrompt.Infrastructure.Extensions
         {
             var currentDesign = ((entity.OriginalOrderId == null && designs.Any()) || (entity.OriginalOrderId != null && designs.Count() > 1)) ? designs.Last() : null;
             var previousDesigns = designs.Where(d => currentDesign == null || d.Id != currentDesign.Id);
-            var result = new GetOrderModel(entity.Id, entity.OrderNumber, entity.Priority, entity.Concept, entity.PrintColor.AsModel(), entity.DesignBracket.AsModel(), entity.OutputSize.AsModel(), entity.UserGroupId, entity.CustomerEmail, entity.OrderImageReferences.Select(oir => oir.Url), currentDesign, previousDesigns, entity.ArtistStatus, entity.CheckerStatus, entity.CustomerStatus, entity.ArtistId, entity.CheckerId, entity.UserGroup.Name);
+            var result = new GetOrderModel(entity.Id, entity.OrderNumber, entity.Priority, entity.Concept, entity.PrintColor.AsModel(), entity.DesignBracket.AsModel(), entity.OutputSize.AsModel(), entity.UserGroupId, entity.CustomerEmail, entity.OrderImageReferences.AsModel(), currentDesign, previousDesigns, entity.ArtistStatus, entity.CheckerStatus, entity.CustomerStatus, entity.ArtistId, entity.CheckerId, entity.UserGroup.Name);
+            return result;
+        }
+
+        internal static ImageReferenceModel AsModel(this OrderImageReference entity)
+        {
+            var result = new ImageReferenceModel(entity.Type, entity.Url, entity.Name);
+            return result;
+        }
+
+        internal static IEnumerable<ImageReferenceModel> AsModel(this IEnumerable<OrderImageReference> entities)
+        {
+            var result = entities.Select(AsModel);
             return result;
         }
     }

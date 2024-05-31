@@ -201,6 +201,12 @@ public partial class CottonPromptContext : DbContext
             entity.HasKey(e => new { e.OrderId, e.LineId }).HasName("PK_OrderImageReferences_OrderID_LineId");
 
             entity.Property(e => e.CreatedOn).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(250);
+            entity.Property(e => e.Type)
+                .IsRequired()
+                .HasMaxLength(4);
             entity.Property(e => e.Url).IsRequired();
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderImageReferences)

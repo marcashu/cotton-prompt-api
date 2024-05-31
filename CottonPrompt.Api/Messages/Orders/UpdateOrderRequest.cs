@@ -31,7 +31,7 @@ namespace CottonPrompt.Api.Messages.Orders
         [Required]
         public int UserGroupId { get; set; }
 
-        public IEnumerable<string>? ImageReferences { get; set; }
+        public IEnumerable<ImageReferenceRequest>? ImageReferences { get; set; }
 
         [Required]
         public Guid UpdatedBy { get; set; }
