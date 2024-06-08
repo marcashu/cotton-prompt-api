@@ -1,5 +1,6 @@
 ﻿using CottonPrompt.Api.Messages.Orders;
 using CottonPrompt.Infrastructure.Entities;
+using CottonPrompt.Infrastructure.Models.Orders;
 
 namespace CottonPrompt.Api.Extensions
 {
@@ -60,6 +61,19 @@ namespace CottonPrompt.Api.Extensions
         public static IEnumerable<OrderImageReference> AsEntity(this IEnumerable<ImageReferenceRequest> request, Guid createdBy, int orderId = 0)
         {
             var result = request.Select((r, i) => r.AsEntity(createdBy, i, orderId));
+            return result;
+        }
+
+        public static OrderFiltersModel AsModel(this GetAdminOrdersRequest request)
+        {
+            var orderNumbers = request.OrderNumbers?.Split(',') ?? [];
+            var priorities = request.Priorities?.Split(',') ?? [];
+            var artists = request.Artists?.Split(',').Select(Guid.Parse) ?? [];
+            var checkers = request.Checkers?.Split(',').Select(Guid.Parse) ?? [];
+            var customers = request.Customers?.Split(',') ?? [];
+            var status = request.Status?.Split(',') ?? [];
+            var userGroups = request.UserGroups?.Split(',').Select(s => Convert.ToInt32(s)) ?? [];
+            var result = new OrderFiltersModel(orderNumbers, priorities, artists, checkers, customers, status, userGroups);
             return result;
         }
     }

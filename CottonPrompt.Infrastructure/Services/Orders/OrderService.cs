@@ -11,6 +11,7 @@ using System.Net;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using CottonPrompt.Infrastructure.Models;
+using CottonPrompt.Infrastructure.Helpers;
 
 namespace CottonPrompt.Infrastructure.Services.Orders
 {
@@ -512,22 +513,20 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<IEnumerable<GetOrdersModel>> GetOngoingAsync(string? orderNumber)
+        public async Task<IEnumerable<GetOrdersModel>> GetOngoingAsync(OrderFiltersModel? filters = null)
         {
             try
             {
                 var queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
+                    .Include(o => o.UserGroup)
                     .Where(o => (o.CustomerStatus == null 
                     || o.CustomerStatus == OrderStatuses.ForReview
                     || (o.OriginalOrderId != null && o.CustomerStatus == OrderStatuses.ChangeRequested)) // multi-CR'ed orders
                     && !o.OrderReports.Any(r => r.ResolvedBy == null));  // exclude reported orders 
 
-                if (!string.IsNullOrEmpty(orderNumber))
-                {
-                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
-                }
+                queryableOrders = OrderHelper.FilterOrders(queryableOrders, filters);
 
                 var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
                 var result = orders.AsGetOrdersModel();
@@ -539,20 +538,18 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<IEnumerable<GetOrdersModel>> GetCompletedAsync(string? orderNumber)
+        public async Task<IEnumerable<GetOrdersModel>> GetCompletedAsync(OrderFiltersModel? filters = null)
         {
             try
             {
                 var queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
+                    .Include(o => o.UserGroup)
                     .Where(o => o.CustomerStatus == OrderStatuses.Accepted
                         && o.SentForPrintingOn == null);
 
-                if (!string.IsNullOrEmpty(orderNumber))
-                {
-                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
-                }
+                queryableOrders = OrderHelper.FilterOrders(queryableOrders, filters);
 
                 var orders = await queryableOrders.OrderByDescending(o => o.AcceptedOn).ToListAsync();
                 var result = orders.AsGetCompletedOrdersModel();
@@ -564,7 +561,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<IEnumerable<GetOrdersModel>> GetRejectedAsync(string? orderNumber)
+        public async Task<IEnumerable<GetOrdersModel>> GetRejectedAsync(OrderFiltersModel? filters = null)
         {
             try
             {
@@ -572,15 +569,13 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
                     .Include(o => o.ChangeRequestOrder)
+                    .Include(o => o.UserGroup)
                     .Where(o => o.ArtistStatus == OrderStatuses.Completed
                     && o.CustomerStatus == OrderStatuses.ChangeRequested
                     && o.OriginalOrderId == null
                     && o.ChangeRequestOrder.CustomerStatus != OrderStatuses.Accepted);
 
-                if (!string.IsNullOrEmpty(orderNumber))
-                {
-                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
-                }
+                queryableOrders = OrderHelper.FilterOrders(queryableOrders, filters);
 
                 var orders = await queryableOrders.OrderByDescending(o => o.ChangeRequestedOn).ToListAsync();
                 var result = orders.AsGetRejectedOrdersModel();
@@ -592,19 +587,17 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<IEnumerable<GetOrdersModel>> GetReportedAsync(string? orderNumber)
+        public async Task<IEnumerable<GetOrdersModel>> GetReportedAsync(OrderFiltersModel? filters = null)
         {
             try
             {
                 var queryableOrders = dbContext.Orders
                     .Include(o => o.OrderReports.Where(r => r.ResolvedBy == null))
                     .ThenInclude(or => or.ReportedByNavigation)
+                    .Include(o => o.UserGroup)
                     .Where(o => o.OrderReports.Any(r => r.ResolvedBy == null));
 
-                if (!string.IsNullOrEmpty(orderNumber))
-                {
-                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
-                }
+                queryableOrders = OrderHelper.FilterOrders(queryableOrders, filters);
 
                 var orders = await queryableOrders.OrderByDescending(o => o.ReportedOn).ToListAsync();
                 var result = orders.AsGetReportedOrdersModel();
@@ -616,20 +609,18 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task<IEnumerable<GetOrdersModel>> GetSentForPrintingAsync(string? orderNumber)
+        public async Task<IEnumerable<GetOrdersModel>> GetSentForPrintingAsync(OrderFiltersModel? filters = null)
         {
             try
             {
                 var queryableOrders = dbContext.Orders
                     .Include(o => o.Artist)
                     .Include(o => o.Checker)
+                    .Include(o => o.UserGroup)
                     .Where(o => o.CustomerStatus == OrderStatuses.Accepted
                         && o.SentForPrintingOn != null);
 
-                if (!string.IsNullOrEmpty(orderNumber))
-                {
-                    queryableOrders = queryableOrders.Where(o => o.OrderNumber.ToUpper().StartsWith(orderNumber.ToUpper()));
-                }
+                queryableOrders = OrderHelper.FilterOrders(queryableOrders, filters);
 
                 var orders = await queryableOrders.OrderByDescending(o => o.SentForPrintingOn).ToListAsync();
                 var result = orders.AsGetCompletedOrdersModel();
