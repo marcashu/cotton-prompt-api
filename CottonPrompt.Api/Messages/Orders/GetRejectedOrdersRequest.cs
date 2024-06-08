@@ -2,9 +2,7 @@
 
 namespace CottonPrompt.Api.Messages.Orders
 {
-    public class GetRejectedOrdersRequest
+    public class GetRejectedOrdersRequest : GetAdminOrdersRequest
     {
-        [FromQuery(Name = "orderNumber")]
-        public string? OrderNumber { get; set; }
     }
 }

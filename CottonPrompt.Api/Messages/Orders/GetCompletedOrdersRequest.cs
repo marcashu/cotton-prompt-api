@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace CottonPrompt.Api.Messages.Orders
+﻿namespace CottonPrompt.Api.Messages.Orders
 {
-    public class GetCompletedOrdersRequest
+    public class GetCompletedOrdersRequest : GetAdminOrdersRequest
     {
-        [FromQuery(Name = "orderNumber")]
-        public string? OrderNumber { get; set; }
     }
 }

@@ -9,6 +9,7 @@
         string CheckerStatus,
         Guid? ArtistId,
         string? ArtistName,
+        Guid? CheckerId,
         string? CheckerName,
         string CustomerStatus,
         string CustomerName,
@@ -19,6 +20,7 @@
         DateTime? ChangeRequestedOn,
         DateTime? ReportedOn,
         string? ReporterName,
-        DateTime? SentForPrintingOn
+        int UserGroupId,
+        string UserGroupName
     );
 }

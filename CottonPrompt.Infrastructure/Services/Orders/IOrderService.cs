@@ -8,15 +8,15 @@ namespace CottonPrompt.Infrastructure.Services.Orders
     {
         Task<IEnumerable<GetOrdersModel>> GetAsync(bool? priority, string? artistStatus, string? checkerStatus, string? customerStatus, Guid? artistId, Guid? checkerId, bool noArtist = false, bool noChecker = false);
 
-        Task<IEnumerable<GetOrdersModel>> GetOngoingAsync(string? orderNumber);
+        Task<IEnumerable<GetOrdersModel>> GetOngoingAsync(OrderFiltersModel? filters = null);
 
-        Task<IEnumerable<GetOrdersModel>> GetRejectedAsync(string? orderNumber);
+        Task<IEnumerable<GetOrdersModel>> GetRejectedAsync(OrderFiltersModel? filters = null);
 
-        Task<IEnumerable<GetOrdersModel>> GetCompletedAsync(string? orderNumber);
+        Task<IEnumerable<GetOrdersModel>> GetCompletedAsync(OrderFiltersModel? filters = null);
 
-        Task<IEnumerable<GetOrdersModel>> GetReportedAsync(string? orderNumber);
+        Task<IEnumerable<GetOrdersModel>> GetReportedAsync(OrderFiltersModel? filters = null);
 
-        Task<IEnumerable<GetOrdersModel>> GetSentForPrintingAsync(string? orderNumber);
+        Task<IEnumerable<GetOrdersModel>> GetSentForPrintingAsync(OrderFiltersModel? filters = null);
 
         Task<IEnumerable<GetOrdersModel>> GetAvailableAsArtistAsync(Guid artistId, bool? priority, bool changeRequest = false);
 
