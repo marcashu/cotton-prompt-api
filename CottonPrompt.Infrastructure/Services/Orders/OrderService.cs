@@ -177,7 +177,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                IQueryable<Order> queryableOrders = dbContext.Orders.Where(o => true);
+                IQueryable<Order> queryableOrders = dbContext.Orders
+                    .Include(o => o.UserGroup)
+                    .Where(o => true);
 
                 if (priority != null)
                 {
@@ -236,14 +238,15 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             try
             {
                 var userGroupIds = await dbContext.UserGroupUsers
-                    .Include(ugu => ugu.UserGroup)
                     .Where(ugu => ugu.UserId == artistId)
                     .Select(ugu => ugu.UserGroupId)
                     .ToListAsync();
 
-                var queryableOrders = dbContext.Orders.Where(o => o.ArtistId == null
-                    && userGroupIds.Contains(o.UserGroupId)
-                    && (!o.OrderReports.Any(r => r.ResolvedBy == null)));
+                var queryableOrders = dbContext.Orders
+                    .Include(ugu => ugu.UserGroup)
+                    .Where(o => o.ArtistId == null
+                        && userGroupIds.Contains(o.UserGroupId)
+                        && (!o.OrderReports.Any(r => r.ResolvedBy == null)));
 
                 if (changeRequest)
                 {
