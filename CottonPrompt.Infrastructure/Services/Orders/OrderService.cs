@@ -671,6 +671,12 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     await UpdateCustomerStatusAsync(id, OrderStatuses.ForReview);
                 }
 
+                if (order.SentForPrintingOn != null)
+                {
+                    order.SentForPrintingOn = null;
+                    await dbContext.SaveChangesAsync();
+                }
+
                 await SendOrderProof(id, order.CustomerEmail);
             }
             catch (Exception)
