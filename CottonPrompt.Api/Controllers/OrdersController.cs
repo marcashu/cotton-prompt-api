@@ -188,5 +188,14 @@ namespace CottonPrompt.Api.Controllers
             await orderService.SendForPrintingAsync(id, request.UserId);
             return NoContent();
         }
+
+        [HttpPost("{changeRequestOrderId}/redraw")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> RedrawAsync([FromRoute] int changeRequestOrderId, [FromBody] CreateOrderRequest request)
+        {
+            await orderService.RedrawAsync(request.AsEntity(), changeRequestOrderId);
+            return NoContent();
+        }
     }
 }
