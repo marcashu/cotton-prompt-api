@@ -441,8 +441,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         CheckerStatus = OrderStatuses.Claimed,
                         CreatedBy = customerId,
                         OriginalOrderId = order.Id,
-                        OrderDesigns = new List<OrderDesign>
-                        {
+                        OrderDesigns =
+                        [
                             new()
                             {
                                 Name = currentDesign.Name,
@@ -452,7 +452,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                                 },
                                 CreatedBy = customerId,
                             }
-                        },
+                        ],
                         OrderImageReferences = order.OrderImageReferences.Select(oir => new OrderImageReference
                         {
                             LineId = oir.LineId,
@@ -685,13 +685,32 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task ReportAsync(int id, string reason, Guid userId)
+        public async Task ReportAsync(int id, string reason, bool isRedraw)
         {
             try
             {
-                var order = await dbContext.Orders.FindAsync(id);
+                var order = await dbContext.Orders
+                    .Include(o => o.OrderDesigns)
+                    .SingleOrDefaultAsync(o => o.Id == id);
 
-                if (order is null) return;
+                if (order is null || order.ArtistId is null) return;
+
+                var isDesignSubmitted = (order.OriginalOrderId == null && order.OrderDesigns.Count > 0) || (order.OriginalOrderId != null && order.OrderDesigns.Count > 1);
+
+                var orderReport = new OrderReport
+                {
+                    OrderId = id,
+                    Reason = reason,
+                    ReportedBy = order.ArtistId.Value,
+                    CheckerId = order.CheckerId,
+                    IsRedraw = isRedraw,
+                    IsDesignSubmitted = isDesignSubmitted,
+                    ArtistStatus = order.ArtistStatus,
+                    CheckerStatus = order.CheckerStatus,
+                    CustomerStatus = order.CustomerStatus,
+                };
+
+                await dbContext.OrderReports.AddAsync(orderReport);
 
                 order.ArtistId = null;
                 order.ArtistStatus = null;
@@ -699,15 +718,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                 order.CheckerStatus = null;
                 order.CustomerStatus = null;
                 order.ReportedOn = DateTime.UtcNow;
-
-                var orderReport = new OrderReport
-                {
-                    OrderId = id,
-                    Reason = reason,
-                    ReportedBy = userId,
-                };
-
-                await dbContext.OrderReports.AddAsync(orderReport);
+                
                 await dbContext.SaveChangesAsync();
             }
             catch (Exception)
@@ -720,16 +731,37 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         {
             try
             {
-                await dbContext.OrderReports.Where(or => or.OrderId == id && or.ResolvedBy == null)
-                    .ExecuteUpdateAsync(setter => setter
-                        .SetProperty(or => or.ResolvedBy, resolvedBy)
-                        .SetProperty(or => or.ResolvedOn, DateTime.UtcNow));
+                var report = await dbContext.OrderReports.SingleOrDefaultAsync(r => r.OrderId == id && r.ResolvedOn == null);
+                var order = await dbContext.Orders.FindAsync(id);
 
-                await dbContext.Orders.Where(o => o.Id == id)
-                    .ExecuteUpdateAsync(setter => setter
-                        .SetProperty(o => o.CreatedOn, DateTime.UtcNow)
-                        .SetProperty(o => o.UpdatedBy, resolvedBy)
-                        .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
+                if (report is null || order is null) return;
+
+                if (report.IsDesignSubmitted || report.IsRedraw)
+                {
+                    order.ArtistId = report.ReportedBy;
+                    order.ArtistStatus = report.ArtistStatus;
+                    order.CheckerId = report.CheckerId;
+                    order.CheckerStatus = report.CheckerStatus;
+                    order.CustomerStatus = report.CustomerStatus;
+                }
+                else
+                {
+                    if (order.OriginalOrderId != null)
+                    {
+                        order.CheckerId = report.CheckerId;
+                        order.CheckerStatus = OrderStatuses.Claimed;
+                    }
+
+                    order.CreatedOn = DateTime.UtcNow;
+                }
+
+                order.UpdatedBy = resolvedBy;
+                order.UpdatedOn = DateTime.UtcNow;
+
+                report.ResolvedBy = resolvedBy;
+                report.ResolvedOn = DateTime.UtcNow;
+                
+                await dbContext.SaveChangesAsync();
             }
             catch (Exception)
             {
@@ -746,6 +778,43 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         .SetProperty(o => o.SentForPrintingOn, DateTime.UtcNow)
                         .SetProperty(o => o.UpdatedBy, userId)
                         .SetProperty(o => o.UpdatedOn, DateTime.UtcNow));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task RedrawAsync(Order order, int changeRequestOrderId)
+        {
+            try
+            {
+                await CreateAsync(order);
+
+                var invoiceOrders = await dbContext.InvoiceSectionOrders
+                    .Include(o => o.InvoiceSection)
+                    .ThenInclude(o => o.Invoice)
+                    .Where(o => o.OrderId == changeRequestOrderId).ToListAsync();
+
+                foreach (var invoiceOrder in invoiceOrders)
+                {
+                    var phTimeOffset = 8;
+                    var invoiceSection = invoiceOrder.InvoiceSection;
+                    var invoice = invoiceSection.Invoice;
+
+                    if (DateTime.UtcNow.AddHours(phTimeOffset) < invoice.EndDate)
+                    {
+                        invoice.Amount -= invoiceSection.Rate;
+                        invoiceSection.Amount -= invoiceSection.Rate;
+                        invoiceSection.Quantity--;
+
+                        dbContext.InvoiceSectionOrders.Remove(invoiceOrder);
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+
+                await DeleteAsync(changeRequestOrderId);
             }
             catch (Exception)
             {
