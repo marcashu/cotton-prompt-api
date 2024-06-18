@@ -13,6 +13,18 @@ public partial class OrderReport
 
     public string Reason { get; set; }
 
+    public bool IsRedraw { get; set; }
+
+    public bool IsDesignSubmitted { get; set; }
+
+    public Guid? CheckerId { get; set; }
+
+    public string ArtistStatus { get; set; }
+
+    public string CheckerStatus { get; set; }
+
+    public string CustomerStatus { get; set; }
+
     public Guid ReportedBy { get; set; }
 
     public DateTime ReportedOn { get; set; }
@@ -20,6 +32,8 @@ public partial class OrderReport
     public Guid? ResolvedBy { get; set; }
 
     public DateTime? ResolvedOn { get; set; }
+
+    public virtual User Checker { get; set; }
 
     public virtual Order Order { get; set; }
 

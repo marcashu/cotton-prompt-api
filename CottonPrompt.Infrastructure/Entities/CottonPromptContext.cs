@@ -240,8 +240,15 @@ public partial class CottonPromptContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_OrderReports_Id");
 
+            entity.Property(e => e.ArtistStatus).HasMaxLength(50);
+            entity.Property(e => e.CheckerStatus).HasMaxLength(50);
+            entity.Property(e => e.CustomerStatus).HasMaxLength(50);
             entity.Property(e => e.Reason).IsRequired();
             entity.Property(e => e.ReportedOn).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(d => d.Checker).WithMany(p => p.OrderReportCheckers)
+                .HasForeignKey(d => d.CheckerId)
+                .HasConstraintName("FK_OrderReports_Checkers");
 
             entity.HasOne(d => d.Order).WithMany(p => p.OrderReports)
                 .HasForeignKey(d => d.OrderId)

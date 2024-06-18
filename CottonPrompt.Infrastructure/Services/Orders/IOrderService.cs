@@ -44,7 +44,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
         Task ResendForCustomerReviewAsync(int id);
 
-        Task ReportAsync(int id, string reason, Guid userId);
+        Task ReportAsync(int id, string reason, bool isRedraw);
 
         Task ResolveAsync(int id, Guid resolvedBy);
 

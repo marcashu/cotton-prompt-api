@@ -8,6 +8,6 @@ namespace CottonPrompt.Api.Messages.Orders
         public string Reason { get; set; }
 
         [Required]
-        public Guid UserId { get; set; }
+        public bool IsRedraw { get; set; }
     }
 }

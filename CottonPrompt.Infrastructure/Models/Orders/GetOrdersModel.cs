@@ -21,6 +21,8 @@
         DateTime? ReportedOn,
         string? ReporterName,
         int UserGroupId,
-        string UserGroupName
+        string UserGroupName,
+        bool? IsReportDesignSubmitted,
+        bool? IsReportRedraw
     );
 }

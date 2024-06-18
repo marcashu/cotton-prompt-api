@@ -169,7 +169,7 @@ namespace CottonPrompt.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> ReportAsync([FromRoute] int id, [FromBody] ReportRequest request)
         {
-            await orderService.ReportAsync(id, request.Reason, request.UserId);
+            await orderService.ReportAsync(id, request.Reason, request.IsRedraw);
             return NoContent();
         }
 
