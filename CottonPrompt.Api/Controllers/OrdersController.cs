@@ -197,5 +197,14 @@ namespace CottonPrompt.Api.Controllers
             await orderService.RedrawAsync(request.AsEntity(), changeRequestOrderId);
             return NoContent();
         }
+
+        [HttpPost("{id}/toggle-redraw-mark")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> ToggleRedrawMarkAsync([FromRoute] int id)
+        {
+            await orderService.ToggleRedrawMarkAsync(id);
+            return NoContent();
+        }
     }
 }
