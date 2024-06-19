@@ -822,6 +822,21 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
+        public async Task ToggleRedrawMarkAsync(int id)
+        {
+            try
+            {
+                await dbContext.OrderReports
+                    .Where(or => or.OrderId == id && or.ResolvedBy == null)
+                    .ExecuteUpdateAsync(setter => setter
+                        .SetProperty(or => or.IsRedraw, or => !or.IsRedraw));
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private async Task UpdateArtistStatusAsync(int id, string status, Guid artistId)
         {
             try

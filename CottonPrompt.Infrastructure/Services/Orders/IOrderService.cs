@@ -51,5 +51,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
         Task SendForPrintingAsync(int id, Guid userId);
 
         Task RedrawAsync(Order order, int changeRequestOrderId);
+
+        Task ToggleRedrawMarkAsync(int id);
     }
 }
