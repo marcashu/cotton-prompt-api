@@ -9,7 +9,7 @@ using CottonPrompt.Infrastructure.Services.Invoices;
 using CottonPrompt.Infrastructure.Services.Orders;
 using CottonPrompt.Infrastructure.Services.OutputSizes;
 using CottonPrompt.Infrastructure.Services.PrintColors;
-using CottonPrompt.Infrastructure.Services.Rates;
+using CottonPrompt.Infrastructure.Services.Settings;
 using CottonPrompt.Infrastructure.Services.UserGroups;
 using CottonPrompt.Infrastructure.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -81,7 +81,7 @@ builder.Services.AddScoped<IArtistService, ArtistService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserGroupService, UserGroupService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
-builder.Services.AddScoped<IRatesService, RatesService>();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
 var app = builder.Build();

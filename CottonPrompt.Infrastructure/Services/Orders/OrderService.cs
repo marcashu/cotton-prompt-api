@@ -941,7 +941,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             var daysOffset = completedOn.DayOfWeek != DayOfWeek.Sunday ? (int)completedOn.DayOfWeek : 7;
             var startDate = completedOn.AddDays((daysOffset - (int)DayOfWeek.Monday) * -1).Date + new TimeSpan(0, 0, 0);
             var endDate = completedOn.AddDays(7 - daysOffset).Date + new TimeSpan(23, 59, 59);
-            var rates = await dbContext.Rates.FirstAsync();
+            var rates = await dbContext.Settings.FirstAsync();
 
             var artistInvoice = await dbContext.Invoices
                 .Include(i => i.InvoiceSections)

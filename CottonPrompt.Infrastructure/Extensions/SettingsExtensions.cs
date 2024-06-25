@@ -3,9 +3,9 @@ using CottonPrompt.Infrastructure.Models.Rates;
 
 namespace CottonPrompt.Infrastructure.Extensions
 {
-    public static class RatesExtensions
+    public static class SettingsExtensions
     {
-        public static RatesModel AsModel(this Rate entity)
+        public static RatesModel AsRatesModel(this Setting entity)
         {
             var result = new RatesModel(entity.QualityControlRate, entity.ChangeRequestRate);
             return result;

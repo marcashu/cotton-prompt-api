@@ -1,10 +1,10 @@
 ﻿using CottonPrompt.Infrastructure.Models.Rates;
 
-namespace CottonPrompt.Infrastructure.Services.Rates
+namespace CottonPrompt.Infrastructure.Services.Settings
 {
-    public interface IRatesService
+    public interface ISettingsService
     {
-        Task<RatesModel> GetAsync();
+        Task<RatesModel> GetRatesAsync();
 
         Task UpdateAsync(decimal qualityControlRate, decimal changeRequestRate, Guid updatedBy);
     }

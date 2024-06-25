@@ -1,4 +1,4 @@
-﻿using CottonPrompt.Infrastructure.Models.Rates;
+﻿using CottonPrompt.Infrastructure.Models.EmailTemplates;
 
 namespace CottonPrompt.Infrastructure.Services.EmailTemplates
 {

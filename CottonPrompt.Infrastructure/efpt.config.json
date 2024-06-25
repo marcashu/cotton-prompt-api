@@ -68,7 +68,7 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[Rates]",
+         "Name": "[dbo].[Settings]",
          "ObjectType": 0
       },
       {
