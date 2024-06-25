@@ -124,5 +124,24 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
                 throw;
             }
         }
+
+        public async Task<IEnumerable<GetUserGroupsModel>> GetArtistGroupsAsync()
+        {
+            try
+            {
+                var traingGroupCheckersId = await dbContext.Settings.Select(s => s.TrainingGroupCheckersGroupId).FirstOrDefaultAsync();
+                var userGroups = await dbContext.UserGroups
+                    .Where(ug => ug.Id != traingGroupCheckersId)
+                    .Include(ug => ug.UserGroupUsers)
+                    .OrderBy(ug => ug.Name)
+                    .ToListAsync();
+                var result = userGroups.AsModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

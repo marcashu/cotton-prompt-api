@@ -18,6 +18,14 @@ namespace CottonPrompt.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("artist-groups")]
+        [ProducesResponseType<GetUserGroupsModel>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetArtistGroupsAsync()
+        {
+            var result = await userGroupService.GetArtistGroupsAsync();
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType<GetUserGroupModel>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetByIdAsync([FromRoute] int id)
