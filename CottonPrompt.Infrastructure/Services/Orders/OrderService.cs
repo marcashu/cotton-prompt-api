@@ -412,9 +412,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Include(o => o.OrderImageReferences)
                     .SingleOrDefaultAsync(o => o.Id == id);
 
-                var changeRequestGroup = await dbContext.UserGroups.SingleOrDefaultAsync(ug => ug.Name == Constants.UserGroups.ChangeRequestArtists);
+                var changeRequestArtistsGroupId = await dbContext.Settings.Select(s => s.ChangeRequestArtistsGroupId).FirstOrDefaultAsync();
 
-                if (order is null || changeRequestGroup is null) return;
+                if (order is null) return;
 
                 var customerId = Guid.Empty;
                 var currentDesign = order.OrderDesigns.Last();
@@ -435,7 +435,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         PrintColorId = order.PrintColorId,
                         DesignBracketId = order.DesignBracketId,
                         OutputSizeId = order.OutputSizeId,
-                        UserGroupId = changeRequestGroup.Id,
+                        UserGroupId = changeRequestArtistsGroupId,
                         CustomerEmail = order.CustomerEmail,
                         CheckerId = order.CheckerId,
                         CheckerStatus = OrderStatuses.Claimed,

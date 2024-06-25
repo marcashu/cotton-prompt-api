@@ -36,7 +36,8 @@ namespace CottonPrompt.Infrastructure.Services.Artists
         {
 			try
 			{
-				var isChangeRequestArtist = await dbContext.UserGroupUsers.Include(ugu => ugu.UserGroup).AnyAsync(ugu => ugu.UserId == id && ugu.UserGroup.Name == Constants.UserGroups.ChangeRequestArtists);
+				var changeRequestArtistsGroupId = await dbContext.Settings.Select(s => s.ChangeRequestArtistsGroupId).FirstOrDefaultAsync();
+				var isChangeRequestArtist = await dbContext.UserGroupUsers.AnyAsync(ugu => ugu.UserId == id && ugu.UserGroupId == changeRequestArtistsGroupId);
 				return new CanDoModel(isChangeRequestArtist, string.Empty);
 			}
 			catch (Exception)
