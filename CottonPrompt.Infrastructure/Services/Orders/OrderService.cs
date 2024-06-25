@@ -272,6 +272,40 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
+        public async Task<IEnumerable<GetOrdersModel>> GetAvailableAsCheckerAsync(bool? priority, bool trainingGroup = false)
+        {
+            try
+            {
+                var trainingGroupArtistsId = await dbContext.Settings.Select(s => s.TrainingGroupArtistsGroupId).FirstOrDefaultAsync();
+
+                var queryableOrders = dbContext.Orders
+                    .Include(o => o.UserGroup)
+                    .Where(o => o.ArtistStatus == OrderStatuses.DesignSubmitted && o.CheckerId == null);
+
+                if (priority != null)
+                {
+                    queryableOrders = queryableOrders.Where(o => o.Priority == priority);
+                }
+
+                if (trainingGroup)
+                {
+                    queryableOrders = queryableOrders.Where(o => o.UserGroupId == trainingGroupArtistsId);
+                }
+                else
+                {
+                    queryableOrders = queryableOrders.Where(o => o.UserGroupId != trainingGroupArtistsId);
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<GetOrderModel> GetByIdAsync(int id)
         {
             try

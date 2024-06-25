@@ -68,6 +68,14 @@ namespace CottonPrompt.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("available-as-checker")]
+        [ProducesResponseType<IEnumerable<GetOrdersModel>>((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetAvailableAsCheckerAsync([FromQuery] GetAvailableAsCheckerOrdersRequest request)
+        {
+            var result = await orderService.GetAvailableAsCheckerAsync(request.Priority, request.TrainingGroup);
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType<GetOrderModel>((int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetByIdAsync([FromRoute] int id)
