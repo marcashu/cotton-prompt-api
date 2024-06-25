@@ -1,5 +1,5 @@
 ﻿using CottonPrompt.Api.Messages.EmailTemplates;
-using CottonPrompt.Infrastructure.Models.Rates;
+using CottonPrompt.Infrastructure.Models.EmailTemplates;
 using CottonPrompt.Infrastructure.Services.EmailTemplates;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;

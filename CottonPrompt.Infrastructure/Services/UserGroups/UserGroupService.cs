@@ -103,9 +103,10 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
                 userGroup.UpdatedBy = updatedBy;
                 userGroup.UpdatedOn = DateTime.UtcNow;
 
-                var newUserIds = userIds.Except(userGroup.UserGroupUsers.Select(ugu => ugu.UserId));
+                var currentUserIds = userGroup.UserGroupUsers.Select(ugu => ugu.UserId).ToList();
+                var newUserIds = userIds.Except(currentUserIds).ToList();
 
-                foreach (var userId in userIds)
+                foreach (var userId in newUserIds)
                 {
                     var userGroupUser = new UserGroupUser
                     {
@@ -118,6 +119,25 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
                 }
 
                 await dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<GetUserGroupsModel>> GetArtistGroupsAsync()
+        {
+            try
+            {
+                var traingGroupCheckersId = await dbContext.Settings.Select(s => s.TrainingGroupCheckersGroupId).FirstOrDefaultAsync();
+                var userGroups = await dbContext.UserGroups
+                    .Where(ug => ug.Id != traingGroupCheckersId)
+                    .Include(ug => ug.UserGroupUsers)
+                    .OrderBy(ug => ug.Name)
+                    .ToListAsync();
+                var result = userGroups.AsModel();
+                return result;
             }
             catch (Exception)
             {

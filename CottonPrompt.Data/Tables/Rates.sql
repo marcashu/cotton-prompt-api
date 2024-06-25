@@ -1,8 +1,0 @@
-﻿CREATE TABLE [dbo].[Rates]
-(
-	[Id] INT CONSTRAINT PK_RateId PRIMARY KEY IDENTITY(1,1),
-	[QualityControlRate] DECIMAL(18, 2) NOT NULL CONSTRAINT DF_Rates_QualityControlRate DEFAULT 0.2,
-	[ChangeRequestRate] DECIMAL(18, 2) NOT NULL CONSTRAINT DF_Rates_ChangeRequestRate DEFAULT 2,
-	[UpdatedBy] UNIQUEIDENTIFIER NULL,
-    [UpdatedOn] DATETIME2 NULL,
-)

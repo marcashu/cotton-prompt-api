@@ -272,6 +272,40 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
+        public async Task<IEnumerable<GetOrdersModel>> GetAvailableAsCheckerAsync(bool? priority, bool trainingGroup = false)
+        {
+            try
+            {
+                var trainingGroupArtistsId = await dbContext.Settings.Select(s => s.TrainingGroupArtistsGroupId).FirstOrDefaultAsync();
+
+                var queryableOrders = dbContext.Orders
+                    .Include(o => o.UserGroup)
+                    .Where(o => o.ArtistStatus == OrderStatuses.DesignSubmitted && o.CheckerId == null);
+
+                if (priority != null)
+                {
+                    queryableOrders = queryableOrders.Where(o => o.Priority == priority);
+                }
+
+                if (trainingGroup)
+                {
+                    queryableOrders = queryableOrders.Where(o => o.UserGroupId == trainingGroupArtistsId);
+                }
+                else
+                {
+                    queryableOrders = queryableOrders.Where(o => o.UserGroupId != trainingGroupArtistsId);
+                }
+
+                var orders = await queryableOrders.OrderByDescending(o => o.Priority).ThenBy(o => o.CreatedOn).ToListAsync();
+                var result = orders.AsGetOrdersModel();
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<GetOrderModel> GetByIdAsync(int id)
         {
             try
@@ -412,9 +446,9 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Include(o => o.OrderImageReferences)
                     .SingleOrDefaultAsync(o => o.Id == id);
 
-                var changeRequestGroup = await dbContext.UserGroups.SingleOrDefaultAsync(ug => ug.Name == Constants.UserGroups.ChangeRequestArtists);
+                var changeRequestArtistsGroupId = await dbContext.Settings.Select(s => s.ChangeRequestArtistsGroupId).FirstOrDefaultAsync();
 
-                if (order is null || changeRequestGroup is null) return;
+                if (order is null) return;
 
                 var customerId = Guid.Empty;
                 var currentDesign = order.OrderDesigns.Last();
@@ -435,7 +469,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                         PrintColorId = order.PrintColorId,
                         DesignBracketId = order.DesignBracketId,
                         OutputSizeId = order.OutputSizeId,
-                        UserGroupId = changeRequestGroup.Id,
+                        UserGroupId = changeRequestArtistsGroupId,
                         CustomerEmail = order.CustomerEmail,
                         CheckerId = order.CheckerId,
                         CheckerStatus = OrderStatuses.Claimed,
@@ -941,7 +975,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             var daysOffset = completedOn.DayOfWeek != DayOfWeek.Sunday ? (int)completedOn.DayOfWeek : 7;
             var startDate = completedOn.AddDays((daysOffset - (int)DayOfWeek.Monday) * -1).Date + new TimeSpan(0, 0, 0);
             var endDate = completedOn.AddDays(7 - daysOffset).Date + new TimeSpan(23, 59, 59);
-            var rates = await dbContext.Rates.FirstAsync();
+            var rates = await dbContext.Settings.FirstAsync();
 
             var artistInvoice = await dbContext.Invoices
                 .Include(i => i.InvoiceSections)

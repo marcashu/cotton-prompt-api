@@ -13,5 +13,7 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
         Task UpdateAsync(int id, string name, IEnumerable<Guid> userIds, Guid updatedBy);
 
         Task RemoveUserAsync(int id, Guid userId);
+
+        Task<IEnumerable<GetUserGroupsModel>> GetArtistGroupsAsync();
     }
 }

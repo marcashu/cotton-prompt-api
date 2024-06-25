@@ -20,6 +20,8 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
         Task<IEnumerable<GetOrdersModel>> GetAvailableAsArtistAsync(Guid artistId, bool? priority, bool changeRequest = false);
 
+        Task<IEnumerable<GetOrdersModel>> GetAvailableAsCheckerAsync(bool? priority, bool trainingGroup = false);
+
         Task<GetOrderModel> GetByIdAsync(int id);
 
         Task CreateAsync(Order order);

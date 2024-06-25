@@ -1,6 +1,6 @@
 ﻿using CottonPrompt.Api.Messages.Rates;
 using CottonPrompt.Infrastructure.Models.Rates;
-using CottonPrompt.Infrastructure.Services.Rates;
+using CottonPrompt.Infrastructure.Services.Settings;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -8,21 +8,21 @@ namespace CottonPrompt.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RatesController(IRatesService rateService) : ControllerBase
+    public class SettingsController(ISettingsService settingsService) : ControllerBase
     {
-        [HttpGet]
+        [HttpGet("rates")]
         [ProducesResponseType<RatesModel>((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> GetRatesAsync()
         {
-            var result = await rateService.GetAsync();
+            var result = await settingsService.GetRatesAsync();
             return Ok(result);
         }
 
-        [HttpPut]
+        [HttpPut("rates")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> UpdateAsync([FromBody] UpdateRatesRequest request)
         {
-            await rateService.UpdateAsync(request.QualityControlRate, request.ChangeRequestRate, request.UpdatedBy);
+            await settingsService.UpdateAsync(request.QualityControlRate, request.ChangeRequestRate, request.UpdatedBy);
             return NoContent();
         }
     }

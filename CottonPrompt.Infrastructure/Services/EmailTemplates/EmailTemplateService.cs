@@ -1,6 +1,6 @@
 ﻿using CottonPrompt.Infrastructure.Entities;
 using CottonPrompt.Infrastructure.Extensions;
-using CottonPrompt.Infrastructure.Models.Rates;
+using CottonPrompt.Infrastructure.Models.EmailTemplates;
 using Microsoft.EntityFrameworkCore;
 
 namespace CottonPrompt.Infrastructure.Services.EmailTemplates
