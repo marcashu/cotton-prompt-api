@@ -103,9 +103,10 @@ namespace CottonPrompt.Infrastructure.Services.UserGroups
                 userGroup.UpdatedBy = updatedBy;
                 userGroup.UpdatedOn = DateTime.UtcNow;
 
-                var newUserIds = userIds.Except(userGroup.UserGroupUsers.Select(ugu => ugu.UserId));
+                var currentUserIds = userGroup.UserGroupUsers.Select(ugu => ugu.UserId).ToList();
+                var newUserIds = userIds.Except(currentUserIds).ToList();
 
-                foreach (var userId in userIds)
+                foreach (var userId in newUserIds)
                 {
                     var userGroupUser = new UserGroupUser
                     {
