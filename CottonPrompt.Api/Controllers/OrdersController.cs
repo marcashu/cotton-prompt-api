@@ -143,9 +143,9 @@ namespace CottonPrompt.Api.Controllers
 
         [HttpPost("{id}/accept")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        public async Task<IActionResult> AcceptAsync([FromRoute] int id)
+        public async Task<IActionResult> AcceptAsync([FromRoute] int id, [FromQuery] Guid? userId)
         {
-            await orderService.AcceptAsync(id);
+            await orderService.AcceptAsync(id, userId);
             return NoContent();
         }
 

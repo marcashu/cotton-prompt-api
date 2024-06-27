@@ -38,7 +38,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
 
         Task ApproveAsync(int id);
 
-        Task AcceptAsync(int id);
+        Task AcceptAsync(int id, Guid? userId);
 
         Task ChangeRequestAsync(int id, int designId, string comment, IEnumerable<OrderImageReference> imageReferences);
 
