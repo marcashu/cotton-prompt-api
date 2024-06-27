@@ -414,7 +414,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        public async Task AcceptAsync(int id)
+        public async Task AcceptAsync(int id, Guid? userId)
         {
             try
             {
@@ -422,7 +422,7 @@ namespace CottonPrompt.Infrastructure.Services.Orders
                     .Include(o => o.DesignBracket)
                     .SingleOrDefaultAsync(o => o.Id == id);
 
-                await UpdateCustomerStatusAsync(id, OrderStatuses.Accepted);
+                await UpdateCustomerStatusAsync(id, OrderStatuses.Accepted, userId);
 
                 if (order != null && order.OriginalOrderId != null && order.ArtistId != null)
                 {
@@ -909,19 +909,21 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             }
         }
 
-        private async Task UpdateCustomerStatusAsync(int id, string status)
+        private async Task UpdateCustomerStatusAsync(int id, string status, Guid? userId = null)
         {
             try
             {
+                var updateUserId = userId ?? Guid.Empty;
+
                 await dbContext.Orders
                     .Where(o => o.Id == id)
                     .ExecuteUpdateAsync(setter => setter
                         .SetProperty(o => o.CustomerStatus, status)
                         .SetProperty(o => o.UpdatedOn, DateTime.UtcNow)
-                        .SetProperty(o => o.UpdatedBy, Guid.Empty)
+                        .SetProperty(o => o.UpdatedBy, updateUserId)
                         .SetProperty(o => status == OrderStatuses.Accepted ? o.AcceptedOn : o.ChangeRequestedOn, DateTime.UtcNow));
 
-                await CreateOrderHistory(id, status, Guid.Empty);
+                await CreateOrderHistory(id, status, updateUserId);
             }
             catch (Exception)
             {
