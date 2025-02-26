@@ -948,6 +948,17 @@ namespace CottonPrompt.Infrastructure.Services.Orders
             {
                 await CreateAsync(order);
 
+               var changeRequestOrderDesigns = await dbContext.OrderDesigns
+                    .Where(od => od.OrderId == changeRequestOrderId)
+                    .ToListAsync();
+
+  
+                for(int i = 0; i < changeRequestOrderDesigns.Count; i++) 
+                {
+                    changeRequestOrderDesigns[i].OrderId = order.Id;
+                }
+                
+
                 var invoiceOrders = await dbContext.InvoiceSectionOrders
                     .Include(o => o.InvoiceSection)
                     .ThenInclude(o => o.Invoice)

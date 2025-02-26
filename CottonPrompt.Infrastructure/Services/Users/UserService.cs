@@ -79,7 +79,12 @@ namespace CottonPrompt.Infrastructure.Services.Users
         {
 			try
 			{
-				var users = await dbContext.Users.Include(u => u.UserRoles.OrderBy(ur => ur.SortOrder)).OrderBy(u => u.Name).ToListAsync();
+				var users = await dbContext.Users
+					.Include(u => u.UserRoles.OrderBy(ur => ur.SortOrder))
+					.Include(u => u.UserGroupUsers)
+					.OrderBy(u => u.Name).ToListAsync();
+		
+
 				var result = users.AsModel();
 				return result;
 			}
@@ -97,7 +102,7 @@ namespace CottonPrompt.Infrastructure.Services.Users
 
 				if (user == null)
 				{
-                    return new GetUsersModel(id, name, email, [], "");
+                    return new GetUsersModel(id, name, email, [], "", []);
                 }
 				else
 				{

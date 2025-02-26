@@ -5,6 +5,7 @@
         string Name, 
         string Email, 
         IEnumerable<string> Roles,
-        string PaymentLink
+        string PaymentLink,
+        IEnumerable<string> Groups
     );
 }
